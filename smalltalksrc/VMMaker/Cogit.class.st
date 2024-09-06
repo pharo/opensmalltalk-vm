@@ -8660,8 +8660,10 @@ Cogit >> initialize [
 											ifFalse: [CogMethodSurrogate64].	
 	statCompileFullBlockCount := 0.
 	statCompileFullBlockUsecs := 0.
+	statCompileFullBlockSize := 0.
 	statCompileMethodCount := 0.
 	statCompileMethodUsecs := 0.
+	statCompileMethodSize := 0.
 	jitCodeZoneWriteEnabled := false.
 ]
 
