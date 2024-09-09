@@ -2831,6 +2831,9 @@ StackInterpreter >> bytecodePrimBitShift [
 { #category : #'common selector sends' }
 StackInterpreter >> bytecodePrimClass [
 
+	<compilationInfo: #isMapped>
+	<druidInfo: #hasSend>
+
 	| rcvr |
 	rcvr := self stackTop.
 	(objectMemory isOopForwarded: rcvr) ifTrue: [ 
