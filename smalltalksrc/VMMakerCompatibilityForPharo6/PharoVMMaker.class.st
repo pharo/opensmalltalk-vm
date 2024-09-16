@@ -204,6 +204,17 @@ PharoVMMaker >> generateDruidVMStaticTypePrediction [
 ]
 
 { #category : #generation }
+PharoVMMaker >> generateDruidVMSuperInstructions [
+
+	options := #( PartialCompilation false ).
+
+	self
+		generate: CoInterpreter
+		memoryManager: Spur64BitCoMemoryManager
+		compilerClass: DruidSuperInstructionsJIT
+]
+
+{ #category : #generation }
 PharoVMMaker >> generateJITVM [
 
 	self generateCoInterpreter
