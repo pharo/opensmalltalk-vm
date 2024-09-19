@@ -1934,7 +1934,7 @@ SimpleDruidJIT >> gen_BytecodePrimIdenticalSistaV1 [
 	t2 := Extra0Reg.
 	t3 := Extra1Reg.
 	t4 := Extra2Reg.
-	self MoveMw: 1 r: SPReg R: ClassReg.
+	self MoveMw: 8 r: SPReg R: ClassReg.
 	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
@@ -2154,7 +2154,7 @@ SimpleDruidJIT >> gen_BytecodePrimNotIdenticalSistaV1 [
 	t2 := Extra0Reg.
 	t3 := Extra1Reg.
 	t4 := Extra2Reg.
-	self MoveMw: 1 r: SPReg R: ClassReg.
+	self MoveMw: 8 r: SPReg R: ClassReg.
 	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
