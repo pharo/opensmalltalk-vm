@@ -29,5 +29,5 @@ ManifestVMMaker class >> ruleTempsReadBeforeWrittenRuleV1FalsePositive [
 ManifestVMMaker class >> ruleUncommonMessageSendRuleV1FalsePositive [
 
 	<ignoreForCoverage>
-	^ #(#(#(#RGClassDefinition #(#DruidJIT)) #'2023-04-26T00:25:40.525381+02:00') #(#(#RGClassDefinition #(#Cogit)) #'2023-11-14T14:51:46.485495+01:00') )
+	^ #(#(#(#RGClassDefinition #(#DruidJIT)) #'2023-04-26T00:25:40.525381+02:00') #(#(#RGClassDefinition #(#Cogit)) #'2023-11-14T14:51:46.485495+01:00') #(#(#RGClassDefinition #(#SimpleDruidJIT)) #'2024-09-19T21:54:33.337109+02:00') #(#(#RGClassDefinition #(#CogObjectRepresentationForSpur)) #'2024-09-20T13:53:16.522059+02:00') )
 ]
