@@ -421,6 +421,8 @@ VMSimpleStackBasedCogitAbstractTest >> executeMethodWithReceiver: receiverOop wi
 		prepareStackForSendReceiver: (self twoComplementFor: receiverOop)
 		arguments: (aCollection collect: [ :arg | self twoComplementFor: arg ]).
 
+"self openMachineDebugger . 1halt."
+
 	self runUntilReturn
 ]
 
@@ -444,19 +446,11 @@ VMSimpleStackBasedCogitAbstractTest >> executePrimitiveWithReceiver: receiverOop
 
 { #category : #helpers }
 VMSimpleStackBasedCogitAbstractTest >> executePrimitiveWithReceiver: receiverOop withArguments: aCollection [
-	"Simulate a primitive execution having an object as receiver and a single argument
-	  - the receiver goes to the receiver register
-	  - the argument should be pushed to the stack
-	If we are in a system without a link register, we need to push the caller IP to the stack to simulate a call"
 
 	self
-		prepareStackForPrimitiveReceiver: (self twoComplementFor: receiverOop)
-		arguments: (aCollection collect: [ :arg | self twoComplementFor: arg ])
-		method: 0.
-
-"self openMachineDebugger . 1halt."
-
-	self runUntilReturn
+		executePrimitiveWithReceiver: receiverOop
+		withArguments: aCollection
+		method: 0
 ]
 
 { #category : #helpers }
@@ -466,10 +460,13 @@ VMSimpleStackBasedCogitAbstractTest >> executePrimitiveWithReceiver: receiverOop
 	  - the receiver goes to the receiver register
 	  - the argument should be pushed to the stack
 	If we are in a system without a link register, we need to push the caller IP to the stack to simulate a call"
+
 	self
 		prepareStackForPrimitiveReceiver: (self twoComplementFor: receiverOop)
 		arguments: (aCollection collect: [ :arg | self twoComplementFor: arg ])
 		method: aMethod.
+
+"self openMachineDebugger . 1halt."
 
 	self runUntilReturn
 ]
