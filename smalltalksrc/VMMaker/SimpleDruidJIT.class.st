@@ -4075,7 +4075,7 @@ SimpleDruidJIT >> gen_PrimitiveAdd [
 	| jump1 jump2 currentBlock |
 	self mclassIsSmallInteger ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: SendNumArgsReg.
 	jump1 := self JumpZero: 0.
 	self AddCq:  -1 R: SendNumArgsReg.
@@ -4117,7 +4117,7 @@ SimpleDruidJIT >> gen_PrimitiveAsCharacter [
 	s13 := self methodNumArgs.
 	s13 = 1 ifTrue: [
 		| jump3 jump2 jump1 |
-		self genLoadArg: 0 into: ClassReg.
+		self genLoadArgAtDepth: 0 into: ClassReg.
 		self TstCq: 1 R: ClassReg.
 		jump3 := self JumpZero: 0.
 		self ArithmeticShiftRightCq: 3 R: ClassReg.
@@ -4216,7 +4216,7 @@ SimpleDruidJIT >> gen_PrimitiveAt [
 	self SubCq: 24 R: SPReg.
 	self MoveR: ReceiverResultReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 0 r: SPReg.
-	self genLoadArg: 0 into: Extra3Reg.
+	self genLoadArgAtDepth: 0 into: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self MoveMw: 0 r: SPReg R: Extra3Reg.
 	self TstCq: 7 R: Extra3Reg.
@@ -4500,9 +4500,9 @@ SimpleDruidJIT >> gen_PrimitiveAtPut [
 	self SubCq: 24 R: SPReg.
 	self MoveR: ReceiverResultReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 0 r: SPReg.
-	self genLoadArg: 0 into: Extra3Reg.
+	self genLoadArgAtDepth: 0 into: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
-	self genLoadArg: 1 into: Extra3Reg.
+	self genLoadArgAtDepth: 1 into: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 16 r: SPReg.
 	self MoveMw: 0 r: SPReg R: Extra3Reg.
 	self TstCq: 7 R: Extra3Reg.
@@ -4890,7 +4890,7 @@ SimpleDruidJIT >> gen_PrimitiveBitAnd [
 
 	| jump1 currentBlock |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: SendNumArgsReg R: Extra0Reg.
 	self AndR: ClassReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -4909,7 +4909,7 @@ SimpleDruidJIT >> gen_PrimitiveBitOr [
 
 	| jump1 currentBlock |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: SendNumArgsReg R: Extra0Reg.
 	self AndR: ClassReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -4929,7 +4929,7 @@ SimpleDruidJIT >> gen_PrimitiveBitShift [
 	| jump1 s63 s54 jump9 jump6 jump3 s42 currentBlock jump8 jump5 jump2 s41 s17 jump7 jump4 |
 	self mclassIsSmallInteger ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: SendNumArgsReg.
 	jump1 := self JumpZero: 0.
 	self ArithmeticShiftRightCq: 3 R: ClassReg.
@@ -5036,7 +5036,7 @@ SimpleDruidJIT >> gen_PrimitiveBitXor [
 
 	| jump1 jump2 currentBlock |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: SendNumArgsReg.
 	jump1 := self JumpZero: 0.
 	self TstCq: 1 R: ClassReg.
@@ -5132,7 +5132,7 @@ SimpleDruidJIT >> gen_PrimitiveClass [
 	s56 := self methodNumArgs.
 	s56 = 1 ifTrue: [
 		| jump5 jump3 jump1 jump6 jump4 jump2 |
-		self genLoadArg: 0 into: Extra0Reg.
+		self genLoadArgAtDepth: 0 into: Extra0Reg.
 		self MoveR: Extra0Reg R: ClassReg.
 		self AndCq: 7 R: ClassReg.
 		self CmpCq: 0 R: ClassReg.
@@ -5211,7 +5211,7 @@ SimpleDruidJIT >> gen_PrimitiveDiv [
 
 	| jump1 s43 s22 jump3 s30 currentBlock s15 s38 jump2 jump5 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -5264,11 +5264,11 @@ SimpleDruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: ClassReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	s38 := 0.
-	self MoveCq: s38 R: Extra0Reg.
-	self SubR: ClassReg R: Extra0Reg.
+	self MoveCq: s38 R: ClassReg.
+	self SubR: Extra0Reg R: ClassReg.
 	jump4 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
@@ -5280,8 +5280,10 @@ SimpleDruidJIT >> gen_PrimitiveDiv [
 		R: Extra0Reg
 		Quo: Extra0Reg
 		Rem: ClassReg.
+	self MoveR: Extra0Reg R: ClassReg.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
+	self MoveR: ClassReg R: Extra0Reg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
 	self MoveR: Extra0Reg R: ClassReg.
@@ -5316,7 +5318,7 @@ SimpleDruidJIT >> gen_PrimitiveDivide [
 
 	| jump5 jump3 jump1 currentBlock jump4 jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: ClassReg.
 	jump1 := self JumpZero: 0.
 	self ArithmeticShiftRightCq: 3 R: ClassReg.
@@ -5328,9 +5330,9 @@ SimpleDruidJIT >> gen_PrimitiveDivide [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: Extra1Reg
-		Rem: Extra0Reg.
-	self CmpCq: 0 R: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: Extra1Reg.
+	self CmpCq: 0 R: Extra1Reg.
 	jump4 := self JumpNonZero: 0.
 	self
 		DivR: SendNumArgsReg
@@ -5363,7 +5365,7 @@ SimpleDruidJIT >> gen_PrimitiveEqual [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -5392,7 +5394,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatAdd [
 
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -5575,7 +5577,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatEqual [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -5693,7 +5695,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatGreaterOrEqual [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -5811,7 +5813,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatGreaterThan [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -5929,7 +5931,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatLessOrEqual [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -6047,7 +6049,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatLessThan [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -6165,7 +6167,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatMultiply [
 
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -6348,7 +6350,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatNotEqual [
 
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -6466,7 +6468,7 @@ SimpleDruidJIT >> gen_PrimitiveFloatSubtract [
 
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -6684,7 +6686,7 @@ SimpleDruidJIT >> gen_PrimitiveFullClosureValue [
 	s22 = 1 ifTrue: [
 		| jump4 jump3 jump2 jump1 |
 		self MoveR: ReceiverResultReg R: ClassReg.
-		self genLoadArg: 0 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 		self MoveM64: 24 r: ClassReg R: SendNumArgsReg.
 		self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
 		self CmpCq: 1 R: SendNumArgsReg.
@@ -6717,8 +6719,8 @@ SimpleDruidJIT >> gen_PrimitiveFullClosureValue [
 	s43 = 2 ifTrue: [
 		| jump1 jump2 jump3 jump4 |
 		self MoveR: ReceiverResultReg R: ClassReg.
-		self genLoadArg: 0 into: SendNumArgsReg.
-		self genLoadArg: 1 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 0 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 1 into: SendNumArgsReg.
 		self MoveM64: 24 r: ClassReg R: SendNumArgsReg.
 		self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
 		self CmpCq: 2 R: SendNumArgsReg.
@@ -6791,7 +6793,7 @@ SimpleDruidJIT >> gen_PrimitiveFullClosureValueNoContextSwitch [
 	s22 = 1 ifTrue: [
 		| jump4 jump3 jump2 jump1 |
 		self MoveR: ReceiverResultReg R: ClassReg.
-		self genLoadArg: 0 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 		self MoveM64: 24 r: ClassReg R: SendNumArgsReg.
 		self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
 		self CmpCq: 1 R: SendNumArgsReg.
@@ -6824,8 +6826,8 @@ SimpleDruidJIT >> gen_PrimitiveFullClosureValueNoContextSwitch [
 	s43 = 2 ifTrue: [
 		| jump1 jump2 jump3 jump4 |
 		self MoveR: ReceiverResultReg R: ClassReg.
-		self genLoadArg: 0 into: SendNumArgsReg.
-		self genLoadArg: 1 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 0 into: SendNumArgsReg.
+		self genLoadArgAtDepth: 1 into: SendNumArgsReg.
 		self MoveM64: 24 r: ClassReg R: SendNumArgsReg.
 		self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
 		self CmpCq: 2 R: SendNumArgsReg.
@@ -6863,7 +6865,7 @@ SimpleDruidJIT >> gen_PrimitiveGreaterOrEqual [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -6892,7 +6894,7 @@ SimpleDruidJIT >> gen_PrimitiveGreaterThan [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -6921,7 +6923,7 @@ SimpleDruidJIT >> gen_PrimitiveIdentical [
 
 	| jump1 jump4 jump6 jump3 b450 s56 s53 currentBlock jump5 jump2 b454 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -7090,7 +7092,7 @@ SimpleDruidJIT >> gen_PrimitiveImmediateAsInteger [
 	s40 := self methodNumArgs.
 	s40 = 1 ifTrue: [
 		| jump5 jump3 jump1 jump4 jump2 |
-		self genLoadArg: 0 into: ClassReg.
+		self genLoadArgAtDepth: 0 into: ClassReg.
 		self TstCq: 1 R: ClassReg.
 		jump1 := self JumpZero: 0.
 		self ArithmeticShiftRightCq: 3 R: ClassReg.
@@ -7140,7 +7142,7 @@ SimpleDruidJIT >> gen_PrimitiveLessOrEqual [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -7169,7 +7171,7 @@ SimpleDruidJIT >> gen_PrimitiveLessThan [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -7198,7 +7200,7 @@ SimpleDruidJIT >> gen_PrimitiveMod [
 
 	| jump5 jump3 jump1 currentBlock jump4 jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -7267,7 +7269,7 @@ SimpleDruidJIT >> gen_PrimitiveMultiply [
 
 	| jump1 jump2 jump3 currentBlock |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: ClassReg.
 	jump1 := self JumpZero: 0.
 	self TstCq: 1 R: SendNumArgsReg.
@@ -7418,7 +7420,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self SubCq: 32 R: SPReg.
 	self MoveR: ReceiverResultReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 0 r: SPReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: SendNumArgsReg.
 	jump1 := self JumpZero: 0.
 	self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
@@ -7483,11 +7485,10 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: Extra0Reg
-		Rem: ClassReg.
+		Quo: ClassReg
+		Rem: Extra0Reg.
 	self AndCq: 1 R: SendNumArgsReg.
 	self AddR: SendNumArgsReg R: Extra1Reg.
-	self MoveR: Extra0Reg R: ClassReg.
 	jump10 := self Jump: 0.
 	currentBlock := self Label.
 	jump8 jmpTarget: currentBlock.
@@ -7527,28 +7528,28 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: Extra0Reg
-		Rem: ClassReg.
+		Quo: Extra2Reg
+		Rem: Extra0Reg.
 	s85 := 4.
-	self MoveCq: s85 R: ClassReg.
-	self SubR: SendNumArgsReg R: ClassReg.
-	self AndCq: 3 R: ClassReg.
-	self AddR: ClassReg R: Extra1Reg.
+	self MoveCq: s85 R: Extra0Reg.
+	self SubR: SendNumArgsReg R: Extra0Reg.
+	self AndCq: 3 R: Extra0Reg.
+	self AddR: Extra0Reg R: Extra1Reg.
 	self MoveCq: s78 R: ClassReg.
-	self MoveR: Extra0Reg R: SendNumArgsReg.
+	self MoveR: Extra2Reg R: SendNumArgsReg.
 	jump8 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
 	s94 := 0.
 	self CmpCq: 16 R: Extra1Reg.
 	jump3 := self JumpNonZero: 0.
-	self MoveR: SendNumArgsReg R: ClassReg.
-	self AddCq: 7 R: ClassReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self AddCq: 7 R: Extra0Reg.
 	s98 := 8.
-	self MoveCq: s98 R: Extra0Reg.
+	self MoveCq: s98 R: Extra2Reg.
 	self
-		DivR: Extra0Reg
-		R: ClassReg
+		DivR: Extra2Reg
+		R: Extra0Reg
 		Quo: Extra2Reg
 		Rem: Extra0Reg.
 	s101 := 8.
@@ -7696,7 +7697,7 @@ SimpleDruidJIT >> gen_PrimitiveNotEqual [
 
 	| s11 s8 jump1 jump3 currentBlock jump2 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndR: SendNumArgsReg R: Extra0Reg.
 	self TstCq: 1 R: Extra0Reg.
@@ -7725,7 +7726,7 @@ SimpleDruidJIT >> gen_PrimitiveNotIdentical [
 
 	| jump1 jump4 jump6 jump3 b450 s56 s53 currentBlock jump5 jump2 b454 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -7810,7 +7811,7 @@ SimpleDruidJIT >> gen_PrimitiveQuo [
 
 	| jump1 s31 s39 s36 jump3 jump6 s18 currentBlock s27 jump5 jump2 s14 jump4 |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: ClassReg.
 	jump1 := self JumpZero: 0.
 	self ArithmeticShiftRightCq: 3 R: ClassReg.
@@ -7826,8 +7827,9 @@ SimpleDruidJIT >> gen_PrimitiveQuo [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: ClassReg
-		Rem: SendNumArgsReg.
+		Quo: SendNumArgsReg
+		Rem: ClassReg.
+	self MoveR: SendNumArgsReg R: ClassReg.
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
@@ -7837,15 +7839,15 @@ SimpleDruidJIT >> gen_PrimitiveQuo [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: SendNumArgsReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: SendNumArgsReg.
 	s18 := 0.
-	self MoveCq: s18 R: Extra0Reg.
-	self SubR: SendNumArgsReg R: Extra0Reg.
-	self MoveR: Extra0Reg R: ClassReg.
+	self MoveCq: s18 R: SendNumArgsReg.
+	self SubR: Extra0Reg R: SendNumArgsReg.
+	self MoveR: SendNumArgsReg R: ClassReg.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
-	self MoveR: ClassReg R: Extra0Reg.
+	self MoveR: ClassReg R: SendNumArgsReg.
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
@@ -7874,23 +7876,23 @@ SimpleDruidJIT >> gen_PrimitiveQuo [
 	self
 		DivR: ClassReg
 		R: Extra0Reg
-		Quo: ClassReg
-		Rem: Extra0Reg.
-	self MoveR: ClassReg R: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
-	self MoveR: Extra0Reg R: ClassReg.
-	self LogicalShiftRightCq: 60 R: ClassReg.
-	self AddCq: 1 R: ClassReg.
-	self AndCq: 15 R: ClassReg.
-	self CmpCq: 1 R: ClassReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self LogicalShiftRightCq: 60 R: Extra0Reg.
+	self AddCq: 1 R: Extra0Reg.
+	self AndCq: 15 R: Extra0Reg.
+	self CmpCq: 1 R: Extra0Reg.
 	jump6 := self JumpAbove: 0.
-	self MoveR: Extra0Reg R: ClassReg.
-	self LogicalShiftLeftCq: 3 R: ClassReg.
-	self AddCq: 1 R: ClassReg.
-	self MoveR: ClassReg R: ReceiverResultReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self LogicalShiftLeftCq: 3 R: Extra0Reg.
+	self AddCq: 1 R: Extra0Reg.
+	self MoveR: Extra0Reg R: ReceiverResultReg.
 	self genPrimReturn.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
@@ -8124,7 +8126,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatAdd [
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8308,7 +8310,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatDivide [
 	| jump1 jump10 jumpNext s92 jump6 jump3 jump9 currentBlock jump8 jump5 jump2 s121 s124 jumpTrue s96 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8497,7 +8499,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatEqual [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8616,7 +8618,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatGreaterOrEqual [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8735,7 +8737,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatGreaterThan [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8854,7 +8856,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatLessOrEqual [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -8973,7 +8975,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatLessThan [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -9092,7 +9094,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatMultiply [
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -9276,7 +9278,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatNotEqual [
 	| jump1 jump6 jump3 currentBlock s82 jump8 jump5 s79 jump2 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -9395,7 +9397,7 @@ SimpleDruidJIT >> gen_PrimitiveSmallFloatSubtract [
 	| jump1 s89 jumpNext jump9 jump6 jump3 currentBlock jump8 jump5 jump2 s121 jumpTrue s118 s93 jump7 jump4 |
 	self mclassIsSmallFloat ifFalse: [ ^ UnimplementedPrimitive ].
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self MoveR: ClassReg R: Extra0Reg.
 	self AndCq: 7 R: Extra0Reg.
 	self CmpCq: 0 R: Extra0Reg.
@@ -9580,7 +9582,7 @@ SimpleDruidJIT >> gen_PrimitiveStringAt [
 	self SubCq: 24 R: SPReg.
 	self MoveR: ReceiverResultReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 0 r: SPReg.
-	self genLoadArg: 0 into: Extra3Reg.
+	self genLoadArgAtDepth: 0 into: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self MoveMw: 0 r: SPReg R: Extra3Reg.
 	self TstCq: 7 R: Extra3Reg.
@@ -9870,7 +9872,7 @@ SimpleDruidJIT >> gen_PrimitiveSubtract [
 
 	| jump1 jump2 jump3 currentBlock |
 	self MoveR: ReceiverResultReg R: ClassReg.
-	self genLoadArg: 0 into: SendNumArgsReg.
+	self genLoadArgAtDepth: 0 into: SendNumArgsReg.
 	self TstCq: 1 R: ClassReg.
 	jump1 := self JumpZero: 0.
 	self TstCq: 1 R: SendNumArgsReg.
