@@ -1779,7 +1779,7 @@ SimpleDruidJIT >> gen_BytecodePrimClass [
 	t1 := SendNumArgsReg.
 	t2 := Extra0Reg.
 	t3 := Extra1Reg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 R: t1.
 	self AndCq: 7 R: t1.
 	self CmpCq: 0 R: t1.
@@ -1944,8 +1944,8 @@ SimpleDruidJIT >> gen_BytecodePrimIdenticalSistaV1 [
 	t2 := Extra0Reg.
 	t3 := Extra1Reg.
 	t4 := Extra2Reg.
-	self MoveMw: 8 r: SPReg R: ClassReg.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 8 r: SPReg R: t0.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -2164,8 +2164,8 @@ SimpleDruidJIT >> gen_BytecodePrimNotIdenticalSistaV1 [
 	t2 := Extra0Reg.
 	t3 := Extra1Reg.
 	t4 := Extra2Reg.
-	self MoveMw: 8 r: SPReg R: ClassReg.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 8 r: SPReg R: t0.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -2352,7 +2352,7 @@ SimpleDruidJIT >> gen_DuplicateTopBytecode [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PushR: t0.
 	^ 0
 ]
@@ -2422,7 +2422,7 @@ SimpleDruidJIT >> gen_ExtJumpIfFalse [
 	extA := 0.
 	extB := 0.
 	numExtB := 0.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s12 := objectMemory falseObject.
 	self CmpCq: s12 R: t0.
@@ -2459,7 +2459,7 @@ SimpleDruidJIT >> gen_ExtJumpIfTrue [
 	extA := 0.
 	extB := 0.
 	numExtB := 0.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s12 := objectMemory trueObject.
 	self CmpCq: s12 R: t0.
@@ -2539,7 +2539,7 @@ SimpleDruidJIT >> gen_ExtPushFullClosureBytecode [
 	s12 := s11.
 	b4 := self Label.
 	[ ((s12<=s8)) ] whileTrue: [
-		self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+		self MoveMw: 0 r: SPReg R: t1.
 		self PopN: 1.
 		s18 := FullClosureFirstCopiedValueIndex.
 		s19 := s18 + s8.
@@ -2551,7 +2551,7 @@ SimpleDruidJIT >> gen_ExtPushFullClosureBytecode [
 		s25 := s12 + 1.
 		s12 := s25 ].
 	(s7 anyMask: 128) ifTrue: [
-		self MoveMw: 0 r: SPReg R: Extra0Reg.
+		self MoveMw: 0 r: SPReg R: t2.
 		self PopN: 1.
 		s37 := FullClosureReceiverIndex.
 		s38 := s37 << 3.
@@ -2781,7 +2781,7 @@ SimpleDruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	s4 := extA.
 	s5 := s4 << 8.
 	s6 := s3 + s5.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	extA := 0.
 	self genMoveConstant: methodObj R: t1.
@@ -3009,7 +3009,7 @@ SimpleDruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 	s4 := extA.
 	s5 := s4 << 8.
 	s6 := s3 + s5.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t1.
@@ -3383,7 +3383,7 @@ SimpleDruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	s5 := s4 << 8.
 	s6 := s3 + s5.
 	extA := 0.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self genMoveConstant: methodObj R: t1.
 	s10 := LiteralStart.
 	s11 := s6 + s10.
@@ -3609,7 +3609,7 @@ SimpleDruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 	s4 := extA.
 	s5 := s4 << 8.
 	s6 := s3 + s5.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t1.
@@ -4052,7 +4052,7 @@ SimpleDruidJIT >> gen_LongStoreAndPopTemporaryVariableBytecode [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: byte1) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -4064,7 +4064,7 @@ SimpleDruidJIT >> gen_LongStoreTemporaryVariableBytecode [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: byte1) r: FPReg.
 	^ 0
 ]
@@ -4326,13 +4326,12 @@ SimpleDruidJIT >> gen_PrimitiveAt [
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	s73 := 0.
-	self MoveCq: s73 R: SendNumArgsReg.
+	self MoveCq: s73 R: Extra2Reg.
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump9 jmpTarget: currentBlock.
 	self CmpCq: 2 R: Extra1Reg.
 	jump9 := self JumpAboveOrEqual: 0.
-	self MoveR: Extra2Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
 	jump7 := self Jump: 0.
 	currentBlock := self Label.
@@ -4382,8 +4381,8 @@ SimpleDruidJIT >> gen_PrimitiveAt [
 	self MoveM64: 24 r: ClassReg R: Extra0Reg.
 	self ArithmeticShiftRightCq: 3 R: Extra0Reg.
 	self AndCq: 16rFFFF R: Extra0Reg.
-	self MoveR: Extra0Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
+	self MoveR: Extra0Reg R: Extra2Reg.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	jump7 jmpTarget: currentBlock.
@@ -4397,7 +4396,7 @@ SimpleDruidJIT >> gen_PrimitiveAt [
 	jump6 := self JumpZero: 0.
 	currentBlock := self Label.
 	jump7 jmpTarget: currentBlock.
-	self SubR: SendNumArgsReg R: ClassReg.
+	self SubR: Extra2Reg R: ClassReg.
 	self CmpCq: 24 R: Extra1Reg.
 	jump7 := self JumpAboveOrEqual: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
@@ -4407,7 +4406,7 @@ SimpleDruidJIT >> gen_PrimitiveAt [
 	self CmpR: ClassReg R: Extra3Reg.
 	jump4 := self JumpAbove: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self AddR: SendNumArgsReg R: Extra3Reg.
+	self AddR: Extra2Reg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self CmpCq: 5 R: Extra1Reg.
 	jump9 := self JumpAbove: 0.
@@ -5237,8 +5236,9 @@ SimpleDruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: SendNumArgsReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: SendNumArgsReg.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
@@ -5286,8 +5286,9 @@ SimpleDruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: ClassReg
 		R: Extra0Reg
-		Quo: ClassReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
+	self MoveR: Extra0Reg R: ClassReg.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
 	self MoveR: ClassReg R: SendNumArgsReg.
@@ -5344,18 +5345,18 @@ SimpleDruidJIT >> gen_PrimitiveDivide [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: Extra1Reg
-		Rem: Extra0Reg.
-	self MoveR: Extra1Reg R: Extra0Reg.
-	self LogicalShiftRightCq: 60 R: Extra0Reg.
-	self AddCq: 1 R: Extra0Reg.
-	self AndCq: 15 R: Extra0Reg.
-	self CmpCq: 1 R: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: Extra1Reg.
+	self MoveR: Extra0Reg R: Extra1Reg.
+	self LogicalShiftRightCq: 60 R: Extra1Reg.
+	self AddCq: 1 R: Extra1Reg.
+	self AndCq: 15 R: Extra1Reg.
+	self CmpCq: 1 R: Extra1Reg.
 	jump5 := self JumpAbove: 0.
-	self MoveR: Extra1Reg R: Extra0Reg.
-	self LogicalShiftLeftCq: 3 R: Extra0Reg.
-	self AddCq: 1 R: Extra0Reg.
-	self MoveR: Extra0Reg R: ReceiverResultReg.
+	self MoveR: Extra0Reg R: Extra1Reg.
+	self LogicalShiftLeftCq: 3 R: Extra1Reg.
+	self AddCq: 1 R: Extra1Reg.
+	self MoveR: Extra1Reg R: ReceiverResultReg.
 	self genPrimReturn.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
@@ -7428,10 +7429,10 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	"AutoGenerated by Druid"
 
 	| jump5 jump10 s94 s55 jump3 b690 jump8 jump1 s36 currentBlock s101 s58 jump13 jump6 s73 s82 s47 jump11 jump4 s78 s168 jump9 jump2 s85 s157 s98 jump7 jump12 |
-	self SubCq: 32 R: SPReg.
+	self SubCq: 24 R: SPReg.
 	self MoveR: ReceiverResultReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 0 r: SPReg.
-	self genLoadArg: 0 spilled: 4 into: SendNumArgsReg.
+	self genLoadArg: 0 spilled: 3 into: SendNumArgsReg.
 	self TstCq: 1 R: SendNumArgsReg.
 	jump1 := self JumpZero: 0.
 	self ArithmeticShiftRightCq: 3 R: SendNumArgsReg.
@@ -7444,12 +7445,9 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self LogicalShiftRightCq: 16 R: Extra1Reg.
 	self AndCq: 31 R: Extra1Reg.
 	self MoveMw: 0 r: SPReg R: Extra3Reg.
-	self MoveM32: 4 r: Extra3Reg R: Extra3Reg.
-	self AndCq: 16rFFFFFFFF R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 8 r: SPReg.
-	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self AndCq: 16r3FFFFF R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 8 r: SPReg.
+	self MoveM32: 4 r: Extra3Reg R: Extra2Reg.
+	self AndCq: 16rFFFFFFFF R: Extra2Reg.
+	self AndCq: 16r3FFFFF R: Extra2Reg.
 	self CmpCq: 2 R: Extra1Reg.
 	jump3 := self JumpNonZero: 0.
 	self genMoveConstant: objectMemory nilObject R: Extra0Reg.
@@ -7484,8 +7482,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	jump3 jmpTarget: currentBlock.
 	self CmpCq: 10 R: Extra1Reg.
 	jump3 := self JumpNonZero: 0.
-	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self CmpCq: 34 R: Extra3Reg.
+	self CmpCq: 34 R: Extra2Reg.
 	jump8 := self JumpNonZero: 0.
 	self CmpCq: 2 R: SendNumArgsReg.
 	jump9 := self JumpNonZero: 0.
@@ -7496,10 +7493,11 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: ClassReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	self AndCq: 1 R: SendNumArgsReg.
 	self AddR: SendNumArgsReg R: Extra1Reg.
+	self MoveR: Extra0Reg R: ClassReg.
 	jump10 := self Jump: 0.
 	currentBlock := self Label.
 	jump8 jmpTarget: currentBlock.
@@ -7515,8 +7513,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 		Rem: ClassReg.
 	self AndCq: 1 R: SendNumArgsReg.
 	self AddR: SendNumArgsReg R: Extra1Reg.
-	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self CmpCq: 0 R: Extra3Reg.
+	self CmpCq: 0 R: Extra2Reg.
 	jump8 := self JumpNonZero: 0.
 	self MoveCq: s55 R: ClassReg.
 	jump11 := self Jump: 0.
@@ -7562,15 +7559,15 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: Extra2Reg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	s101 := 8.
-	self MoveCq: s101 R: Extra0Reg.
-	self SubR: SendNumArgsReg R: Extra0Reg.
-	self AndCq: 7 R: Extra0Reg.
-	self AddR: Extra0Reg R: Extra1Reg.
+	self MoveCq: s101 R: ClassReg.
+	self SubR: SendNumArgsReg R: ClassReg.
+	self AndCq: 7 R: ClassReg.
+	self AddR: ClassReg R: Extra1Reg.
 	self MoveCq: s94 R: ClassReg.
-	self MoveR: Extra2Reg R: SendNumArgsReg.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	jump12 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
@@ -7579,8 +7576,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self CmpCq: 5 R: Extra1Reg.
 	jump13 := self JumpAbove: 0.
 	self AndCq: 16rFFFF R: Extra0Reg.
-	self genMoveConstant: objectMemory nilObject R: Extra2Reg.
-	self MoveR: Extra2Reg R: ClassReg.
+	self genMoveConstant: objectMemory nilObject R: ClassReg.
 	self MoveR: Extra0Reg R: SendNumArgsReg.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
@@ -7589,8 +7585,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	jump7 jmpTarget: currentBlock.
 	jump8 jmpTarget: currentBlock.
 	jump12 jmpTarget: currentBlock.
-	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self CmpCq: 0 R: Extra3Reg.
+	self CmpCq: 0 R: Extra2Reg.
 	jump12 := self JumpNonZero: 0.
 	self MoveR: SendNumArgsReg R: Extra0Reg.
 	currentBlock := self Label.
@@ -7604,9 +7599,9 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self CmpCq: 0 R: Extra2Reg.
 	jump8 := self JumpBelow: 0.
 	self MoveR: ClassReg R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 16 r: SPReg.
+	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self MoveR: Extra0Reg R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 24 r: SPReg.
+	self MoveR: Extra3Reg Mw: 16 r: SPReg.
 	jump7 := self Jump: 0.
 	currentBlock := self Label.
 	jump12 jmpTarget: currentBlock.
@@ -7615,20 +7610,18 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	currentBlock := self Label.
 	jump10 jmpTarget: currentBlock.
 	self MoveR: Extra0Reg R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 16 r: SPReg.
+	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self MoveR: ClassReg R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 24 r: SPReg.
-	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self MoveR: Extra3Reg R: Extra2Reg.
+	self MoveR: Extra3Reg Mw: 16 r: SPReg.
 	currentBlock := self Label.
 	jump7 jmpTarget: currentBlock.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self CmpCq: 16rFFFF R: Extra3Reg.
 	jump7 := self JumpAbove: 0.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self CmpCq: 255 R: Extra3Reg.
 	jump10 := self JumpAboveOrEqual: 0.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self CmpCq: 1 R: Extra3Reg.
 	jump12 := self JumpAboveOrEqual: 0.
 	s157 := 8.
@@ -7636,7 +7629,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump12 jmpTarget: currentBlock.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self MoveR: Extra3Reg R: ClassReg.
 	self LogicalShiftLeftCq: 3 R: ClassReg.
 	currentBlock := self Label.
@@ -7652,7 +7645,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	self MoveAw: objectMemory freeStartAddress R: SendNumArgsReg.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self MoveR: Extra3Reg R: Extra0Reg.
 	self LogicalShiftLeftCq: 56 R: Extra0Reg.
 	self LogicalShiftLeftCq: 24 R: Extra1Reg.
@@ -7665,18 +7658,18 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	self MoveR: Extra0Reg Aw: objectMemory freeStartAddress.
 	self MoveR: SendNumArgsReg R: Extra0Reg.
 	self AddCq: 8 R: Extra0Reg.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self LogicalShiftLeftCq: 3 R: Extra3Reg.
-	self MoveR: Extra3Reg Mw: 24 r: SPReg.
+	self MoveR: Extra3Reg Mw: 16 r: SPReg.
 	self MoveR: SendNumArgsReg R: ClassReg.
-	self MoveMw: 24 r: SPReg R: Extra3Reg.
+	self MoveMw: 16 r: SPReg R: Extra3Reg.
 	self AddR: Extra3Reg R: ClassReg.
 	self AddCq: 8 R: ClassReg.
 	self SubCq: 1 R: ClassReg.
 	b690 := self Label.
 	self CmpR: Extra0Reg R: ClassReg.
 	jump6 := self JumpLess: 0.
-	self MoveMw: 16 r: SPReg R: Extra3Reg.
+	self MoveMw: 8 r: SPReg R: Extra3Reg.
 	self MoveR: Extra3Reg M64: 0 r: Extra0Reg.
 	self MoveR: Extra0Reg R: Extra2Reg.
 	self AddCq: 8 R: Extra2Reg.
@@ -7685,7 +7678,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	self MoveR: SendNumArgsReg R: ReceiverResultReg.
-	self AddCq: 32 R: SPReg.
+	self AddCq: 24 R: SPReg.
 	self genPrimReturn.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
@@ -7698,7 +7691,7 @@ SimpleDruidJIT >> gen_PrimitiveNewWithArg [
 	jump7 jmpTarget: currentBlock.
 	jump10 jmpTarget: currentBlock.
 	jump12 jmpTarget: currentBlock.
-	self AddCq: 32 R: SPReg.
+	self AddCq: 24 R: SPReg.
 	^ 0
 ]
 
@@ -11252,7 +11245,7 @@ SimpleDruidJIT >> gen_PushNewArrayBytecode [
 			[ ((s30<=s29)) ] whileTrue: [
 				s34 := s3 - s30.
 				s35 := s34 - 1.
-				self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+				self MoveMw: 0 r: SPReg R: t1.
 				self PopN: 1.
 				s38 := s35 << 3.
 				self MoveR: t0 R: t2.
@@ -11307,7 +11300,7 @@ SimpleDruidJIT >> gen_PushNewArrayBytecode [
 		[ ((s30<=s29)) ] whileTrue: [
 			s34 := s3 - s30.
 			s35 := s34 - 1.
-			self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+			self MoveMw: 0 r: SPReg R: t1.
 			self PopN: 1.
 			s38 := s35 << 3.
 			self MoveR: t0 R: t2.
@@ -11820,7 +11813,7 @@ SimpleDruidJIT >> gen_ReturnTopFromBlock [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	self MoveR: t0 R: ReceiverResultReg.
 	self genBlockReturn.
@@ -11833,7 +11826,7 @@ SimpleDruidJIT >> gen_ReturnTopFromMethod [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	self MoveR: t0 R: ReceiverResultReg.
 	self genUpArrowReturn.
@@ -12290,7 +12283,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse0 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12319,7 +12312,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse1 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12348,7 +12341,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse2 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12377,7 +12370,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse3 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12406,7 +12399,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse4 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12435,7 +12428,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse5 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12464,7 +12457,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse6 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12493,7 +12486,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpFalse7 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory falseObject.
 	self CmpCq: s5 R: t0.
@@ -12522,7 +12515,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue0 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12551,7 +12544,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue1 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12580,7 +12573,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue2 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12609,7 +12602,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue3 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12638,7 +12631,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue4 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12667,7 +12660,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue5 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12696,7 +12689,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue6 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12725,7 +12718,7 @@ SimpleDruidJIT >> gen_ShortConditionalJumpTrue7 [
 	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 s7 |
 	t0 := ClassReg.
 	self annotateBytecode: self Label.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self PopN: 1.
 	s5 := objectMemory trueObject.
 	self CmpCq: s5 R: t0.
@@ -12848,7 +12841,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13016,7 +13009,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13184,7 +13177,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13352,7 +13345,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13520,7 +13513,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13688,7 +13681,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -13856,7 +13849,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -14024,7 +14017,7 @@ SimpleDruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 	needsFrame ifTrue:
 		[self putSelfInReceiverResultReg]..
 	self MoveR: ReceiverResultReg R: t0.
-	self MoveMw: 0 r: SPReg R: SendNumArgsReg.
+	self MoveMw: 0 r: SPReg R: t1.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -14229,7 +14222,7 @@ SimpleDruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 		self MoveCq: s3 R: t1.
 		currentBlock := self Label.
 		jump3 jmpTarget: currentBlock.
-		self MoveMw: 0 r: SPReg R: t2.
+		self MoveMw: 8 r: SPReg R: t2.
 		self MoveR: t2 Mw: 0 r: SPReg.
 		self MoveR: t0 R: t3.
 		self AndCq: 7 R: t3.
@@ -14390,7 +14383,7 @@ SimpleDruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 		self AddCq: 8 R: SPReg.
 		^ 0 ].
 	self MoveCq: s3 R: t1.
-	self MoveMw: 0 r: SPReg R: t2.
+	self MoveMw: 8 r: SPReg R: t2.
 	self MoveR: t2 Mw: 0 r: SPReg.
 	self MoveR: t0 R: t3.
 	self AndCq: 7 R: t3.
@@ -14558,7 +14551,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode0 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 0) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14570,7 +14563,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode1 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 1) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14582,7 +14575,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode2 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 2) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14594,7 +14587,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode3 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 3) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14606,7 +14599,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode4 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 4) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14618,7 +14611,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode5 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 5) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14630,7 +14623,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode6 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 6) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14642,7 +14635,7 @@ SimpleDruidJIT >> gen_StoreAndPopTemporaryVariableBytecode7 [
 
 	| currentBlock t0 |
 	t0 := ClassReg.
-	self MoveMw: 0 r: SPReg R: ClassReg.
+	self MoveMw: 0 r: SPReg R: t0.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: 7) r: FPReg.
 	self PopN: 1.
 	^ 0
@@ -14696,7 +14689,7 @@ SimpleDruidJIT >> gen_StoreRemoteTempLongBytecode [
 		self MoveCq: s3 R: t1.
 		currentBlock := self Label.
 		jump3 jmpTarget: currentBlock.
-		self MoveMw: 0 r: SPReg R: Extra0Reg.
+		self MoveMw: 0 r: SPReg R: t2.
 		self MoveR: t0 R: t3.
 		self AndCq: 7 R: t3.
 		self CmpCq: 0 R: t3.
@@ -14851,7 +14844,7 @@ SimpleDruidJIT >> gen_StoreRemoteTempLongBytecode [
 		self MoveR: t1 M64: 8 r: t0.
 		^ 0 ].
 	self MoveCq: s3 R: t1.
-	self MoveMw: 0 r: SPReg R: Extra0Reg.
+	self MoveMw: 0 r: SPReg R: t2.
 	self MoveR: t0 R: t3.
 	self AndCq: 7 R: t3.
 	self CmpCq: 0 R: t3.
