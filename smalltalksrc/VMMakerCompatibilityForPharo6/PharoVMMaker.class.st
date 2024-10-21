@@ -257,6 +257,17 @@ PharoVMMaker >> generateSimpleDruid [
 ]
 
 { #category : #generation }
+PharoVMMaker >> generateSimpleDruidVMStaticTypePrediction [
+
+	options := #( PartialCompilation false ).
+
+	self
+		generate: CoInterpreter
+		memoryManager: Spur64BitCoMemoryManager
+		compilerClass: SimpleDruidStaticTypePredictionJIT
+]
+
+{ #category : #generation }
 PharoVMMaker >> generateStackVM [
 
 	self generates64Bits ifTrue: [self generate: StackInterpreter memoryManager: Spur64BitMemoryManager].
