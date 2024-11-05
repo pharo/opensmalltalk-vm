@@ -12,6 +12,13 @@ Class {
 }
 
 { #category : 'transformations' }
+TBraceCaseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+
+	self caseLabels: (caseLabels collect: [:node| node bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables]).
+	self cases: (cases collect: [:node| node bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables])
+]
+
+{ #category : 'transformations' }
 TBraceCaseNode >> bindVariableUsesIn: aDictionary [
 
 	self caseLabels: (caseLabels collect: [:node| node bindVariableUsesIn: aDictionary]).

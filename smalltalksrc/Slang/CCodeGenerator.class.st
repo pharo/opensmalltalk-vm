@@ -772,6 +772,26 @@ CCodeGenerator >> checkForGlobalUsage: vars in: aTMethod [
 		self logger cr; nextPutAll: em; cr; flush]
 ]
 
+{ #category : 'error notification' }
+CCodeGenerator >> checkForVariableNameConflict: var inMethod: m [
+
+	(variables includes: var) ifTrue: [
+		self error:
+			'Local variable ''' , var , ''' may mask global when inlining '
+			, m selector ].
+	((methods at: var ifAbsent: [ nil ])
+		 ifNil: [ false ]
+		 ifNotNil: [ :m1 | m1 isStructAccessor not ]) ifTrue: [
+		logger
+			newLine;
+			nextPutAll: 'Local variable name ''';
+			nextPutAll: var;
+			nextPutAll: ''' in ';
+			nextPutAll: m selector;
+			nextPutAll: ' may mask method when inlining';
+			cr ]
+]
+
 { #category : 'inlining' }
 CCodeGenerator >> collectInlineList: strategy [
 	"Make a list of methods that should be inlined.  If inlineFlagOrSymbol == #asSpecified
@@ -4133,24 +4153,19 @@ CCodeGenerator >> preDeclareInterpreterProxyOn: aStream [
 
 { #category : 'utilities' }
 CCodeGenerator >> prepareMethods [
+
 	| globals |
 	globals := Set new: 200.
 	globals addAll: variables.
-	methods do:
-		[:m |
-		m allLocals, m args do:
-			[:var |
-			(globals includes: var) ifTrue:
-				[self error: 'Local variable ''', var, ''' may mask global when inlining ', m selector].
-			((methods at: var ifAbsent: [nil]) ifNil: [false] ifNotNil: [:m1| m1 isStructAccessor not]) ifTrue:
-				[logger
-					newLine;
-					nextPutAll: 'Local variable name ''', var, ''' in ';
-					nextPutAll: m selector;
-					nextPutAll: ' may mask method when inlining';
-					cr]].
+	methods do: [ :m |
+		m allLocals do: [ :var | "todo : trouver comment mettre a jour les occurences de var dans tous le parseTree"
+			self checkForVariableNameConflict: var inMethod: m ].
+		m args do: [ :var | "todo : trouver comment mettre a jour les occurences de var dans tous le parseTree"
+			self checkForVariableNameConflict: var inMethod: m ].
+		"m bindVariableUsesIn: constants andConstantFoldIf: globals in: self."
+		self halt.
 		m bindClassVariablesIn: constants.
-		m prepareMethodIn: self]
+		m prepareMethodIn: self ]
 ]
 
 { #category : 'accessing' }
@@ -5045,7 +5060,7 @@ CCodeGenerator >> typeOfVariable: varName [ "<String>"
 				ifNotNil: [apiVariables at: varName ifAbsent: []]
 				ifNil: []]) ifNotNil:
 		[:decl| ^self extractTypeFor: varName fromDeclaration: decl].
-	^(constants at: varName ifAbsent: []) ifNotNil:
+	^(constants at: varName "allButFirst" ifAbsent: []) ifNotNil:
 		[:const|
 		const value isInteger
 			ifTrue: [self defaultType]

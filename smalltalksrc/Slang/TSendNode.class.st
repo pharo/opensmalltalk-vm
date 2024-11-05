@@ -192,6 +192,18 @@ TSendNode >> asTransformedConstantPerform [
 ]
 
 { #category : 'transformations' }
+TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+
+	self receiver: (receiver
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables).
+	self arguments: (arguments collect: [ :a |
+			 a
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables ])
+]
+
+{ #category : 'transformations' }
 TSendNode >> bindVariableUsesIn: aDictionary [
 
 	self receiver: (receiver bindVariableUsesIn: aDictionary).

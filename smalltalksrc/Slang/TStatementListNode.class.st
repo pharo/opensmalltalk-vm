@@ -308,6 +308,15 @@ TStatementListNode >> assignLastExpressionTo: variableNode [
 ]
 
 { #category : 'transformations' }
+TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+
+	self statements: (statements collect: [ :s |
+			 s
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables ])
+]
+
+{ #category : 'transformations' }
 TStatementListNode >> bindVariableUsesIn: aDictionary [
 
 	self statements: (statements collect: [ :s | s bindVariableUsesIn: aDictionary ]).

@@ -173,6 +173,17 @@ TSwitchStmtNode >> asCASTIn: aBuilder addToEndOfCases: aNodeToPrependOrNil [
 ]
 
 { #category : 'transformations' }
+TSwitchStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+	expression := expression bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables.
+	cases := (cases collect:
+				[:pair| "<Array with: <Array with: ParseTreeNode> with: TStmtListNode"
+				{ pair first collect: [:labelNode| labelNode bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables].
+				   pair last bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables }]).
+	otherwiseOrNil ifNotNil:
+		[otherwiseOrNil := otherwiseOrNil bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables]
+]
+
+{ #category : 'transformations' }
 TSwitchStmtNode >> bindVariableUsesIn: aDictionary [
 	expression := expression bindVariableUsesIn: aDictionary.
 	cases := (cases collect:

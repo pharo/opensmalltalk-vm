@@ -105,6 +105,13 @@ TCaseStmtNode >> asCASTIn: aBuilder addToEndOfCases: aNodeToPrepend [
 ]
 
 { #category : 'transformations' }
+TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+
+	self expression: (expression bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables).
+	self cases: (cases collect: [ :c | c bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables ]).
+]
+
+{ #category : 'transformations' }
 TCaseStmtNode >> bindVariableUsesIn: aDictionary [
 
 	self expression: (expression bindVariableUsesIn: aDictionary).

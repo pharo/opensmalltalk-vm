@@ -22,6 +22,13 @@ TInlineNode >> asCASTIn: aBuilder [
 ]
 
 { #category : 'transformations' }
+TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+
+	method := method bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables.
+
+]
+
+{ #category : 'transformations' }
 TInlineNode >> bindVariableUsesIn: aDictionary [
 	method := method bindVariableUsesIn: aDictionary.
 

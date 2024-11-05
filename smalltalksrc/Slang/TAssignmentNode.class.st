@@ -139,6 +139,14 @@ TAssignmentNode >> asCASTValueExpansionIn: aCodeGen [
 ]
 
 { #category : 'transformations' }
+TAssignmentNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can changed and the globals had no need to be rebind "
+
+	self variable: (variable bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables).
+	self expression: (expression bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables).
+]
+
+{ #category : 'transformations' }
 TAssignmentNode >> bindVariableUsesIn: aDictionary [
 	"Do NOT bind the variable on the left-hand-side of an assignment statement."
 	"was bindVariablesIn:"
