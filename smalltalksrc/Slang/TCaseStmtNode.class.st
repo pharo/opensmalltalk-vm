@@ -112,6 +112,20 @@ TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: glob
 ]
 
 { #category : 'transformations' }
+TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	self expression: (expression
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen).
+	self cases: (cases collect: [ :c |
+			 c
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables
+				 in: aCodeGen ])
+]
+
+{ #category : 'transformations' }
 TCaseStmtNode >> bindVariableUsesIn: aDictionary [
 
 	self expression: (expression bindVariableUsesIn: aDictionary).

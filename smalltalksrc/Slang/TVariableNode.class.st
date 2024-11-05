@@ -49,6 +49,19 @@ TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: glob
 ]
 
 { #category : 'transformations' }
+TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
+
+	| actualName |
+	"all the variable has an '_' first by default"
+	actualName := name allButFirst.
+	(aCodeGen isNonArgumentImplicitReceiverVariableName: actualName)
+		ifTrue: [ ^ self ].
+	globalsVariables do: [ :e | e = actualName ifTrue: [ ^ e copy ] ].
+	^ (classVariables at: actualName ifAbsent: [ ^ self ]) copy
+]
+
+{ #category : 'transformations' }
 TVariableNode >> bindVariableUsesIn: aDictionary [
 
 	^ (aDictionary at: name ifAbsent: [^ self]) copy
@@ -63,7 +76,7 @@ TVariableNode >> bindVariableUsesIn: aDictionary andConstantFoldIf: constantFold
 { #category : 'transformations' }
 TVariableNode >> bindVariablesIn: aDictionary [
 
-	^ (aDictionary at: name "allButFirst" ifAbsent: [ ^ self ]) copy
+	^ (aDictionary at: name allButFirst ifAbsent: [ ^ self ]) copy
 ]
 
 { #category : 'transformations' }

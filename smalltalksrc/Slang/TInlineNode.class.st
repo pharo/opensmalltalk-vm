@@ -29,6 +29,15 @@ TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: global
 ]
 
 { #category : 'transformations' }
+TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	method := method
+		          bindClassVariablesIn: classVariables
+		          andGlobalVariablesIn: globalsVariables
+		          in: aCodeGen
+]
+
+{ #category : 'transformations' }
 TInlineNode >> bindVariableUsesIn: aDictionary [
 	method := method bindVariableUsesIn: aDictionary.
 

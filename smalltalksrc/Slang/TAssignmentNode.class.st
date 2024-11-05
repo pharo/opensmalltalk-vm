@@ -147,6 +147,20 @@ TAssignmentNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: gl
 ]
 
 { #category : 'transformations' }
+TAssignmentNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can changed and the globals had no need to be rebind "
+
+	self variable: (variable
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen).
+	self expression: (expression
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen)
+]
+
+{ #category : 'transformations' }
 TAssignmentNode >> bindVariableUsesIn: aDictionary [
 	"Do NOT bind the variable on the left-hand-side of an assignment statement."
 	"was bindVariablesIn:"

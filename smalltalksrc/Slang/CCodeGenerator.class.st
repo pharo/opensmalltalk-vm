@@ -150,8 +150,9 @@ CCodeGenerator >> addClass: aClass silently: silentlyBoolean [
 { #category : 'public' }
 CCodeGenerator >> addClassVarsFor: aClass [
 	"Add the class variables for the given class to the code base as constants."
-	aClass classPool associationsDo:
-		[:assoc | self addConstantForBinding: assoc]
+
+	aClass classPool associationsDo: [ :assoc |
+		self addConstantForBinding: assoc ]
 ]
 
 { #category : 'public' }
@@ -160,10 +161,12 @@ CCodeGenerator >> addConstantForBinding: variableBinding [
 	| node val |
 	val := variableBinding value.
 	node := (useSymbolicConstants and: [self isCLiteral: val])
-				ifTrue:[TDefineNode new
+				ifTrue:[
+					TDefineNode new
 							setName: variableBinding key
 							value: variableBinding value]
-				ifFalse:[TConstantNode value: variableBinding value].
+				ifFalse:[
+					TConstantNode value: variableBinding value].
 	constants at: variableBinding key put: node
 ]
 
@@ -4162,9 +4165,8 @@ CCodeGenerator >> prepareMethods [
 			self checkForVariableNameConflict: var inMethod: m ].
 		m args do: [ :var | "todo : trouver comment mettre a jour les occurences de var dans tous le parseTree"
 			self checkForVariableNameConflict: var inMethod: m ].
-		"m bindVariableUsesIn: constants andConstantFoldIf: globals in: self."
-		self halt.
-		m bindClassVariablesIn: constants.
+		m bindClassVariablesIn: constants andGlobalVariablesIn: globals in: self.
+		"m bindClassVariablesIn: constants."
 		m prepareMethodIn: self ]
 ]
 

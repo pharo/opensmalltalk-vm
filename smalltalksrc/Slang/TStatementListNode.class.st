@@ -317,6 +317,16 @@ TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn:
 ]
 
 { #category : 'transformations' }
+TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	self statements: (statements collect: [ :s |
+			 s
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables
+				 in: aCodeGen ])
+]
+
+{ #category : 'transformations' }
 TStatementListNode >> bindVariableUsesIn: aDictionary [
 
 	self statements: (statements collect: [ :s | s bindVariableUsesIn: aDictionary ]).

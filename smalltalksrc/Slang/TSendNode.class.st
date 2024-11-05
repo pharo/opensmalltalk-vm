@@ -204,6 +204,20 @@ TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsV
 ]
 
 { #category : 'transformations' }
+TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	self receiver: (receiver
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen).
+	self arguments: (arguments collect: [ :a |
+			 a
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables
+				 in: aCodeGen ])
+]
+
+{ #category : 'transformations' }
 TSendNode >> bindVariableUsesIn: aDictionary [
 
 	self receiver: (receiver bindVariableUsesIn: aDictionary).

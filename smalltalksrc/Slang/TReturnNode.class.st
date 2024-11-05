@@ -76,6 +76,15 @@ TReturnNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: global
 ]
 
 { #category : 'transformations' }
+TReturnNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	self expression: (expression
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen)
+]
+
+{ #category : 'transformations' }
 TReturnNode >> bindVariableUsesIn: aDictionary [
 
 	self expression: (expression bindVariableUsesIn: aDictionary)

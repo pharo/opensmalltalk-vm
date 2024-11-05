@@ -19,6 +19,21 @@ TBraceCaseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: glo
 ]
 
 { #category : 'transformations' }
+TBraceCaseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+
+	self caseLabels: (caseLabels collect: [ :node |
+			 node
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables
+				 in: aCodeGen ]).
+	self cases: (cases collect: [ :node |
+			 node
+				 bindClassVariablesIn: classVariables
+				 andGlobalVariablesIn: globalsVariables
+				 in: aCodeGen ])
+]
+
+{ #category : 'transformations' }
 TBraceCaseNode >> bindVariableUsesIn: aDictionary [
 
 	self caseLabels: (caseLabels collect: [:node| node bindVariableUsesIn: aDictionary]).

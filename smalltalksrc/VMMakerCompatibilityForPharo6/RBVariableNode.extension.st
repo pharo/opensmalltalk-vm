@@ -8,7 +8,7 @@ RBVariableNode >> asTranslatorNodeIn: aTMethod [
 	name = 'false' ifTrue: [ ^ TConstantNode value: false ].
 	(#( 'nil' 'self' ) includes: name) ifTrue: [
 		^ TVariableNode new setName: name ].
-	^ TVariableNode new setName: "#_ ," name
+	^ TVariableNode new setName: #_ , name
 ]
 
 { #category : '*VMMakerCompatibilityForPharo6-testing' }
