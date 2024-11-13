@@ -147,7 +147,7 @@ SimpleStackBasedCogit class >> initializeBytecodeTableForSistaV1 [
 		(2 225 225 extBBytecode extension)
 
 		"pushes"
-		(2 226 226 genExtPushReceiverVariableBytecode isInstVarRef isMappedIfImmutability)		"Needs a frame for context inst var access"
+		(2 226 226 genExtPushReceiverVariableBytecode isInstVarRef)		"Needs a frame for context inst var access"
 		(2 227 227 genExtPushLiteralVariableBytecode			needsFrameNever: 1)
 		(2 228 228 genExtPushLiteralBytecode					needsFrameNever: 1)
 		(2 229 229 genLongPushTemporaryVariableBytecode)
@@ -184,8 +184,8 @@ SimpleStackBasedCogit class >> initializeBytecodeTableForSistaV1 [
 		(3 249 249 genExtPushFullClosureBytecode) 
 		(3 250 250 unknownBytecode) "was genExtPushClosureBytecode"
 		(3 251 251 genPushRemoteTempLongBytecode)
-		(3 252 252 genStoreRemoteTempLongBytecode needsFrameIfImmutability: 0)
-		(3 253 253 genStoreAndPopRemoteTempLongBytecode needsFrameIfImmutability: -1)
+		(3 252 252 genStoreRemoteTempLongBytecode isMappedIfImmutability needsFrameIfImmutability: 0)
+		(3 253 253 genStoreAndPopRemoteTempLongBytecode isMappedIfImmutability needsFrameIfImmutability: -1)
 
 		(3 254 255	unknownBytecode))
 ]
