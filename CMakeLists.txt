@@ -33,9 +33,10 @@ option(FEATURE_COMPILE_GNUISATION			"Use gcc gnu extensions to compile the VM"		
 option(PHARO_DEPENDENCIES_PREFER_DOWNLOAD_BINARIES	"Prefer downloading dependencies"						OFF)
 option(FEATURE_COMPILE_INLINE_MEMORY_ACCESSORS		"Use inline memory accessors instead of macros"					 ON)
 option(PHARO_VM_IN_WORKER_THREAD			"Have support for pharo running in a different thread that the main one"	 ON)
-option(BUILD_IS_RELEASE					"Is this a release version?"							OFF)
 option(DEPENDENCIES_FORCE_BUILD         "Force build libraries" OFF)
 option(BUILD_WITH_GRAPHVIZ              "Generate dependency graphs" ON)
+option(VERSION_UPDATE_FROM_GIT              "Extract version information from git tags. Default to true. Follow vX.Y.Z-suffix" TRUE)
+
 
 set(APPNAME			"Pharo"         CACHE STRING                 "VM Application name")
 set(FLAVOUR			"CoInterpreter" CACHE STRING                 "The kind of VM to generate. Possible values: StackVM, CoInterpreter")
@@ -46,24 +47,6 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0")
 if(VERBOSE_BUILD)
     set(CMAKE_VERBOSE_MAKEFILE TRUE)
 endif(VERBOSE_BUILD)
-
-# Extract VCS information
-include(cmake/versionExtraction.cmake)
-extractVCSInformation(GIT_COMMIT_HASH GIT_DESCRIBE GIT_COMMIT_DATE)
-
-set(VERSION_MAJOR 10)
-set(VERSION_MINOR 3)
-set(VERSION_PATCH_NUMBER 0)
-
-if(BUILD_IS_RELEASE)
-	set(VERSION_PATCH "${VERSION_PATCH_NUMBER}")
-else()
-	set(VERSION_PATCH "${VERSION_PATCH_NUMBER}-${GIT_COMMIT_HASH}")
-endif(BUILD_IS_RELEASE)
-
-message(STATUS "Building version ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
-message(STATUS "Commit hash ${GIT_COMMIT_HASH} : ${GIT_COMMIT_DATE}")
-
 
 # Visual Studio stores user build settings in file 'CmakeSettings.json'.  We would like to manage that via a project template.
 # To push out new template, update 'template_uuid' field in 'template_file' with value from https://www.uuidgenerator.net/
@@ -99,10 +82,6 @@ endif()
 # Configure CMake to load our modules
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-#Variable used to set the VM date
-set(BUILT_FROM "${GIT_DESCRIBE} - Commit: ${GIT_COMMIT_HASH} - Date: ${GIT_COMMIT_DATE}")
-message(STATUS ${BUILT_FROM})
-
 # Avoid using the d postfix to debug libraries
 # Otherwise, debug libraries change name and breaks FFI bindings
 set(CMAKE_DEBUG_POSTFIX "")
@@ -125,6 +104,12 @@ endif()
 #Set up the project
 #This needs to be at this point, after setting the toolchain configuration
 project(PharoVM)
+
+include(cmake/versionExtraction.cmake)
+
+set(BUILT_FROM "${PharoVM_VERSION_STRING_FULL} - Commit: ${PharoVM_VERSION_GIT_SHA} - Date: ${PharoVM_VERSION_GIT_COMMIT_DATE}")
+message(STATUS ${BUILT_FROM})
+
 
 # Correctly set the system processor under MSVC
 # This is required because CMake will set the HOST_PROCESSOR in windows
