@@ -308,22 +308,14 @@ TStatementListNode >> assignLastExpressionTo: variableNode [
 ]
 
 { #category : 'transformations' }
-TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-
-	self statements: (statements collect: [ :s |
-			 s
-				 bindClassVariablesIn: classVariables
-				 andGlobalVariablesIn: globalsVariables ])
-]
-
-{ #category : 'transformations' }
-TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TStatementListNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 
 	self statements: (statements collect: [ :s |
 			 s
 				 bindClassVariablesIn: classVariables
 				 andGlobalVariablesIn: globalsVariables
-				 in: aCodeGen ])
+				 in: aCodeGen
+				 collect: changedVariables ])
 ]
 
 { #category : 'transformations' }

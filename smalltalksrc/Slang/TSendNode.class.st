@@ -192,29 +192,19 @@ TSendNode >> asTransformedConstantPerform [
 ]
 
 { #category : 'transformations' }
-TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-
-	self receiver: (receiver
-			 bindClassVariablesIn: classVariables
-			 andGlobalVariablesIn: globalsVariables).
-	self arguments: (arguments collect: [ :a |
-			 a
-				 bindClassVariablesIn: classVariables
-				 andGlobalVariablesIn: globalsVariables ])
-]
-
-{ #category : 'transformations' }
-TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TSendNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 
 	self receiver: (receiver
 			 bindClassVariablesIn: classVariables
 			 andGlobalVariablesIn: globalsVariables
-			 in: aCodeGen).
+			 in: aCodeGen
+			 collect: changedVariables).
 	self arguments: (arguments collect: [ :a |
 			 a
 				 bindClassVariablesIn: classVariables
 				 andGlobalVariablesIn: globalsVariables
-				 in: aCodeGen ])
+				 in: aCodeGen
+				 collect: changedVariables ])
 ]
 
 { #category : 'transformations' }

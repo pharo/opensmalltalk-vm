@@ -10,30 +10,52 @@ SLNormalizeVariablesTestClass >> emptyMethod: arg [
 	^ arg
 ]
 
-{ #category : 'methods' }
-SLNormalizeVariablesTestClass >> methodWith2Arguments: arg1 arg: arg2 [
+{ #category : 'methods-with-unused-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUnusedArguments: arg1 arg: arg2 [
 
 	
 ]
 
-{ #category : 'methods' }
-SLNormalizeVariablesTestClass >> methodWithVariables [
+{ #category : 'methods-with-unused-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUnusedVariables [
 
 	| var1 var2 |
-	self emptyMethod: var2.
-	self emptyMethod: 'var'.
-	self emptyMethod: 12.
-	'var'.
-	12
+	
 ]
 
-{ #category : 'methods' }
-SLNormalizeVariablesTestClass >> methodWithVariablesAnd2Arguments: arg1 arg: arg2 [
+{ #category : 'methods-with-unused-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUsedAndUnusedArguments: arg1 arg: arg2 [
+
+	arg1
+]
+
+{ #category : 'methods-with-unused-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUsedAndUnusedVariables [
 
 	| var1 var2 |
-	self emptyMethod: var2.
-	self emptyMethod: 'var'.
-	self emptyMethod: 12.
-	'var'.
-	12
+	var2.
+]
+
+{ #category : 'methods-with-unused-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUsedAndUnusedVariablesAndArguments: arg1 arg: arg2 [
+
+	| var1 var2 |
+	var2.
+	arg2
+]
+
+{ #category : 'methods-with-used-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUsedArguments [
+
+	| var1 var2 |
+	var1.
+	var2
+]
+
+{ #category : 'methods-with-used-locals-and-arguments' }
+SLNormalizeVariablesTestClass >> methodWithUsedVariables [
+
+	| var1 var2 |
+	var1.
+	var2
 ]

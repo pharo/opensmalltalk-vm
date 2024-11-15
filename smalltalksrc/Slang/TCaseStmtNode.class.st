@@ -105,24 +105,19 @@ TCaseStmtNode >> asCASTIn: aBuilder addToEndOfCases: aNodeToPrepend [
 ]
 
 { #category : 'transformations' }
-TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-
-	self expression: (expression bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables).
-	self cases: (cases collect: [ :c | c bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables ]).
-]
-
-{ #category : 'transformations' }
-TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TCaseStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 
 	self expression: (expression
 			 bindClassVariablesIn: classVariables
 			 andGlobalVariablesIn: globalsVariables
-			 in: aCodeGen).
+			 in: aCodeGen
+			 collect: changedVariables).
 	self cases: (cases collect: [ :c |
 			 c
 				 bindClassVariablesIn: classVariables
 				 andGlobalVariablesIn: globalsVariables
-				 in: aCodeGen ])
+				 in: aCodeGen
+				 collect: changedVariables ])
 ]
 
 { #category : 'transformations' }

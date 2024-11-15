@@ -68,20 +68,13 @@ TReturnNode >> asReturnNode [
 ]
 
 { #category : 'transformations' }
-TReturnNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-
-	self expression: (expression
-			 bindClassVariablesIn: classVariables
-			 andGlobalVariablesIn: globalsVariables)
-]
-
-{ #category : 'transformations' }
-TReturnNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TReturnNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 
 	self expression: (expression
 			 bindClassVariablesIn: classVariables
 			 andGlobalVariablesIn: globalsVariables
-			 in: aCodeGen)
+			 in: aCodeGen
+			 collect: changedVariables)
 ]
 
 { #category : 'transformations' }

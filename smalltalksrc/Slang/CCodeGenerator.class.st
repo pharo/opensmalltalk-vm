@@ -4159,14 +4159,14 @@ CCodeGenerator >> prepareMethods [
 
 	| globals |
 	globals := Set new: 200.
-	globals addAll: variables.
+	globals addAll: variables
+		, (apiVariables ifNotNil: [ apiVariables keys ] ifNil: [ #(  ) ]).
 	methods do: [ :m |
-		m allLocals do: [ :var | "todo : trouver comment mettre a jour les occurences de var dans tous le parseTree"
+		m allLocals do: [ :var |
 			self checkForVariableNameConflict: var inMethod: m ].
-		m args do: [ :var | "todo : trouver comment mettre a jour les occurences de var dans tous le parseTree"
+		m args do: [ :var |
 			self checkForVariableNameConflict: var inMethod: m ].
 		m bindClassVariablesIn: constants andGlobalVariablesIn: globals in: self.
-		"m bindClassVariablesIn: constants."
 		m prepareMethodIn: self ]
 ]
 

@@ -38,27 +38,25 @@ TVariableNode >> asCASTIn: aBuilder [
 ]
 
 { #category : 'transformations' }
-TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
+TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
 
-	| actualName |
-	"all the variable has an '_' first by default"
-	actualName := name allButFirst.
-	globalsVariables do: [ :e | e = actualName ifTrue: [ ^ e copy ] ].
-	^ (classVariables at: actualName ifAbsent: [ ^ self ]) copy
-]
+	"all the variable has an '_' first by default except 'nil, 'self' and 'super'"
 
-{ #category : 'transformations' }
-TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
-	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
-
-	| actualName |
-	"all the variable has an '_' first by default"
-	actualName := name allButFirst.
-	(aCodeGen isNonArgumentImplicitReceiverVariableName: actualName)
-		ifTrue: [ ^ self ].
-	globalsVariables do: [ :e | e = actualName ifTrue: [ ^ e copy ] ].
-	^ (classVariables at: actualName ifAbsent: [ ^ self ]) copy
+	((#( #nil #super ) includes: name) or: [
+		 (name beginsWith: #self) or: [ name beginsWith: #cascade ] ])
+		ifTrue: [ ^ self copy ].
+	(aCodeGen isNonArgumentImplicitReceiverVariableName: name) ifTrue: [
+		^ self class new setName: name ].
+	globalsVariables do: [ :e |
+		e = name ifTrue: [ ^ self class new setName: e copy ] ].
+	^ (classVariables
+		   at: name
+		   ifAbsent: [ "the variable is local, we update its name with an _ and add it to the changedVariables collection which will change it in the locals, args, declaration and pragmas type declaration"
+			   | newName |
+			   newName := #_ , name.
+			   changedVariables add: name.
+			   ^ self class new setName: newName ]) copy
 ]
 
 { #category : 'transformations' }
@@ -76,7 +74,7 @@ TVariableNode >> bindVariableUsesIn: aDictionary andConstantFoldIf: constantFold
 { #category : 'transformations' }
 TVariableNode >> bindVariablesIn: aDictionary [
 
-	^ (aDictionary at: name allButFirst ifAbsent: [ ^ self ]) copy
+	^ (aDictionary at: name ifAbsent: [ ^ self ]) copy
 ]
 
 { #category : 'transformations' }

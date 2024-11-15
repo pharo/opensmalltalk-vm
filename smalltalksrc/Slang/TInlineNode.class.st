@@ -22,19 +22,13 @@ TInlineNode >> asCASTIn: aBuilder [
 ]
 
 { #category : 'transformations' }
-TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-
-	method := method bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables.
-
-]
-
-{ #category : 'transformations' }
-TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TInlineNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 
 	method := method
 		          bindClassVariablesIn: classVariables
 		          andGlobalVariablesIn: globalsVariables
 		          in: aCodeGen
+		          collect: changedVariables
 ]
 
 { #category : 'transformations' }

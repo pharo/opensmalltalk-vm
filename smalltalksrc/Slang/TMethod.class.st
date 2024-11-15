@@ -263,6 +263,12 @@ TMethod >> args [
 	^args
 ]
 
+{ #category : 'accessing' }
+TMethod >> args: arguments [
+
+	args := arguments
+]
+
 { #category : 'CAST translation' }
 TMethod >> asCASTCommentIn: aCodeGen [
 
@@ -433,7 +439,44 @@ TMethod >> bindClassVariablesIn: constantDictionary [
 TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
 	"Answer either the receiver, if it contains no references to the given variables, or a new node with the given variables rebound.
 	 But do not change variables that appear on the left-hand-side of an assignment statement."
-	^self
+
+	| changedVariables |
+	changedVariables := Set new.
+	self parseTree: (parseTree
+			 bindClassVariablesIn: classVariables
+			 andGlobalVariablesIn: globalsVariables
+			 in: aCodeGen
+			 collect: changedVariables).
+	cachedLocals := nil.
+	changedVariables do: [ :varName |
+		self locals: (self locals collect: [ :e |
+				 e ~= varName
+					 ifTrue: [ e ]
+					 ifFalse: [ #_ , varName ] ]).
+		self args: (self args collect: [ :e |
+				 e ~= varName
+					 ifTrue: [ e ]
+					 ifFalse: [ #_ , varName ] ]).
+
+		self parseTree nodesDo: [ :node |
+			node isStatementList ifTrue: [
+				node locals: (node locals collect: [ :e |
+						 e ~= varName
+							 ifTrue: [ e ]
+							 ifFalse: [ #_ , varName ] ]).
+				node setArguments: (node arguments collect: [ :e |
+						 e ~= varName
+							 ifTrue: [ e ]
+							 ifFalse: [ #_ , varName ] ]) ] ].
+		(declarations keys includes: varName) ifTrue: [
+			| oldDeclaration |
+			oldDeclaration := declarations at: varName.
+			"new declaration"
+			declarations at: #_ , varName put: (oldDeclaration
+					 copyReplaceAll: varName
+					 with: #_ , varName
+					 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
+			declarations removeKey: varName ] ]
 ]
 
 { #category : 'transformations' }
@@ -2825,7 +2868,7 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 	| tempParseTree |
 	selector := sel.
 	definingClass := class.
-	args := argList asOrderedCollection collect: [:arg | #_ ,   arg name].
+	args := argList asOrderedCollection collect: [:arg | arg name].
 	declarations := Dictionary new.
 	self addTypeForSelf.
 	primitive := aNumber.
@@ -2836,10 +2879,10 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 	"hack; allows nodes to find their parent, compute the conflicting locals when inlinign super sends..."
 	self parseTree: TStatementListNode new.
 	tempParseTree := parseTree.
-	self locals: tempParseTree locals, (localList  collect: [:arg | #_ ,  arg name]).
+	self locals: tempParseTree locals, (localList  collect: [:arg | arg name]).
 
 	self parseTree: (aBlockNode asTranslatorNodeIn: self).
-	self locals: tempParseTree locals, (localList  collect: [:arg | #_ ,  arg name]).
+	self locals: tempParseTree locals, (localList  collect: [:arg | arg name]).
 	
 	
 	complete := false.  "set to true when all possible inlining has been done"
@@ -2982,7 +3025,7 @@ TMethod >> superExpansionNodeFor: aSelector args: argumentNodes [
 			[:superMethod| | superTMethod commonVars varMap |
 			superTMethod := superMethod asTranslationMethodOfClass: self class.
 			((argumentNodes allSatisfy: [:parseNode| parseNode isVariable])
-			and: [(argumentNodes asOrderedCollection collect: [:parseNode| #_ , parseNode name]) = superTMethod args]) ifFalse:
+			and: [(argumentNodes asOrderedCollection collect: [:parseNode| parseNode name]) = superTMethod args]) ifFalse:
 				[self error: definingClass name, '>>',selector, ' args ~= ',
 							superTMethod definingClass name, '>>', aSelector,
 							(String with: $. with: Character cr),

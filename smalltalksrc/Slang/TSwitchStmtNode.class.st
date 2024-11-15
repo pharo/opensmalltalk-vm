@@ -173,14 +173,32 @@ TSwitchStmtNode >> asCASTIn: aBuilder addToEndOfCases: aNodeToPrependOrNil [
 ]
 
 { #category : 'transformations' }
-TSwitchStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-	expression := expression bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables.
-	cases := (cases collect:
-				[:pair| "<Array with: <Array with: ParseTreeNode> with: TStmtListNode"
-				{ pair first collect: [:labelNode| labelNode bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables].
-				   pair last bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables }]).
-	otherwiseOrNil ifNotNil:
-		[otherwiseOrNil := otherwiseOrNil bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables]
+TSwitchStmtNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
+
+	expression := expression
+		              bindClassVariablesIn: classVariables
+		              andGlobalVariablesIn: globalsVariables
+		              in: aCodeGen
+		              collect: changedVariables.
+	cases := cases collect: [ :pair | "<Array with: <Array with: ParseTreeNode> with: TStmtListNode"
+		         {
+			         (pair first collect: [ :labelNode |
+				          labelNode
+					          bindClassVariablesIn: classVariables
+					          andGlobalVariablesIn: globalsVariables
+					          in: aCodeGen
+					          collect: changedVariables ]).
+			         (pair last
+				          bindClassVariablesIn: classVariables
+				          andGlobalVariablesIn: globalsVariables
+				          in: aCodeGen
+				          collect: changedVariables) } ].
+	otherwiseOrNil ifNotNil: [
+		otherwiseOrNil := otherwiseOrNil
+			                  bindClassVariablesIn: classVariables
+			                  andGlobalVariablesIn: globalsVariables
+			                  in: aCodeGen
+			                  collect: changedVariables ]
 ]
 
 { #category : 'transformations' }

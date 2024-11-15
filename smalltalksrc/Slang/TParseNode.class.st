@@ -104,14 +104,7 @@ TParseNode >> assignLastExpressionTo: aTVariableNode [
 ]
 
 { #category : 'transformations' }
-TParseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables [
-	"Answer either the receiver, if it contains no references to the given variables, or a new node with the given variables rebound.
-	 But do not change variables that appear on the left-hand-side of an assignment statement."
-	^self
-]
-
-{ #category : 'transformations' }
-TParseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
+TParseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
 	"Answer either the receiver, if it contains no references to the given variables, or a new node with the given variables rebound.
 	 But do not change variables that appear on the left-hand-side of an assignment statement."
 	^self
