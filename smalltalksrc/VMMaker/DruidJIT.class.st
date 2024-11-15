@@ -3823,6 +3823,10 @@ DruidJIT >> gen_ExtUnconditionalJump [
 		self CmpR: t1 R: t0.
 		jump1 := self JumpAboveOrEqual: 0.
 		self CallRT: ceCheckForInterruptTrampoline.
+
+	self annotateBytecode: self Label.
+
+
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
 		s26 := bytecodePC.
