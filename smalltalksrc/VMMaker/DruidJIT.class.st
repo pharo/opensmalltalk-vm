@@ -3030,13 +3030,14 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extA.
 	s5 := s4 << 8.
 	s6 := s3 + s5.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
+
 	extA := 0.
 	self genMoveConstant: methodObj R: t1.
 	s11 := LiteralStart.
@@ -3121,6 +3122,9 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	self MoveR: t1 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+	
+	self annotateBytecode: self Label.
+
 	jump9 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
@@ -3189,7 +3193,7 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extA.
 	s5 := s4 << 8.
@@ -3200,7 +3204,7 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 	s9 := ReceiverIndex.
 	self ssFlushStackExceptTop: 0.
 	s6 <= s9 ifTrue: [
-		| jump7 jump5 jump3 jump1 jump8 jump6 jump4 jump2 |
+		| jump8 |
 		self MoveM64: 0 r: t1 R: t2.
 		self AndCq: 16r3FFFFF R: t2.
 		s14 := ClassMethodContextCompactIndex.
@@ -3253,6 +3257,9 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 		self MoveR: t1 R: TempReg.
 		backEnd saveAndRestoreLinkRegAround: [
 			self CallRT: ceStoreCheckTrampoline ].
+
+		self annotateBytecode: self Label.
+
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
 		jump4 jmpTarget: currentBlock.
@@ -3342,6 +3349,9 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 	self MoveR: t1 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
 	jump4 jmpTarget: currentBlock.
@@ -3408,7 +3418,7 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extA.
 	s5 := s4 << 8.
@@ -3498,6 +3508,9 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	self MoveR: t1 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	jump9 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
@@ -3566,7 +3579,7 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extA.
 	s5 := s4 << 8.
@@ -3577,7 +3590,7 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 	s9 := ReceiverIndex.
 	self ssFlushStackExceptTop: 0.
 	s6 <= s9 ifTrue: [
-		| jump7 jump5 jump3 jump1 jump8 jump6 jump4 jump2 |
+		| jump8 |
 		self MoveM64: 0 r: t1 R: t2.
 		self AndCq: 16r3FFFFF R: t2.
 		s14 := ClassMethodContextCompactIndex.
@@ -3629,6 +3642,9 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 		self MoveR: t1 R: TempReg.
 		backEnd saveAndRestoreLinkRegAround: [
 			self CallRT: ceStoreCheckTrampoline ].
+
+		self annotateBytecode: self Label.
+
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
 		jump4 jmpTarget: currentBlock.
@@ -3717,6 +3733,9 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 	self MoveR: t1 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
 	jump4 jmpTarget: currentBlock.
@@ -3779,13 +3798,12 @@ DruidJIT >> gen_ExtUnconditionalJump [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extB.
 	s5 := s4 << 8.
 	s6 := s3 + s5.
 	s6 < 0 ifTrue: [
-		| jump1 |
 		s8 := numExtB.
 		s9 := s8 << 1.
 		s10 := s9.
@@ -3831,6 +3849,9 @@ DruidJIT >> gen_ExtUnconditionalJump [
 	self CmpR: t1 R: t0.
 	jump1 := self JumpAboveOrEqual: 0.
 	self CallRT: ceCheckForInterruptTrampoline.
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	s26 := bytecodePC.
@@ -13916,7 +13937,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -13963,6 +13984,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14026,7 +14050,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14073,6 +14097,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14136,7 +14163,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14183,6 +14210,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14246,7 +14276,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14293,6 +14323,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14356,7 +14389,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14403,6 +14436,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14466,7 +14502,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14513,6 +14549,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14576,7 +14615,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14623,6 +14662,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14686,7 +14728,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	self annotateBytecode: self Label.
+
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14733,6 +14775,9 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -14806,8 +14851,6 @@ DruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 	self AndCq: 7 R: t2.
 	self ssFlushStackExceptTop: 0.
 
-	self annotateBytecode: self Label.
-
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	s38 := objectMemory getMemoryMap getSpaceMaskToUse.
@@ -14845,6 +14888,9 @@ DruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
@@ -15057,8 +15103,6 @@ DruidJIT >> gen_StoreRemoteTempLongBytecode [
 	self AndCq: 7 R: t2.
 	self ssFlushStackExceptTop: 0.
 
-	self annotateBytecode: self Label.
-
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	s38 := objectMemory getMemoryMap getSpaceMaskToUse.
@@ -15096,6 +15140,9 @@ DruidJIT >> gen_StoreRemoteTempLongBytecode [
 	self MoveR: t0 R: TempReg.
 	backEnd saveAndRestoreLinkRegAround: [
 		self CallRT: ceStoreCheckTrampoline ].
+
+	self annotateBytecode: self Label.
+
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
