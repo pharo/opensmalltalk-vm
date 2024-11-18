@@ -5965,7 +5965,7 @@ SlangBasicTranslationTest >> testSendWhileTrueWithNilAsArgument [
 						          receiver: (TVariableNode new setName: 'a')
 						          arguments: { (TVariableNode new setName: 'b') }) })
 		        arguments: { (TStatementListNode new statements:
-				         { (TVariableNode new setName: 'nil') }) }.
+				         { (TConstantNode new setValue: nil) }) }.
 	translation := self translate: send.
 
 	self assert: translation trimBoth equals: 'do{
@@ -6638,7 +6638,7 @@ SlangBasicTranslationTest >> testTranslateLiteralArrayAssignment [
 SlangBasicTranslationTest >> testTranslateNil [
 
 	| translation |
-	translation :=  self translate: (TVariableNode new setName: 'nil').
+	translation :=  self translate: (TConstantNode new setValue: nil).
 
 	self assert: translation equals: 'null'
 ]

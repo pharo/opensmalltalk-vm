@@ -1739,7 +1739,7 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 			ifFalse: [
 				inlineStmts add:
 					(TReturnNode new setExpression:
-						 (TVariableNode new setName: 'nil')) ] ].
+						 (TConstantNode new setValue: nil)) ] ].
 	exitLabel
     ifNotNil: [
 			inlineStmts add: (TLabeledCommentNode new

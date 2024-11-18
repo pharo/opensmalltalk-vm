@@ -3993,8 +3993,8 @@ CCodeGenerator >> nilOrBooleanConstantReceiverOf: aNode [
 			ifTrue: [ ^ receiver perform: aNode selector with: argument ].
 		"Inlining for e.g. CharacterTable ifNil: [...] ifNotNil: [...]], which compiles to CharacterTable == nil ifTrue: [...] ifFalse: [...]"
 		(aNode selector == #== and: [ 
-			 aNode arguments first isVariable and: [ 
-				 aNode arguments first name = 'nil' and: [ 
+			 aNode arguments first isConstant and: [ 
+				 aNode arguments first value = nil and: [ 
 					 aNode receiver isConstant and: [ aNode receiver value == nil ] ] ] ]) 
 			ifTrue: [ ^ true ] ].
 	^ nil

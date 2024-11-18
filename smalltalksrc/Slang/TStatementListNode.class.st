@@ -459,10 +459,11 @@ TStatementListNode >> isEmptyStmtListNode [
 { #category : 'testing' }
 TStatementListNode >> isNilStmtListNode [
 
-	|stmt|
-	statements size = 1 ifFalse: [^false].
+	| stmt |
+	statements size = 1 ifFalse: [ ^ false ].
 	stmt := statements at: 1.
-	^ stmt isVariable and: [stmt name = 'nil']
+	^ (stmt isVariable and: [ stmt name = 'nil' ]) or: [
+		  stmt isConstant and: [ stmt value isNil ] ]
 ]
 
 { #category : 'testing' }

@@ -83,7 +83,7 @@ RBMessageNode >> asTranslatorNodeIn: aTMethod [
 								    setSelector: #==
 								    receiver:
 									    (TVariableNode new setName: args first arguments first)
-								    arguments: { (TVariableNode new setName: 'nil') };
+								    arguments: { (TConstantNode new setValue: nil) };
 								    yourself)
 						   arguments: { args first }) } ].
 
@@ -104,7 +104,7 @@ RBMessageNode >> asTranslatorNodeIn: aTMethod [
 			rcvrOrNil := TSendNode new
 				             setSelector: #==
 				             receiver: comparand
-				             arguments: { (TVariableNode new setName: 'nil') }.
+				             arguments: { (TConstantNode new setValue: nil) }.
 
 			"If there is a variable we should epand the message as a statement"
 			blockWithPossibleArgument arguments notEmpty ifTrue: [ 
@@ -125,7 +125,7 @@ RBMessageNode >> asTranslatorNodeIn: aTMethod [
 		rcvrOrNil := TSendNode new
 			             setSelector: #==
 			             receiver: rcvrOrNil
-			             arguments: { (TVariableNode new setName: 'nil') } ].
+			             arguments: { (TConstantNode new setValue: nil) } ].
 
 	(usedSelector == #ifTrue:ifFalse: and: [ 
 		 arguments first statements isEmpty ]) ifTrue: [ 
