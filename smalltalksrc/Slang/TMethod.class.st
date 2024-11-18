@@ -442,12 +442,15 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 
 	| changedVariables |
 	changedVariables := Set new.
+	"	self haltIf: [ selector = #cogMethodDoesntLookKosher: ]."
+	"	self haltIf: [ selector = #addressIsInFixups: ]."
+
 	self parseTree: (parseTree
 			 bindClassVariablesIn: classVariables
 			 andGlobalVariablesIn: globalsVariables
 			 in: aCodeGen
 			 collect: changedVariables).
-	cachedLocals := nil.
+
 	changedVariables do: [ :varName |
 		self locals: (self locals collect: [ :e |
 				 e ~= varName
@@ -458,6 +461,7 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 					 ifTrue: [ e ]
 					 ifFalse: [ #_ , varName ] ]).
 
+		"update all the parseTree"
 		self parseTree nodesDo: [ :node |
 			node isStatementList ifTrue: [
 				node locals: (node locals collect: [ :e |
@@ -467,7 +471,16 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 				node setArguments: (node arguments collect: [ :e |
 						 e ~= varName
 							 ifTrue: [ e ]
-							 ifFalse: [ #_ , varName ] ]) ] ].
+							 ifFalse: [ #_ , varName ] ]) ].
+			"rare case but it can happen, see addressIsInFixups:"
+			(node isSend and: [
+				 (node selector beginsWith: #cCode:) and: [
+					 (node arguments first value findString: varName) > 0 ] ])
+				ifTrue: [
+					node arguments first setValue: (node arguments first value
+							 copyReplaceAll: varName
+							 with: #_ , varName
+							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ] ].
 		(declarations keys includes: varName) ifTrue: [
 			| oldDeclaration |
 			oldDeclaration := declarations at: varName.
