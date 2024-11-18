@@ -139,17 +139,19 @@ TAssignmentNode >> asCASTValueExpansionIn: aCodeGen [
 ]
 
 { #category : 'transformations' }
-TAssignmentNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
+TAssignmentNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
 	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can change in value and the globals had no name change i.e: assuming every reference to a global is meant"
 
 	self variable: (variable
 			 bindClassVariablesIn: classVariables
-			 andGlobalVariablesIn: globalsVariables
+			 globalVariablesIn: globalsVariables
+			 classNameIn: classNames
 			 in: aCodeGen
 			 collect: changedVariables).
 	self expression: (expression
 			 bindClassVariablesIn: classVariables
-			 andGlobalVariablesIn: globalsVariables
+			 globalVariablesIn: globalsVariables
+			 classNameIn: classNames
 			 in: aCodeGen
 			 collect: changedVariables)
 ]

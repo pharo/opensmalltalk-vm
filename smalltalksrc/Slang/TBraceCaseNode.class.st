@@ -12,18 +12,20 @@ Class {
 }
 
 { #category : 'transformations' }
-TBraceCaseNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
+TBraceCaseNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
 
 	self caseLabels: (caseLabels collect: [ :node |
 			 node
 				 bindClassVariablesIn: classVariables
-				 andGlobalVariablesIn: globalsVariables
+				 globalVariablesIn: globalsVariables
+				 classNameIn: classNames
 				 in: aCodeGen
 				 collect: changedVariables ]).
 	self cases: (cases collect: [ :node |
 			 node
 				 bindClassVariablesIn: classVariables
-				 andGlobalVariablesIn: globalsVariables
+				 globalVariablesIn: globalsVariables
+				 classNameIn: classNames
 				 in: aCodeGen
 				 collect: changedVariables ])
 ]

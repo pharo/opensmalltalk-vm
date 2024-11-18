@@ -38,19 +38,17 @@ TVariableNode >> asCASTIn: aBuilder [
 ]
 
 { #category : 'transformations' }
-TVariableNode >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen collect: changedVariables [
+TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
 	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
 
-	| classesName |
-	classesName := aCodeGen structClasses collect: [ :class | class name ].
-	
 	"all the variable has an '_' first by default except 'nil, 'self' and 'super'"
+
 	((#( #nil #super ) includes: name) or: [
 		 (name beginsWith: #self) or: [ name beginsWith: #cascade ] ])
 		ifTrue: [ ^ self copy ].
-		
+
 	"don't rename variables which reference class name"
-	(classesName includes: name) ifTrue: [ ^ self copy ].
+	(classNames includes: name) ifTrue: [ ^ self copy ].
 	(aCodeGen isNonArgumentImplicitReceiverVariableName: name) ifTrue: [
 		^ self class new setName: name ].
 	globalsVariables do: [ :e |

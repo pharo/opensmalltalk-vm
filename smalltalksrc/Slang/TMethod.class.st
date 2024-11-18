@@ -442,12 +442,12 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 
 	| changedVariables |
 	changedVariables := Set new.
-	"	self haltIf: [ selector = #cogMethodDoesntLookKosher: ]."
-	"	self haltIf: [ selector = #addressIsInFixups: ]."
 
 	self parseTree: (parseTree
 			 bindClassVariablesIn: classVariables
-			 andGlobalVariablesIn: globalsVariables
+			 globalVariablesIn: globalsVariables
+			 classNameIn:
+			 (VMStructType allSubclasses collect: [ :class | class name ])
 			 in: aCodeGen
 			 collect: changedVariables).
 
