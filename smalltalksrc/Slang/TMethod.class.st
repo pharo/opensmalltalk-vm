@@ -442,7 +442,8 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 
 	| changedVariables |
 	changedVariables := Set new.
-
+	self haltIf: [
+		self selector = #genEnilopmartFor:and:and:forCall:called: ].
 	self parseTree: (parseTree
 			 bindClassVariablesIn: classVariables
 			 globalVariablesIn: globalsVariables
@@ -472,6 +473,7 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 						 e ~= varName
 							 ifTrue: [ e ]
 							 ifFalse: [ #_ , varName ] ]) ].
+
 			"rare case but it can happen, see addressIsInFixups:"
 			(node isSend and: [
 				 (node selector beginsWith: #cCode:) and: [
@@ -480,7 +482,11 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 					node arguments first setValue: (node arguments first value
 							 copyReplaceAll: varName
 							 with: #_ , varName
-							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ] ].
+							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ]
+			
+			"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+			"to do: remplacer dans returnTtypeC:"
+				 ].
 		(declarations keys includes: varName) ifTrue: [
 			| oldDeclaration |
 			oldDeclaration := declarations at: varName.
@@ -489,7 +495,9 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 					 copyReplaceAll: varName
 					 with: #_ , varName
 					 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
-			declarations removeKey: varName ] ]
+			declarations removeKey: varName ] ].
+	self haltIf: [
+		self selector = #genEnilopmartFor:and:and:forCall:called: ]
 ]
 
 { #category : 'transformations' }
