@@ -332,7 +332,7 @@ VMRememberedSet >> rememberWithoutMarkingAsRemembered: objOop [
 
 	<api>
 	<inline: false>
-
+	
 	self assert: (manager isNonImmediate: objOop).
 	self deny: (manager getMemoryMap isYoungObject: objOop).
 
