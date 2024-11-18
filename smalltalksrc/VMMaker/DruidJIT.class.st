@@ -261,20 +261,20 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 223. 223. #unknownBytecode }.
 		  { 2. 224. 224. #gen_ExtABytecode. #extension }.
 		  { 2. 225. 225. #gen_ExtBBytecode. #extension }.
-		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef }.
-		  { 2. 227. 227. #gen_ExtPushLiteralVariableBytecode. #needsFrameNever:. 1 }.
-		  { 2. 228. 228. #gen_ExtPushLiteralBytecode. #needsFrameNever:. 1 }.
-		  { 2. 229. 229. #gen_LongPushTemporaryVariableBytecode }.
+		  { 2. 226. 226. #genExtPushReceiverVariableBytecode. #isInstVarRef }.
+		  { 2. 227. 227. #genExtPushLiteralVariableBytecode. #needsFrameNever:. 1 }.
+		  { 2. 228. 228. #genExtPushLiteralBytecode. #needsFrameNever:. 1 }.
+		  { 2. 229. 229. #genLongPushTemporaryVariableBytecode }.
 		  { 2. 230. 230. #unknownBytecode }.
-		  { 2. 231. 231. #gen_PushNewArrayBytecode }.
-		  { 2. 232. 232. #gen_ExtPushIntegerBytecode. #needsFrameNever:. 1 }.
-		  { 2. 233. 233. #gen_ExtPushCharacterBytecode. #needsFrameNever:. 1 }.
-		  { 2. 234. 234. #gen_ExtSendBytecode. #isMapped }.
-		  { 2. 235. 235. #gen_ExtSendSuperBytecode. #isMapped }.
+		  { 2. 231. 231. #genPushNewArrayBytecode }.
+		  { 2. 232. 232. #genExtPushIntegerBytecode. #needsFrameNever:. 1 }.
+		  { 2. 233. 233. #genExtPushCharacterBytecode. #needsFrameNever:. 1 }.
+		  { 2. 234. 234. #genExtSendBytecode. #isMapped }.
+		  { 2. 235. 235. #genExtSendSuperBytecode. #isMapped }.
 		  { 2. 236. 236. #unknownBytecode }.
-		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 237. 237. #genExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 238. 238. #genExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 239. 239. #genExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 240. 240. #genExtStoreAndPopReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
 		  { 2. 241. 241. #genExtStoreAndPopLiteralVariableBytecode. #isMappedIfImmutability }.
 		  { 2. 242. 242. #genLongStoreAndPopTemporaryVariableBytecode }.
