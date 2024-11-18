@@ -261,7 +261,7 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 223. 223. #unknownBytecode }.
 		  { 2. 224. 224. #gen_ExtABytecode. #extension }.
 		  { 2. 225. 225. #gen_ExtBBytecode. #extension }.
-		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
+		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef }.
 		  { 2. 227. 227. #gen_ExtPushLiteralVariableBytecode. #needsFrameNever:. 1 }.
 		  { 2. 228. 228. #gen_ExtPushLiteralBytecode. #needsFrameNever:. 1 }.
 		  { 2. 229. 229. #gen_LongPushTemporaryVariableBytecode }.
@@ -2720,7 +2720,7 @@ DruidJIT >> gen_ExtPushReceiverVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	self annotateBytecode: self Label.
+
 	s3 := byte1.
 	s4 := extA.
 	s5 := s4 << 8.
@@ -2730,6 +2730,8 @@ DruidJIT >> gen_ExtPushReceiverVariableBytecode [
 	self MoveR: ReceiverResultReg R: t0.
 	s9 := StackPointerIndex.
 	self ssFlushStackExceptTop: 0.
+
+
 	s6 <= s9 ifTrue: [
 		| jump1 jump2 |
 		self MoveM64: 0 r: t0 R: t1.
@@ -3036,7 +3038,6 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 		deadCode := false.
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
-		self ssPop: 1 popSpilled: true.
 		self MoveM64: 0 r: t1 R: t2.
 		self LogicalShiftRightCq: 23 R: t2.
 		self AndCq: 1 R: t2.
@@ -3047,6 +3048,9 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 		deadCode := false.
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
+
+		self ssPop: 1 popSpilled: true.
+
 		self MoveR: t1 R: t2.
 		self AndCq: 7 R: t2.
 		self CmpCq: 0 R: t2.
@@ -3128,7 +3132,7 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 		jump3 jmpTarget: currentBlock.
 		extA := 0.
 		^ 0 ].
-	self ssPop: 1 popSpilled: true.
+
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -3139,6 +3143,9 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 	deadCode := false.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
+
+	self ssPop: 1 popSpilled: true.
+
 	self MoveR: t1 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -3712,10 +3719,12 @@ DruidJIT >> gen_LongStoreAndPopTemporaryVariableBytecode [
 		      allocateRegNotConflictingWith: live
 		      ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
+
 	(self ssValue: 0) copyToReg: t0.
+	self ssPop: 1 popSpilled: true.
+
 	self ssFlushUpThroughTemporaryVariable: byte1.
 	self MoveR: t0 Mw: (self frameOffsetOfTemporary: byte1) r: FPReg.
-	self ssPop: 1 popSpilled: true.
 	^ 0
 ]
 
