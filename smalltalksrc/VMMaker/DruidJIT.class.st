@@ -3649,8 +3649,12 @@ DruidJIT >> gen_ExtUnconditionalJump [
 			s27 := s26 + s6.
 			s28 := s27 + 2.
 			self Jump: (self ensureFixupAt: s28).
+
+		self annotateBytecode: self Label.
+
 			deadCode := true.
 			^ 0 ].
+		
 		self MoveR: SPReg R: t0.
 		self MoveAw: coInterpreter stackLimitAddress R: t1.
 		self CmpR: t1 R: t0.
@@ -3679,6 +3683,9 @@ DruidJIT >> gen_ExtUnconditionalJump [
 		s27 := s26 + s6.
 		s28 := s27 + 2.
 		self Jump: (self ensureFixupAt: s28).
+
+	self annotateBytecode: self Label.
+
 		deadCode := true.
 		^ 0 ].
 	self MoveR: SPReg R: t0.
@@ -3687,7 +3694,7 @@ DruidJIT >> gen_ExtUnconditionalJump [
 	jump1 := self JumpAboveOrEqual: 0.
 	self CallRT: ceCheckForInterruptTrampoline.
 
-	self annotateBytecode: self Label.
+self annotateBytecode: self Label.
 
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
