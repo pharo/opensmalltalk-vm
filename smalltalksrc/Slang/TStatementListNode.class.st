@@ -463,8 +463,7 @@ TStatementListNode >> isNilStmtListNode [
 	| stmt |
 	statements size = 1 ifFalse: [ ^ false ].
 	stmt := statements at: 1.
-	^ (stmt isVariable and: [ stmt name = 'nil' ]) or: [
-		  stmt isConstant and: [ stmt value isNil ] ]
+	^ stmt isConstant and: [ stmt value isNil ]
 ]
 
 { #category : 'testing' }
@@ -667,14 +666,10 @@ TStatementListNode >> replaceNodesIn: aDictionary [
 TStatementListNode >> returnsExpression [
 	"Answer true if the last statement of this block is a return of some expression, not merely self or nil."
 
-	statements isEmpty ifTrue:
-		[^false].
-	self lastNonCommentStatement isReturn ifFalse:
-		[^false].
-	self lastNonCommentStatement isVariable ifFalse:
-		[^true].
-	^self lastNonCommentStatement variable ~= 'self'
-	  and: [self lastNonCommentStatement variable ~= 'nil']
+	statements isEmpty ifTrue: [ ^ false ].
+	self lastNonCommentStatement isReturn ifFalse: [ ^ false ].
+	self lastNonCommentStatement isVariable ifFalse: [ ^ true ].
+	^ self lastNonCommentStatement variable ~= 'self'
 ]
 
 { #category : 'accessing' }

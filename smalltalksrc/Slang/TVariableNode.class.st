@@ -32,9 +32,7 @@ TVariableNode >> accept: aVisitor [
 { #category : 'tranforming' }
 TVariableNode >> asCASTIn: aBuilder [
 
-	^ name = 'nil'
-		  ifTrue: [ CIdentifierNode name: aBuilder nilTranslation ]
-		  ifFalse: [ CIdentifierNode name: (aBuilder returnPrefixFromVariable: name) ]
+	^ CIdentifierNode name: (aBuilder returnPrefixFromVariable: name)
 ]
 
 { #category : 'transformations' }
