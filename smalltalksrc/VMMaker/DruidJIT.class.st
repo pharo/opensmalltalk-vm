@@ -206,7 +206,7 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 235. 235. #gen_ExtSendSuperBytecode. #isMapped }.
 
 		  { 2. 236. 236. #unknownBytecode }.
-		  { 2. 237. 237. #genExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
+ { 2. 237. 237. #genExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.	
 	
@@ -216,22 +216,18 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 243. 243. #gen_ExtStoreReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
 		  { 2. 244. 244. #gen_ExtStoreLiteralVariableBytecode. #isMappedIfImmutability }.
 		  { 2. 245. 245. #gen_LongStoreTemporaryVariableBytecode }.
-		
-	}
-,
-	#(
-		(2 246 247	unknownBytecode)
 
-		"3 byte bytecodes"
-		(3 248 248 genCallPrimitiveBytecode hasUnsafeJump)
-		(3 249 249 genExtPushFullClosureBytecode)
-		(3 250 250 unknownBytecode) "was genExtPushClosureBytecode"
-		(3 251 251 genPushRemoteTempLongBytecode)
-		(3 252 252 genStoreRemoteTempLongBytecode)
-		(3 253 253 genStoreAndPopRemoteTempLongBytecode)
-		
-		(3 254 255	unknownBytecode)
-)
+		  { 2. 246. 246. #unknownBytecode }.
+		  { 2. 247. 247. #unknownBytecode }.
+		  { 3. 248. 248. #gen_CallPrimitiveBytecode }.
+		  { 3. 249. 249. #gen_ExtPushFullClosureBytecode }.
+		  { 3. 250. 250. #unknownBytecode }.
+		  { 3. 251. 251. #gen_PushRemoteTempLongBytecode }.
+		  { 3. 252. 252. #gen_StoreRemoteTempLongBytecode }.
+		  { 3. 253. 253. #gen_StoreAndPopRemoteTempLongBytecode }.
+		  { 3. 254. 254. #unknownBytecode }.
+		  { 3. 255. 255. #unknownBytecode }
+	}
 ]
 
 { #category : #translation }
