@@ -284,8 +284,6 @@ CCodeGenerator >> addMethodsForTranslatedPrimitives: classAndSelectorList [
 			[meth preparePrimitiveName].
 		meth replaceSizeMessages.
 		self addMethod: meth].
-
-	self prepareMethods
 ]
 
 { #category : 'public' }

@@ -437,8 +437,7 @@ TMethod >> bindClassVariablesIn: constantDictionary [
 
 { #category : 'transformations' }
 TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
-	"Answer either the receiver, if it contains no references to the given variables, or a new node with the given variables rebound.
-	 But do not change variables that appear on the left-hand-side of an assignment statement."
+	"Answer either the receiver, if it is not contained in the parameters, or a new node with the given variable rebound. only work after type inferences for declarations et pragmas updates"
 
 	| changedVariables |
 	changedVariables := Set new.

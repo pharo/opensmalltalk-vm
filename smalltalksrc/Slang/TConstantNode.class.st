@@ -2,7 +2,8 @@ Class {
 	#name : 'TConstantNode',
 	#superclass : 'TParseNode',
 	#instVars : [
-		'value'
+		'value',
+		'shouldBeGenerated'
 	],
 	#category : 'Slang-AST',
 	#package : 'Slang',
