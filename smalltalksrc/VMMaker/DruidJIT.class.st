@@ -193,7 +193,7 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 223. 223. #unknownBytecode }.
 		  { 2. 224. 224. #gen_ExtABytecode. #extension }.
 		  { 2. 225. 225. #gen_ExtBBytecode. #extension }.
-		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
+		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef }.
 		  { 2. 227. 227. #gen_ExtPushLiteralVariableBytecode. #needsFrameNever:. 1 }.
 		  { 2. 228. 228. #gen_ExtPushLiteralBytecode. #needsFrameNever:. 1 }.
 		  { 2. 229. 229. #gen_LongPushTemporaryVariableBytecode }.
@@ -201,22 +201,16 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 231. 231. #gen_PushNewArrayBytecode }.
 		  { 2. 232. 232. #gen_ExtPushIntegerBytecode. #needsFrameNever:. 1 }.
 		  { 2. 233. 233. #gen_ExtPushCharacterBytecode. #needsFrameNever:. 1 }.
-			}
+
+		  { 2. 234. 234. #gen_ExtSendBytecode. #isMapped }.
+		  { 2. 235. 235. #gen_ExtSendSuperBytecode. #isMapped }.
+		  { 2. 236. 236. #unknownBytecode }.
+		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
+	}
 ,
-#(
-		"returns"
-		"sends"
-		(2 234 234 genExtSendBytecode isMapped)
-		(2 235 235 genExtSendSuperBytecode isMapped)
-
-		"sista bytecodes"
-		(2 236 236 genCallMappedInlinedPrimitive isMapped)
-
-		"jumps"
-		(2 237 237 genExtUnconditionalJump	branch isMapped "because of interrupt check" v4:Long:Branch:Distance:)
-		(2 238 238 genExtJumpIfTrue			branch isBranchTrue isMapped "because of mustBeBoolean" v4:Long:Branch:Distance:)
-		(2 239 239 genExtJumpIfFalse			branch isBranchFalse isMapped "because of mustBeBoolean" v4:Long:Branch:Distance:)
-
+	#(
 		"stores"
 		(2 240 240 genExtStoreAndPopReceiverVariableBytecode isInstVarRef isMappedIfImmutability)
 		(2 241 241 genExtStoreAndPopLiteralVariableBytecode isMappedIfImmutability)
