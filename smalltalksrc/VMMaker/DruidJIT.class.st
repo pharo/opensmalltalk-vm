@@ -134,16 +134,33 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 173. 173. #gen_SendLiteralSelector2ArgsBytecode13. #isMapped }.
 		  { 1. 174. 174. #gen_SendLiteralSelector2ArgsBytecode14. #isMapped }.
 		  { 1. 175. 175. #gen_SendLiteralSelector2ArgsBytecode15. #isMapped }.
- }
+ 		  { 1. 176. 176. #gen_ShortUnconditionalJump0. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 177. 177. #gen_ShortUnconditionalJump1. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 178. 178. #gen_ShortUnconditionalJump2. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 179. 179. #gen_ShortUnconditionalJump3. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 180. 180. #gen_ShortUnconditionalJump4. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 181. 181. #gen_ShortUnconditionalJump5. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 182. 182. #gen_ShortUnconditionalJump6. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 183. 183. #gen_ShortUnconditionalJump7. #branch. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 184. 184. #gen_ShortConditionalJumpTrue0. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 185. 185. #gen_ShortConditionalJumpTrue1. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 186. 186. #gen_ShortConditionalJumpTrue2. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 187. 187. #gen_ShortConditionalJumpTrue3. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 188. 188. #gen_ShortConditionalJumpTrue4. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 189. 189. #gen_ShortConditionalJumpTrue5. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 190. 190. #gen_ShortConditionalJumpTrue6. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 191. 191. #gen_ShortConditionalJumpTrue7. #branch. #isBranchTrue. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 192. 192. #gen_ShortConditionalJumpFalse0. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 193. 193. #gen_ShortConditionalJumpFalse1. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 194. 194. #gen_ShortConditionalJumpFalse2. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 195. 195. #gen_ShortConditionalJumpFalse3. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 196. 196. #gen_ShortConditionalJumpFalse4. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 197. 197. #gen_ShortConditionalJumpFalse5. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 198. 198. #gen_ShortConditionalJumpFalse6. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		  { 1. 199. 199. #gen_ShortConditionalJumpFalse7. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
+		}
 ,
 #(
-		"jumps"
-		(1 176 183 genShortUnconditionalJump	branch v3:ShortForward:Branch:Distance:)
-		(1 184 191 genShortJumpIfTrue			branch isBranchTrue isMapped "because of mustBeBoolean"
-													v3:ShortForward:Branch:Distance:)
-		(1 192 199 genShortJumpIfFalse			branch isBranchFalse isMapped "because of mustBeBoolean"
-													v3:ShortForward:Branch:Distance:)
-
 		"stores"
 		(1 200 207 genStoreAndPopReceiverVariableBytecode isInstVarRef is1ByteInstVarStore isMappedIfImmutability needsFrameIfImmutability: -1)
 		(1 208 215 genStoreAndPopTemporaryVariableBytecode)
