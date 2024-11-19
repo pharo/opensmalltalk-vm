@@ -114,17 +114,18 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 85. 85. #unknownBytecode }.
 		  { 1. 86. 86. #unknownBytecode }.
 		  { 1. 87. 87. #unknownBytecode }.
-		  { 1. 88. 88. #gen_ReturnReceiver. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
-		  { 1. 89. 89. #gen_ReturnTrue. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
-		  { 1. 90. 90. #gen_ReturnFalse. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
-		  { 1. 91. 91. #gen_ReturnNil. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
-		  { 1. 92. 92. #gen_ReturnTopFromMethod. #return. #isMappedInBlock. #needsFrameIfInBlock:.
-		  -1 }.
-		  { 1. 93. 93. #gen_ReturnNilFromBlock. #return. #needsFrameNever:. -1 }.
-		  { 1. 94. 94. #gen_ReturnTopFromBlock. #return. #needsFrameNever:. -1 }.
-		  { 1. 95. 95. #gen_ExtNopBytecode. #needsFrameNever:. 0 }.
 		
  }, #(
+		"returns"
+		(1  88   88 genReturnReceiver				return needsFrameIfInBlock: isMappedInBlock 0)
+		(1  89   89 genReturnTrue					return needsFrameIfInBlock: isMappedInBlock 0)
+		(1  90   90 genReturnFalse					return needsFrameIfInBlock: isMappedInBlock 0)
+		(1  91   91 genReturnNil					return needsFrameIfInBlock: isMappedInBlock 0)
+		(1  92   92 genReturnTopFromMethod		return needsFrameIfInBlock: isMappedInBlock -1)
+		(1  93   93 genReturnNilFromBlock			return needsFrameNever: -1)
+		(1  94   94 genReturnTopFromBlock		return needsFrameNever: -1)
+		(1  95   95 genExtNopBytecode			needsFrameNever: 0)
+
 		"sends"
 		(1  96   96 genSpecialSelectorArithmetic isMapped AddRR)
 		(1  97   97 genSpecialSelectorArithmetic isMapped SubRR)
