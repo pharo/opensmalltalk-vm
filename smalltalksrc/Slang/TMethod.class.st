@@ -442,8 +442,6 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 
 	| changedVariables |
 	changedVariables := Set new.
-	self haltIf: [
-		self selector = #genEnilopmartFor:and:and:forCall:called: ].
 	self parseTree: (parseTree
 			 bindClassVariablesIn: classVariables
 			 globalVariablesIn: globalsVariables
@@ -482,11 +480,15 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 					node arguments first setValue: (node arguments first value
 							 copyReplaceAll: varName
 							 with: #_ , varName
-							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ]
-			
-			"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
-			"to do: remplacer dans returnTtypeC:"
-				 ].
+							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ] ].
+		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+		(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
+			ifTrue: [
+				returnType := returnType
+					              copyReplaceAll: varName
+					              with: #_ , varName
+					              tokenish: [ :ch |
+					              ch = $_ or: [ ch isAlphaNumeric ] ] ].
 		(declarations keys includes: varName) ifTrue: [
 			| oldDeclaration |
 			oldDeclaration := declarations at: varName.
@@ -495,9 +497,7 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 					 copyReplaceAll: varName
 					 with: #_ , varName
 					 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
-			declarations removeKey: varName ] ].
-	self haltIf: [
-		self selector = #genEnilopmartFor:and:and:forCall:called: ]
+			declarations removeKey: varName ] ]
 ]
 
 { #category : 'transformations' }
@@ -1515,7 +1515,6 @@ TMethod >> inlineFunctionCall: aSendNode in: aCodeGen [
 	meth := (aCodeGen methodNamed: sel) copy.
 	meth ifNil: [ ^ self inlineBuiltin: aSendNode in: aCodeGen ].
 	doNotRename := Set withAll: args.
-	"self haltIf: [selector = #activateCoggedNewMethod: and: [aSendNode selector = #nilObject] ]."
 	argsForInlining := aSendNode argumentsForInliningCodeGenerator:
 		                   aCodeGen.
 	meth args with: argsForInlining do: [ :argName :exprNode |
