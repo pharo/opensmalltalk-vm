@@ -183,27 +183,27 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 214. 214. #gen_StoreAndPopTemporaryVariableBytecode6 }.
 		  { 1. 215. 215. #gen_StoreAndPopTemporaryVariableBytecode7 }.
 		  { 1. 216. 216. #gen_PopStackBytecode. #needsFrameNever:. -1 }.
+
+		  { 1. 217. 217. #unknownBytecode }.
+		  { 1. 218. 218. #unknownBytecode }.
+		  { 1. 219. 219. #unknownBytecode }.
+		  { 1. 220. 220. #unknownBytecode }.
+		  { 1. 221. 221. #unknownBytecode }.
+		  { 1. 222. 222. #unknownBytecode }.
+		  { 1. 223. 223. #unknownBytecode }.
+		  { 2. 224. 224. #gen_ExtABytecode. #extension }.
+		  { 2. 225. 225. #gen_ExtBBytecode. #extension }.
+		  { 2. 226. 226. #gen_ExtPushReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
+		  { 2. 227. 227. #gen_ExtPushLiteralVariableBytecode. #needsFrameNever:. 1 }.
+		  { 2. 228. 228. #gen_ExtPushLiteralBytecode. #needsFrameNever:. 1 }.
+		  { 2. 229. 229. #gen_LongPushTemporaryVariableBytecode }.
+		  { 2. 230. 230. #unknownBytecode }.
+		  { 2. 231. 231. #gen_PushNewArrayBytecode }.
+		  { 2. 232. 232. #gen_ExtPushIntegerBytecode. #needsFrameNever:. 1 }.
+		  { 2. 233. 233. #gen_ExtPushCharacterBytecode. #needsFrameNever:. 1 }.
 			}
 ,
 #(
-		(1 217 217 genUnconditionalTrapBytecode isMapped)
-
-		(1 218 223 unknownBytecode)
-
-		"2 byte bytecodes"
-		(2 224 224 extABytecode extension)
-		(2 225 225 extBBytecode extension)
-
-		"pushes"
-		(2 226 226 genExtPushReceiverVariableBytecode isInstVarRef)		"Needs a frame for context inst var access"
-		(2 227 227 genExtPushLiteralVariableBytecode			needsFrameNever: 1)
-		(2 228 228 genExtPushLiteralBytecode					needsFrameNever: 1)
-		(2 229 229 genLongPushTemporaryVariableBytecode)
-		(2 230 230 unknownBytecode)
-		(2 231 231 genPushNewArrayBytecode)
-		(2 232 232 genExtPushIntegerBytecode				needsFrameNever: 1)
-		(2 233 233 genExtPushCharacterBytecode				needsFrameNever: 1)
-
 		"returns"
 		"sends"
 		(2 234 234 genExtSendBytecode isMapped)
