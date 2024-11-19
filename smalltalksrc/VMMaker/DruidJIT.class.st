@@ -204,13 +204,17 @@ DruidJIT class >> bytecodeTable [
 
 		  { 2. 234. 234. #gen_ExtSendBytecode. #isMapped }.
 		  { 2. 235. 235. #gen_ExtSendSuperBytecode. #isMapped }.
-		  { 2. 236. 236. #unknownBytecode }.
-		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
 	}
 ,
 	#(
+		"sista bytecodes"
+		(2 236 236 genCallMappedInlinedPrimitive isMapped)
+
+		"jumps"
+		(2 237 237 genExtUnconditionalJump	branch isMapped "because of interrupt check" v4:Long:Branch:Distance:)
+		(2 238 238 genExtJumpIfTrue			branch isBranchTrue isMapped "because of mustBeBoolean" v4:Long:Branch:Distance:)
+		(2 239 239 genExtJumpIfFalse			branch isBranchFalse isMapped "because of mustBeBoolean" v4:Long:Branch:Distance:)
+
 		"stores"
 		(2 240 240 genExtStoreAndPopReceiverVariableBytecode isInstVarRef isMappedIfImmutability)
 		(2 241 241 genExtStoreAndPopLiteralVariableBytecode isMappedIfImmutability)
