@@ -34,17 +34,20 @@ DruidJIT class >> bytecodeTable [
 		(1  32   63 genPushLiteralConstantBytecode					needsFrameNever: 1)
 		(1  64   75 genPushTemporaryVariableBytecode				needsFrameIfMod16GENumArgs: 1)
 		(1  76   76 genPushReceiverBytecode							needsFrameNever: 1)
-		(1  77   77 genPushConstantTrueBytecode						needsFrameNever: 1)
-		(1  78   78 genPushConstantFalseBytecode					needsFrameNever: 1)
-		(1  79   79 genPushConstantNilBytecode						needsFrameNever: 1)
-		(1  80   80 genPushConstantZeroBytecode						needsFrameNever: 1)
-		(1  81   81 genPushConstantOneBytecode						needsFrameNever: 1)
-		(1  82   82 genExtPushPseudoVariable)
-		(1  83   83 duplicateTopBytecode								needsFrameNever: 1)
-
-		(1  84   87 unknownBytecode)
 	)
 ,	{
+		  { 1. 77. 77. #gen_PushConstantTrueBytecode. #needsFrameNever:. 1 }.
+		  { 1. 78. 78. #gen_PushConstantFalseBytecode. #needsFrameNever:. 1 }.
+		  { 1. 79. 79. #gen_PushConstantNilBytecode. #needsFrameNever:. 1 }.
+		  { 1. 80. 80. #gen_PushConstantZeroBytecode. #needsFrameNever:. 1 }.
+		  { 1. 81. 81. #gen_PushConstantOneBytecode. #needsFrameNever:. 1 }.
+		  { 1. 82. 82. #unknownBytecode }.
+		  { 1. 83. 83. #gen_DuplicateTopBytecode. #needsFrameNever:. 1 }.
+		  { 1. 84. 84. #unknownBytecode }.
+		  { 1. 85. 85. #unknownBytecode }.
+		  { 1. 86. 86. #unknownBytecode }.
+		  { 1. 87. 87. #unknownBytecode }.
+		
 		  { 1. 88. 88. #gen_ReturnReceiver. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
 		  { 1. 89. 89. #gen_ReturnTrue. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
 		  { 1. 90. 90. #gen_ReturnFalse. #return. #isMappedInBlock. #needsFrameIfInBlock:. 0 }.
