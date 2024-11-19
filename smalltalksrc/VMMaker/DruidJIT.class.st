@@ -25,17 +25,85 @@ Class {
 DruidJIT class >> bytecodeTable [
 
 	<generated>
-	^ 
-	#(
-		"1 byte bytecodes"
-		"pushes"
-		(1    0   15 genPushReceiverVariableBytecode isInstVarRef		needsFrameNever: 1)
-		(1  16   31 genPushLiteralVariable16CasesBytecode			needsFrameNever: 1)
-		(1  32   63 genPushLiteralConstantBytecode					needsFrameNever: 1)
-		(1  64   75 genPushTemporaryVariableBytecode				needsFrameIfMod16GENumArgs: 1)
-		(1  76   76 genPushReceiverBytecode							needsFrameNever: 1)
-	)
-,	{
+	^ {
+		  { 1. 0. 0. #gen_PushReceiverVariableBytecode0. #isInstVarRef }.
+		  { 1. 1. 1. #gen_PushReceiverVariableBytecode1. #isInstVarRef }.
+		  { 1. 2. 2. #gen_PushReceiverVariableBytecode2. #isInstVarRef }.
+		  { 1. 3. 3. #gen_PushReceiverVariableBytecode3. #isInstVarRef }.
+		  { 1. 4. 4. #gen_PushReceiverVariableBytecode4. #isInstVarRef }.
+		  { 1. 5. 5. #gen_PushReceiverVariableBytecode5. #isInstVarRef }.
+		  { 1. 6. 6. #gen_PushReceiverVariableBytecode6. #isInstVarRef }.
+		  { 1. 7. 7. #gen_PushReceiverVariableBytecode7. #isInstVarRef }.
+		  { 1. 8. 8. #gen_PushReceiverVariableBytecode8. #isInstVarRef }.
+		  { 1. 9. 9. #gen_PushReceiverVariableBytecode9. #isInstVarRef }.
+		  { 1. 10. 10. #gen_PushReceiverVariableBytecode10. #isInstVarRef }.
+		  { 1. 11. 11. #gen_PushReceiverVariableBytecode11. #isInstVarRef }.
+		  { 1. 12. 12. #gen_PushReceiverVariableBytecode12. #isInstVarRef }.
+		  { 1. 13. 13. #gen_PushReceiverVariableBytecode13. #isInstVarRef }.
+		  { 1. 14. 14. #gen_PushReceiverVariableBytecode14. #isInstVarRef }.
+		  { 1. 15. 15. #gen_PushReceiverVariableBytecode15. #isInstVarRef }.
+		  { 1. 16. 16. #gen_PushLiteralVariable16CasesBytecode0. #needsFrameNever:. 1 }.
+		  { 1. 17. 17. #gen_PushLiteralVariable16CasesBytecode1. #needsFrameNever:. 1 }.
+		  { 1. 18. 18. #gen_PushLiteralVariable16CasesBytecode2. #needsFrameNever:. 1 }.
+		  { 1. 19. 19. #gen_PushLiteralVariable16CasesBytecode3. #needsFrameNever:. 1 }.
+		  { 1. 20. 20. #gen_PushLiteralVariable16CasesBytecode4. #needsFrameNever:. 1 }.
+		  { 1. 21. 21. #gen_PushLiteralVariable16CasesBytecode5. #needsFrameNever:. 1 }.
+		  { 1. 22. 22. #gen_PushLiteralVariable16CasesBytecode6. #needsFrameNever:. 1 }.
+		  { 1. 23. 23. #gen_PushLiteralVariable16CasesBytecode7. #needsFrameNever:. 1 }.
+		  { 1. 24. 24. #gen_PushLiteralVariable16CasesBytecode8. #needsFrameNever:. 1 }.
+		  { 1. 25. 25. #gen_PushLiteralVariable16CasesBytecode9. #needsFrameNever:. 1 }.
+		  { 1. 26. 26. #gen_PushLiteralVariable16CasesBytecode10. #needsFrameNever:. 1 }.
+		  { 1. 27. 27. #gen_PushLiteralVariable16CasesBytecode11. #needsFrameNever:. 1 }.
+		  { 1. 28. 28. #gen_PushLiteralVariable16CasesBytecode12. #needsFrameNever:. 1 }.
+		  { 1. 29. 29. #gen_PushLiteralVariable16CasesBytecode13. #needsFrameNever:. 1 }.
+		  { 1. 30. 30. #gen_PushLiteralVariable16CasesBytecode14. #needsFrameNever:. 1 }.
+		  { 1. 31. 31. #gen_PushLiteralVariable16CasesBytecode15. #needsFrameNever:. 1 }.
+		  { 1. 32. 32. #gen_PushLiteralConstantBytecode0. #needsFrameNever:. 1 }.
+		  { 1. 33. 33. #gen_PushLiteralConstantBytecode1. #needsFrameNever:. 1 }.
+		  { 1. 34. 34. #gen_PushLiteralConstantBytecode2. #needsFrameNever:. 1 }.
+		  { 1. 35. 35. #gen_PushLiteralConstantBytecode3. #needsFrameNever:. 1 }.
+		  { 1. 36. 36. #gen_PushLiteralConstantBytecode4. #needsFrameNever:. 1 }.
+		  { 1. 37. 37. #gen_PushLiteralConstantBytecode5. #needsFrameNever:. 1 }.
+		  { 1. 38. 38. #gen_PushLiteralConstantBytecode6. #needsFrameNever:. 1 }.
+		  { 1. 39. 39. #gen_PushLiteralConstantBytecode7. #needsFrameNever:. 1 }.
+		  { 1. 40. 40. #gen_PushLiteralConstantBytecode8. #needsFrameNever:. 1 }.
+		  { 1. 41. 41. #gen_PushLiteralConstantBytecode9. #needsFrameNever:. 1 }.
+		  { 1. 42. 42. #gen_PushLiteralConstantBytecode10. #needsFrameNever:. 1 }.
+		  { 1. 43. 43. #gen_PushLiteralConstantBytecode11. #needsFrameNever:. 1 }.
+		  { 1. 44. 44. #gen_PushLiteralConstantBytecode12. #needsFrameNever:. 1 }.
+		  { 1. 45. 45. #gen_PushLiteralConstantBytecode13. #needsFrameNever:. 1 }.
+		  { 1. 46. 46. #gen_PushLiteralConstantBytecode14. #needsFrameNever:. 1 }.
+		  { 1. 47. 47. #gen_PushLiteralConstantBytecode15. #needsFrameNever:. 1 }.
+		  { 1. 48. 48. #gen_PushLiteralConstantBytecode16. #needsFrameNever:. 1 }.
+		  { 1. 49. 49. #gen_PushLiteralConstantBytecode17. #needsFrameNever:. 1 }.
+		  { 1. 50. 50. #gen_PushLiteralConstantBytecode18. #needsFrameNever:. 1 }.
+		  { 1. 51. 51. #gen_PushLiteralConstantBytecode19. #needsFrameNever:. 1 }.
+		  { 1. 52. 52. #gen_PushLiteralConstantBytecode20. #needsFrameNever:. 1 }.
+		  { 1. 53. 53. #gen_PushLiteralConstantBytecode21. #needsFrameNever:. 1 }.
+		  { 1. 54. 54. #gen_PushLiteralConstantBytecode22. #needsFrameNever:. 1 }.
+		  { 1. 55. 55. #gen_PushLiteralConstantBytecode23. #needsFrameNever:. 1 }.
+		  { 1. 56. 56. #gen_PushLiteralConstantBytecode24. #needsFrameNever:. 1 }.
+		  { 1. 57. 57. #gen_PushLiteralConstantBytecode25. #needsFrameNever:. 1 }.
+		  { 1. 58. 58. #gen_PushLiteralConstantBytecode26. #needsFrameNever:. 1 }.
+		  { 1. 59. 59. #gen_PushLiteralConstantBytecode27. #needsFrameNever:. 1 }.
+		  { 1. 60. 60. #gen_PushLiteralConstantBytecode28. #needsFrameNever:. 1 }.
+		  { 1. 61. 61. #gen_PushLiteralConstantBytecode29. #needsFrameNever:. 1 }.
+		  { 1. 62. 62. #gen_PushLiteralConstantBytecode30. #needsFrameNever:. 1 }.
+		  { 1. 63. 63. #gen_PushLiteralConstantBytecode31. #needsFrameNever:. 1 }.
+		  { 1. 64. 64. #gen_PushTemporaryVariableBytecode0 }.
+		  { 1. 65. 65. #gen_PushTemporaryVariableBytecode1 }.
+		  { 1. 66. 66. #gen_PushTemporaryVariableBytecode2 }.
+		  { 1. 67. 67. #gen_PushTemporaryVariableBytecode3 }.
+		  { 1. 68. 68. #gen_PushTemporaryVariableBytecode4 }.
+		  { 1. 69. 69. #gen_PushTemporaryVariableBytecode5 }.
+		  { 1. 70. 70. #gen_PushTemporaryVariableBytecode6 }.
+		  { 1. 71. 71. #gen_PushTemporaryVariableBytecode7 }.
+		  { 1. 72. 72. #gen_PushTemporaryVariableBytecode8 }.
+		  { 1. 73. 73. #gen_PushTemporaryVariableBytecode9 }.
+		  { 1. 74. 74. #gen_PushTemporaryVariableBytecode10 }.
+		  { 1. 75. 75. #gen_PushTemporaryVariableBytecode11 }.
+		  { 1. 76. 76. #gen_PushReceiverBytecode }.
+			
 		  { 1. 77. 77. #gen_PushConstantTrueBytecode. #needsFrameNever:. 1 }.
 		  { 1. 78. 78. #gen_PushConstantFalseBytecode. #needsFrameNever:. 1 }.
 		  { 1. 79. 79. #gen_PushConstantNilBytecode. #needsFrameNever:. 1 }.
