@@ -14697,6 +14697,10 @@ DruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 	self AndCq: 7 R: t2.
 	self ssFlushStackExceptTop: 0.
 
+	s79 := s3 << 3.
+	self AddCq: s79 R: t0.
+	self MoveR: t1 M64: 8 r: t0.
+
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	s38 := objectMemory getMemoryMap getSpaceMaskToUse.
@@ -14779,9 +14783,6 @@ DruidJIT >> gen_StoreAndPopRemoteTempLongBytecode [
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
-	s79 := s3 << 3.
-	self AddCq: s79 R: t0.
-	self MoveR: t1 M64: 8 r: t0.
 
 	^ 0
 ]
@@ -14949,6 +14950,11 @@ DruidJIT >> gen_StoreRemoteTempLongBytecode [
 	self AndCq: 7 R: t2.
 	self ssFlushStackExceptTop: 0.
 
+	s79 := s3 << 3.
+	self AddCq: s79 R: t0.
+	self MoveR: t1 M64: 8 r: t0.
+
+
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	s38 := objectMemory getMemoryMap getSpaceMaskToUse.
@@ -15031,9 +15037,7 @@ DruidJIT >> gen_StoreRemoteTempLongBytecode [
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
-	s79 := s3 << 3.
-	self AddCq: s79 R: t0.
-	self MoveR: t1 M64: 8 r: t0.
+	
 	^ 0
 ]
 
