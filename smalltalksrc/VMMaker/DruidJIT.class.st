@@ -158,15 +158,34 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 197. 197. #gen_ShortConditionalJumpFalse5. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
 		  { 1. 198. 198. #gen_ShortConditionalJumpFalse6. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
 		  { 1. 199. 199. #gen_ShortConditionalJumpFalse7. #branch. #isBranchFalse. #isMapped. #v3:ShortForward:Branch:Distance: }.
-		}
+		  { 1. 200. 200. #gen_StoreAndPopReceiverVariableBytecode0. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 201. 201. #gen_StoreAndPopReceiverVariableBytecode1. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 202. 202. #gen_StoreAndPopReceiverVariableBytecode2. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 203. 203. #gen_StoreAndPopReceiverVariableBytecode3. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 204. 204. #gen_StoreAndPopReceiverVariableBytecode4. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 205. 205. #gen_StoreAndPopReceiverVariableBytecode5. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 206. 206. #gen_StoreAndPopReceiverVariableBytecode6. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 207. 207. #gen_StoreAndPopReceiverVariableBytecode7. #isInstVarRef. #isMappedIfImmutability.
+		  #needsFrameIfImmutability:. -1 }.
+		  { 1. 208. 208. #gen_StoreAndPopTemporaryVariableBytecode0 }.
+		  { 1. 209. 209. #gen_StoreAndPopTemporaryVariableBytecode1 }.
+		  { 1. 210. 210. #gen_StoreAndPopTemporaryVariableBytecode2 }.
+		  { 1. 211. 211. #gen_StoreAndPopTemporaryVariableBytecode3 }.
+		  { 1. 212. 212. #gen_StoreAndPopTemporaryVariableBytecode4 }.
+		  { 1. 213. 213. #gen_StoreAndPopTemporaryVariableBytecode5 }.
+		  { 1. 214. 214. #gen_StoreAndPopTemporaryVariableBytecode6 }.
+		  { 1. 215. 215. #gen_StoreAndPopTemporaryVariableBytecode7 }.
+		  { 1. 216. 216. #gen_PopStackBytecode. #needsFrameNever:. -1 }.
+			}
 ,
 #(
-		"stores"
-		(1 200 207 genStoreAndPopReceiverVariableBytecode isInstVarRef is1ByteInstVarStore isMappedIfImmutability needsFrameIfImmutability: -1)
-		(1 208 215 genStoreAndPopTemporaryVariableBytecode)
-
-		(1 216 216 genPopStackBytecode needsFrameNever: -1)
-
 		(1 217 217 genUnconditionalTrapBytecode isMapped)
 
 		(1 218 223 unknownBytecode)
