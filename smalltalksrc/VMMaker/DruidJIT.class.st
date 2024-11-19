@@ -277,7 +277,7 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 235. 235. #gen_ExtSendSuperBytecode. #isMapped }.
 
 		  { 2. 236. 236. #unknownBytecode }.
- { 2. 237. 237. #genExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
+		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.	
 	
@@ -294,8 +294,8 @@ DruidJIT class >> bytecodeTable [
 		  { 3. 249. 249. #gen_ExtPushFullClosureBytecode }.
 		  { 3. 250. 250. #unknownBytecode }.
 		  { 3. 251. 251. #gen_PushRemoteTempLongBytecode }.
- { 3. 252. 252. #genStoreRemoteTempLongBytecode }.
- { 3. 253. 253. #genStoreAndPopRemoteTempLongBytecode }.
+		  { 3. 252. 252. #gen_StoreRemoteTempLongBytecode }.
+		  { 3. 253. 253. #gen_StoreAndPopRemoteTempLongBytecode }.
 		  { 3. 254. 254. #unknownBytecode }.
 		  { 3. 255. 255. #unknownBytecode }
 	}
