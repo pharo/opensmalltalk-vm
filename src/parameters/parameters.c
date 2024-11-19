@@ -448,7 +448,7 @@ vm_printUsageTo(FILE *out)
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
 "  --workingDirectory=<dir>		It sets the working directory for the running image.\n"
 "  --avoidSearchingSegmentsWithPinnedObjects\n"
-"                                       When pinning young objects, the objects are clonned into the old space. (default: false)\n"
+"                                       When pinning young objects, the objects are cloned into the old space. (default: false)\n"
 "                                       It tries to allocate the object in a segment with already pinned objects.\n"
 "	                                  Avoid the clonning process avoid this search and allocate the clonned object anywhere?\n"
 "\n"
