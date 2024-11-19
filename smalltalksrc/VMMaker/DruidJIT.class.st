@@ -123,39 +123,26 @@ DruidJIT class >> bytecodeTable [
 		  { 1. 93. 93. #gen_ReturnNilFromBlock. #return. #needsFrameNever:. -1 }.
 		  { 1. 94. 94. #gen_ReturnTopFromBlock. #return. #needsFrameNever:. -1 }.
 		  { 1. 95. 95. #gen_ExtNopBytecode. #needsFrameNever:. 0 }.
-		  { 1. 96. 96. #gen_BytecodePrimAdd. #isMapped }.
-		  { 1. 97. 97. #gen_BytecodePrimSubtract. #isMapped }.
-		  { 1. 98. 98. #gen_BytecodePrimLessThanSistaV1. #isMapped }.
-		  { 1. 99. 99. #gen_BytecodePrimGreaterThanSistaV1. #isMapped }.
-		  { 1. 100. 100. #gen_BytecodePrimLessOrEqualSistaV1. #isMapped }.
-		  { 1. 101. 101. #gen_BytecodePrimGreaterOrEqualSistaV1. #isMapped }.
-		  { 1. 102. 102. #gen_BytecodePrimEqualSistaV1. #isMapped }.
-		  { 1. 103. 103. #gen_BytecodePrimNotEqualSistaV1. #isMapped }.
-		  { 1. 104. 104. #gen_BytecodePrimMultiply. #isMapped }.
-		  { 1. 105. 105. #gen_BytecodePrimDivide. #isMapped }.
-		  { 1. 106. 106. #gen_BytecodePrimMod. #isMapped }.
-		  { 1. 107. 107. #gen_BytecodePrimMakePoint. #isMapped }.
-		  { 1. 108. 108. #gen_BytecodePrimBitShift. #isMapped }.
-		  { 1. 109. 109. #gen_BytecodePrimDiv. #isMapped }.
-		  { 1. 110. 110. #gen_BytecodePrimBitAnd. #isMapped }.
-		  { 1. 111. 111. #gen_BytecodePrimBitOr. #isMapped }.
-		  { 1. 112. 112. #gen_BytecodePrimAt. #isMapped }.
-		  { 1. 113. 113. #gen_BytecodePrimAtPut. #isMapped }.
-		  { 1. 114. 114. #gen_BytecodePrimSize. #isMapped }.
-		  { 1. 115. 115. #gen_BytecodePrimNext. #isMapped }.
-		  { 1. 116. 116. #gen_BytecodePrimNextPut. #isMapped }.
-		  { 1. 117. 117. #gen_BytecodePrimAtEnd. #isMapped }.
-		  { 1. 118. 118. #gen_BytecodePrimIdenticalSistaV1 }.
-		  { 1. 119. 119. #gen_BytecodePrimClass. #isMapped }.
-		  { 1. 120. 120. #gen_BytecodePrimNotIdenticalSistaV1 }.
-		  { 1. 121. 121. #gen_BytecodePrimValue. #isMapped }.
-		  { 1. 122. 122. #gen_BytecodePrimValueWithArg. #isMapped }.
-		  { 1. 123. 123. #gen_BytecodePrimDo. #isMapped }.
-		  { 1. 124. 124. #gen_BytecodePrimNew. #isMapped }.
-		  { 1. 125. 125. #gen_BytecodePrimNewWithArg. #isMapped }.
-		  { 1. 126. 126. #gen_BytecodePrimPointX. #isMapped }.
-		  { 1. 127. 127. #gen_BytecodePrimPointY. #isMapped }.
+		
  }, #(
+		"sends"
+		(1  96   96 genSpecialSelectorArithmetic isMapped AddRR)
+		(1  97   97 genSpecialSelectorArithmetic isMapped SubRR)
+		(1  98   98 genSpecialSelectorComparison isMapped JumpLess)
+		(1  99   99 genSpecialSelectorComparison isMapped JumpGreater)
+		(1 100 100 genSpecialSelectorComparison isMapped JumpLessOrEqual)
+		(1 101 101 genSpecialSelectorComparison isMapped JumpGreaterOrEqual)
+		(1 102 102 genSpecialSelectorComparison isMapped JumpZero)
+		(1 103 103 genSpecialSelectorComparison isMapped JumpNonZero)
+		(1 104 109 genSpecialSelectorSend isMapped)	 " #* #/ #\\ #@ #bitShift: //"
+		(1 110 110 genSpecialSelectorArithmetic isMapped AndRR)
+		(1 111 111 genSpecialSelectorArithmetic isMapped OrRR)
+		(1 112 117 genSpecialSelectorSend isMapped) "#at: #at:put: #size #next #nextPut: #atEnd"
+		(1 118 118 genSpecialSelectorEqualsEquals needsFrameNever: notMapped -1) "not mapped because it is directly inlined (for now)"
+		(1 119 119 genSpecialSelectorClass needsFrameIfStackGreaterThanOne: notMapped 0) "not mapped because it is directly inlined (for now)"
+		(1 120 120 genSpecialSelectorNotEqualsEquals needsFrameNever: notMapped -1) "not mapped because it is directly inlined (for now)"
+		(1 121 127 genSpecialSelectorSend isMapped) "#value #value: #do: #new #new: #x #y"
+
 		(1 128 143 genSendLiteralSelector0ArgsBytecode isMapped)
 		(1 144 159 genSendLiteralSelector1ArgBytecode isMapped)
 		(1 160 175 genSendLiteralSelector2ArgsBytecode isMapped)
