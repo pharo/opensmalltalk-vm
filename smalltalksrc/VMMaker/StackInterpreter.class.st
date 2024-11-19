@@ -4921,6 +4921,13 @@ StackInterpreter >> currentBytecode [
 	^ currentBytecode
 ]
 
+{ #category : 'indexing primitive support' }
+StackInterpreter >> currentBytecode: anInteger [
+
+	<doNotGenerate>
+	currentBytecode := anInteger
+]
+
 { #category : 'initialization' }
 StackInterpreter >> defaultNumStackPages [
 	"Return the default number of stack pages allocate at startup.
