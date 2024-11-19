@@ -606,8 +606,8 @@ If ffi is put as a separate header, slang will sort the header and put it outsid
 			var: #messageCount
 			type: #'usqInt'.
 	
-	aCCodeGenerator removeVariable: #'libFFI'.
-	LibFFIConstants classVariables do: [ :e | aCCodeGenerator removeConstant: e name ].
+"	aCCodeGenerator removeVariable: #'libFFI'.
+	LibFFIConstants classVariables do: [ :e | aCCodeGenerator removeConstant: e name ]."
 	
 	aCCodeGenerator removeVariable: #imageReaderWriter.
 ]
