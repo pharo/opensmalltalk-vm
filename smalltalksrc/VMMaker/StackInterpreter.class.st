@@ -5449,7 +5449,7 @@ StackInterpreter >> extPushReceiverVariableBytecode [
 	"226		11100010	i i i i i i i i	Push Receiver Variable #iiiiiiii (+ Extend A * 256)"
 	| index |
 	<compilationInfo: #isInstVarRef>
-	<compilationInfo: #isMappedIfImmutability>
+	"<compilationInfo: #isMappedIfImmutability>"
 	index := self fetchByte + (extA << 8).
 	self fetchNextBytecode.
 	extA := 0.
@@ -5522,7 +5522,7 @@ StackInterpreter >> extStoreAndPopLiteralVariableBytecode [
 	"236		11101100	i i i i i i i i	Pop and Store Literal Variable #iiiiiiii (+ Extend A * 256)"
 
 	| variableIndex value |
-	<compilationInfo: #isMappedIfImmutability>
+	<compilationInfo: #isMapped"IfImmutability">
 	variableIndex := self fetchByte + (extA << 8).
 	value := self stackTop.
 	self pop: 1.
@@ -5538,7 +5538,7 @@ StackInterpreter >> extStoreAndPopReceiverVariableBytecode [
 
 	| variableIndex value |
 	<compilationInfo: #isInstVarRef>
-	<compilationInfo: #isMappedIfImmutability>
+	<compilationInfo: #isMapped"IfImmutability">
 	variableIndex := self fetchByte + (extA << 8).
 	value := self stackTop.
 	self
@@ -5554,7 +5554,7 @@ StackInterpreter >> extStoreLiteralVariableBytecode [
 	"233		11101001	i i i i i i i i	Store Literal Variable #iiiiiiii (+ Extend A * 256)"
 
 	| variableIndex |
-	<compilationInfo: #isMappedIfImmutability>
+	<compilationInfo: #isMapped"IfImmutability">
 	variableIndex := self fetchByte + (extA << 8).
 	extA := 0.
 	self storeLiteralVariable: variableIndex withValue: self stackTop.
@@ -5568,8 +5568,8 @@ StackInterpreter >> extStoreReceiverVariableBytecode [
 
 	| variableIndex |
 	<compilationInfo: #isInstVarRef>
-	<compilationInfo: #isMappedIfImmutability>
-	<needsFrameIfImmutability: 0>
+	<compilationInfo: #isMapped"IfImmutability">
+	"<needsFrameIfImmutability: 0>"
 
 	variableIndex := self fetchByte + (extA << 8).
 	self
@@ -14707,8 +14707,8 @@ StackInterpreter >> storeAndPopReceiverVariableBytecode [
 
 	| rcvr top instVarIndex |
 	<compilationInfo: #isInstVarRef>
-	<compilationInfo: #isMappedIfImmutability>
-	<needsFrameIfImmutability: -1>
+	<compilationInfo: #isMapped"IfImmutability">
+	"<needsFrameIfImmutability: -1>"
 	
 	"Avoid this annotation for now.
 	It governs the two path compilation"
@@ -14727,8 +14727,8 @@ StackInterpreter >> storeAndPopReceiverVariableBytecode [
 { #category : #'stack bytecodes' }
 StackInterpreter >> storeAndPopRemoteTempLongBytecode [
 
-	<compilationInfo: #isMappedIfImmutability>
-	<needsFrameIfImmutability: -1>
+	<compilationInfo: #isMapped"IfImmutability">
+	"<needsFrameIfImmutability: -1>"
 
 	self storeRemoteTempLongBytecode.
 	self pop: 1
@@ -14885,8 +14885,8 @@ StackInterpreter >> storeRemoteTemp: index inVectorAt: tempVectorIndex [
 { #category : #'stack bytecodes' }
 StackInterpreter >> storeRemoteTempLongBytecode [
 
-	<compilationInfo: #isMappedIfImmutability>
-	<needsFrameIfImmutability: 0>
+	<compilationInfo: #isMapped"IfImmutability">
+	"<needsFrameIfImmutability: 0>"
 
 	| remoteTempIndex tempVectorIndex |
 	remoteTempIndex := self fetchByte.
