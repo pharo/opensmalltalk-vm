@@ -347,8 +347,7 @@ DruidJIT class >> initializePrimitiveTable [
 
 	<generated>
 	MaxCompiledPrimitiveIndex := 550.
-	primitiveTable := CArrayAccessor on:
-		                  (Array new: MaxCompiledPrimitiveIndex + 1).
+	primitiveTable := CArrayAccessor on: (Array new: MaxCompiledPrimitiveIndex + 1).
 	self table: primitiveTable from: self primitiveTableArray.
 	^ primitiveTable
 ]
@@ -1506,10 +1505,7 @@ DruidJIT >> gen_BytecodePrimAdd [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -1
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -1 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1523,10 +1519,7 @@ DruidJIT >> gen_BytecodePrimAt [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -17
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -17 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1540,10 +1533,7 @@ DruidJIT >> gen_BytecodePrimAtEnd [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -22
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -22 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1557,10 +1547,7 @@ DruidJIT >> gen_BytecodePrimAtPut [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: -18
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -18 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1574,10 +1561,7 @@ DruidJIT >> gen_BytecodePrimBitAnd [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -15
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -15 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1591,10 +1575,7 @@ DruidJIT >> gen_BytecodePrimBitOr [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -16
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -16 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1608,10 +1589,7 @@ DruidJIT >> gen_BytecodePrimBitShift [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -13
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -13 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1623,21 +1601,13 @@ DruidJIT >> gen_BytecodePrimClass [
 
 	| jump1 b409 t1 jump6 s48 jump3 currentBlock t3 t0 jump5 jump2 live t2 jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	t3 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t3 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t3).
 	(self ssValue: 0) copyToReg: t0.
 	self MoveR: t0 R: t1.
@@ -1739,10 +1709,7 @@ DruidJIT >> gen_BytecodePrimDiv [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -14
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -14 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1756,10 +1723,7 @@ DruidJIT >> gen_BytecodePrimDivide [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -10
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -10 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1773,10 +1737,7 @@ DruidJIT >> gen_BytecodePrimDo [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -28
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -28 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1790,10 +1751,7 @@ DruidJIT >> gen_BytecodePrimEqualSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -7
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -7 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1807,10 +1765,7 @@ DruidJIT >> gen_BytecodePrimGreaterOrEqualSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -6
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -6 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1824,10 +1779,7 @@ DruidJIT >> gen_BytecodePrimGreaterThanSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -4
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -4 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1839,21 +1791,13 @@ DruidJIT >> gen_BytecodePrimIdenticalSistaV1 [
 
 	| jump1 b507 s57 s54 t1 jump6 jump3 b503 currentBlock t3 t0 jump5 jump2 live t2 jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	t3 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t3 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t3).
 	(self ssValue: 1) copyToReg: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -1944,10 +1888,7 @@ DruidJIT >> gen_BytecodePrimLessOrEqualSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -5
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -5 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1961,10 +1902,7 @@ DruidJIT >> gen_BytecodePrimLessThanSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -3
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -3 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1978,10 +1916,7 @@ DruidJIT >> gen_BytecodePrimMakePoint [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -12
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -12 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -1995,10 +1930,7 @@ DruidJIT >> gen_BytecodePrimMod [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -11
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -11 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2012,10 +1944,7 @@ DruidJIT >> gen_BytecodePrimMultiply [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -9
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -9 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2029,10 +1958,7 @@ DruidJIT >> gen_BytecodePrimNew [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -29
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -29 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2046,10 +1972,7 @@ DruidJIT >> gen_BytecodePrimNewWithArg [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -30
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -30 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2063,10 +1986,7 @@ DruidJIT >> gen_BytecodePrimNext [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -20
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -20 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2080,10 +2000,7 @@ DruidJIT >> gen_BytecodePrimNextPut [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -21
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -21 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2097,10 +2014,7 @@ DruidJIT >> gen_BytecodePrimNotEqualSistaV1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -8
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -8 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2112,21 +2026,13 @@ DruidJIT >> gen_BytecodePrimNotIdenticalSistaV1 [
 
 	| jump1 b507 s57 s54 t1 jump6 jump3 b503 currentBlock t3 t0 jump5 jump2 live t2 jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-	t3 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t3 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t3).
 	(self ssValue: 1) copyToReg: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -2217,10 +2123,7 @@ DruidJIT >> gen_BytecodePrimPointX [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -31
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -31 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2234,10 +2137,7 @@ DruidJIT >> gen_BytecodePrimPointY [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -32
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -32 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2251,10 +2151,7 @@ DruidJIT >> gen_BytecodePrimSize [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -19
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -19 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2268,10 +2165,7 @@ DruidJIT >> gen_BytecodePrimSubtract [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -2
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -2 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2285,10 +2179,7 @@ DruidJIT >> gen_BytecodePrimValue [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: -26
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -26 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2302,10 +2193,7 @@ DruidJIT >> gen_BytecodePrimValueWithArg [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: -27
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: -27 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -2326,9 +2214,7 @@ DruidJIT >> gen_DuplicateTopBytecode [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -2390,40 +2276,38 @@ DruidJIT >> gen_ExtBBytecode [
 DruidJIT >> gen_ExtJumpIfFalse [
 	"AutoGenerated by Druid"
 
-	| s6 s3 jump1 s16 s5 s2 s18 s15 currentBlock s12 t0 jump2 s4 s17 live s20 |
+	| jump1 s3 s19 s16 s5 s2 s15 currentBlock t0 jump2 s4 s17 s14 s11 live |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
-	s3 := byte1.
-	s4 := extB.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extB.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	extA := 0.
 	extB := 0.
 	numExtB := 0.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s12 := objectMemory falseObject.
+	s11 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s12 R: t0.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s15 := bytecodePC.
-	s16 := s15 + s6.
-	s17 := s16 + 2.
-	self Jump: (self ensureFixupAt: s17).
+	s14 := bytecodePC.
+	s15 := s14 + s5.
+	s16 := s15 + 2.
+	self Jump: (self ensureFixupAt: s16).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s20 := objectMemory trueObject.
-	self CmpCq: s20 R: t0.
+	s19 := objectMemory trueObject.
+	self CmpCq: s19 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -2434,40 +2318,38 @@ DruidJIT >> gen_ExtJumpIfFalse [
 DruidJIT >> gen_ExtJumpIfTrue [
 	"AutoGenerated by Druid"
 
-	| s6 s3 jump1 s16 s5 s2 s18 s15 currentBlock s12 t0 jump2 s4 s17 live s20 |
+	| jump1 s3 s19 s16 s5 s2 s15 currentBlock t0 jump2 s4 s17 s14 s11 live |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
-	s3 := byte1.
-	s4 := extB.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extB.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	extA := 0.
 	extB := 0.
 	numExtB := 0.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s12 := objectMemory trueObject.
+	s11 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s12 R: t0.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s15 := bytecodePC.
-	s16 := s15 + s6.
-	s17 := s16 + 2.
-	self Jump: (self ensureFixupAt: s17).
+	s14 := bytecodePC.
+	s15 := s14 + s5.
+	s16 := s15 + 2.
+	self Jump: (self ensureFixupAt: s16).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s20 := objectMemory falseObject.
-	self CmpCq: s20 R: t0.
+	s19 := objectMemory falseObject.
+	self CmpCq: s19 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -2510,22 +2392,14 @@ DruidJIT >> gen_ExtPushFullClosureBytecode [
 
 	| b4 s4 s38 s9 s2 s20 currentBlock t1 s19 s12 s7 s25 live s5 s15 s3 s28 s37 s21 t2 s8 t0 s18 s11 |
 	live := 0.
-
-	live := live bitOr: (self registerMaskFor: ReceiverResultReg).
-	live := live bitOr: (self registerMaskFor: SendNumArgsReg).
 	live := live bitOr: (self registerMaskFor: ClassReg).
-
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	live := live bitOr: (self registerMaskFor: SendNumArgsReg).
+	live := live bitOr: (self registerMaskFor: ReceiverResultReg).
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
 	s2 := byte1.
 	s3 := extA.
@@ -2536,10 +2410,7 @@ DruidJIT >> gen_ExtPushFullClosureBytecode [
 	s8 := s7 bitAnd: 63.
 	s9 := s7 anyMask: 64.
 	self voidReceiverResultRegContainsSelf.
-	self
-		ssAllocateCallReg: ReceiverResultReg
-		and: SendNumArgsReg
-		and: ClassReg.
+	self ssAllocateCallReg: ReceiverResultReg and: SendNumArgsReg and: ClassReg.
 	self
 		genCreateFullClosureInIndex: s5
 		numCopied: s8
@@ -2612,9 +2483,7 @@ DruidJIT >> gen_ExtPushLiteralBytecode [
 
 	| s3 s10 s8 s5 s2 currentBlock t0 s4 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	s2 := byte1.
 	s3 := extA.
@@ -2636,13 +2505,9 @@ DruidJIT >> gen_ExtPushLiteralVariableBytecode [
 
 	| s34 s3 jump1 jump4 s10 t1 s8 s5 s2 jump3 currentBlock t0 s35 s4 jump2 b233 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	s2 := byte1.
 	s3 := extA.
@@ -2692,48 +2557,41 @@ DruidJIT >> gen_ExtPushLiteralVariableBytecode [
 DruidJIT >> gen_ExtPushReceiverVariableBytecode [
 	"AutoGenerated by Druid"
 
-	| s6 s3 t1 s5 s2 s18 currentBlock t0 s4 s14 s11 live s9 |
+	| s3 s13 s10 t1 s8 s5 s2 currentBlock t0 s4 s17 live |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-
-	s3 := byte1.
-	s4 := extA.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extA.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	extA := 0.
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
-	s9 := StackPointerIndex.
+	s8 := StackPointerIndex.
 	self ssFlushStackExceptTop: 0.
-
-
-	s6 <= s9 ifTrue: [
+	s5 <= s8 ifTrue: [
 		| jump1 jump2 |
 		self MoveM64: 0 r: t0 R: t1.
 		self AndCq: 16r3FFFFF R: t1.
-		s14 := ClassMethodContextCompactIndex.
-		self CmpCq: s14 R: t1.
+		s13 := ClassMethodContextCompactIndex.
+		self CmpCq: s13 R: t1.
 		jump1 := self JumpNonZero: 0.
 		self deoptimize.
 		jump2 := self Jump: 0.
 		deadCode := false.
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
-		s18 := s6 << 3.
-		self AddCq: s18 R: t0.
+		s17 := s5 << 3.
+		self AddCq: s17 R: t0.
 		self ssPushBase: t0 offset: 8.
 		currentBlock := self Label.
 		jump2 jmpTarget: currentBlock.
 		^ 0 ].
-	s18 := s6 << 3.
-	self AddCq: s18 R: t0.
+	s17 := s5 << 3.
+	self AddCq: s17 R: t0.
 	self ssPushBase: t0 offset: 8.
 	^ 0
 ]
@@ -2758,10 +2616,7 @@ DruidJIT >> gen_ExtSendBytecode [
 	extB := 0.
 	numExtB := 0.
 	self marshallSendArguments: s12.
-	self
-		genMarshalledSendNoPush: s7
-		numArgs: s12
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: s7 numArgs: s12 sendTable: ordinarySendTrampolines.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
 ]
@@ -2772,9 +2627,7 @@ DruidJIT >> gen_ExtSendSuperBytecode [
 
 	| s6 s3 s16 s10 s8 s5 s2 s18 currentBlock s12 s15 t0 s4 s17 s11 live |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	s2 := byte1.
 	s3 := s2 >> 3.
@@ -2796,10 +2649,7 @@ DruidJIT >> gen_ExtSendSuperBytecode [
 		extB := 0.
 		numExtB := 0.
 		self marshallSendArguments: s18.
-		self
-			genMarshalledSendNoPush: s6
-			numArgs: s18
-			sendTable: superSendTrampolines.
+		self genMarshalledSendNoPush: s6 numArgs: s18 sendTable: superSendTrampolines.
 		self ssPushRegister: ReceiverResultReg.
 		^ 0 ].
 	s15 := s2 bitAnd: 7.
@@ -2809,10 +2659,7 @@ DruidJIT >> gen_ExtSendSuperBytecode [
 	extB := 0.
 	numExtB := 0.
 	self marshallSendArguments: s18.
-	self
-		genMarshalledSendNoPush: s6
-		numArgs: s18
-		sendTable: superSendTrampolines.
+	self genMarshalledSendNoPush: s6 numArgs: s18 sendTable: superSendTrampolines.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
 ]
@@ -2821,41 +2668,33 @@ DruidJIT >> gen_ExtSendSuperBytecode [
 DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	"AutoGenerated by Druid"
 
-	| s6 jump5 jump7 s4 jump3 jump8 s2 t1 currentBlock jump1 s51 s12 jump6 s89 jumpNext s56 live s5 jump4 jumpTrue jump9 s3 s37 s85 t2 s59 s13 s61 b613 t0 s83 s48 jump2 s11 |
+	| jump5 s64 s4 jump3 s44 s62 s2 s36 currentBlock t1 jump1 s51 s12 jump6 jumpNext jump8 s10 s5 live jump4 jumpTrue s54 jump9 s3 t2 b429 jump2 s59 jump7 t0 s11 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
-	s3 := byte1.
-	s4 := extA.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extA.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-
 	extA := 0.
 	self genMoveConstant: methodObj R: t1.
-	s11 := LiteralStart.
-	s12 := s6 + s11.
-	s13 := s12 << 3.
-	self AddCq: s13 R: t1.
+	s10 := LiteralStart.
+	s11 := s5 + s10.
+	s12 := s11 << 3.
+	self AddCq: s12 R: t1.
 	self MoveM64: 8 r: t1 R: t1.
 	self MoveM64: 0 r: t1 R: t2.
 	self AndCq: 16r3FFFF7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	self MoveM64: 8 r: t1 R: t2.
-	b613 := self Label.
+	b429 := self Label.
 	self MoveR: t2 R: t1.
 	self AndCq: 7 R: t1.
 	self CmpCq: 0 R: t1.
@@ -2866,7 +2705,7 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	jump3 := self JumpNonZero: 0.
 	self MoveM64: 8 r: t2 R: t1.
 	self MoveR: t1 R: t2.
-	jump4 := self Jump: b613.
+	jump4 := self Jump: b429.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -2876,7 +2715,7 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	jump1 jmpTarget: currentBlock.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
-	s37 := ValueIndex.
+	s36 := ValueIndex.
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -2888,36 +2727,39 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	deadCode := false.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
+	s44 := s36 << 3.
+	self MoveR: t1 R: t2.
+	self AddCq: s44 R: t2.
+	self MoveR: t0 M64: 8 r: t2.
 	self MoveR: t1 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump3 := self JumpNonZero: 0.
-	s48 := objectMemory getMemoryMap getSpaceMaskToUse.
+	s51 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t1 R: t2.
-	self AndCq: s48 R: t2.
-	s51 := objectMemory getMemoryMap getOldSpaceMask.
-	self CmpCq: s51 R: t2.
+	self AndCq: s51 R: t2.
+	s54 := objectMemory getMemoryMap getOldSpaceMask.
+	self CmpCq: s54 R: t2.
 	jump2 := self JumpNonZero: 0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump5 := self JumpNonZero: 0.
-	s56 := objectMemory getMemoryMap getSpaceMaskToUse.
+	s59 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t0 R: t2.
-	self AndCq: s56 R: t2.
-	s59 := objectMemory getMemoryMap getNewSpaceMask.
-	self CmpCq: s59 R: t2.
+	self AndCq: s59 R: t2.
+	s62 := objectMemory getMemoryMap getNewSpaceMask.
+	self CmpCq: s62 R: t2.
 	jump6 := self JumpNonZero: 0.
-	s61 := objectMemory getMemoryMap getNewSpaceStart.
-	self MoveR: t0 R: t2.
-	self CmpCq: s61 R: t2.
+	s64 := objectMemory getMemoryMap getNewSpaceStart.
+	self CmpCq: s64 R: t0.
 	jumpTrue := self JumpAboveOrEqual: 0.
-	self MoveCq: 0 R: t2.
+	self MoveCq: 0 R: t0.
 	jumpNext := self Jump: 0.
 	jumpTrue jmpTarget: self Label.
-	self MoveCq: 1 R: t2.
+	self MoveCq: 1 R: t0.
 	jumpNext jmpTarget: self Label.
-	self CmpCq: 1 R: t2.
+	self CmpCq: 1 R: t0.
 	jump7 := self JumpNonZero: 0.
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 29 R: t2.
@@ -2925,58 +2767,19 @@ DruidJIT >> gen_ExtStoreAndPopLiteralVariableBytecode [
 	self CmpCq: 0 R: t2.
 	jump8 := self JumpNonZero: 0.
 	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
 	jump9 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
-	jump9 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t1 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump9 := self JumpNonZero: 0.
-	self TstCq: 7 R: t0.
-	jump8 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump7 := self JumpBelow: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t0.
-	jump2 := self JumpBelow: 0.
-	s83 := objectMemory trueObject.
-	self CmpCq: s83 R: t0.
-	jump3 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump2 jmpTarget: currentBlock.
-	s85 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s85 R: t0.
-	jump2 := self JumpBelow: 0.
-	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump9 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	s89 := s37 << 3.
-	self AddCq: s89 R: t1.
-	self MoveR: t0 M64: 8 r: t1.
-	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump2 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
+	jump8 jmpTarget: currentBlock.
+	jump9 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -3214,39 +3017,32 @@ DruidJIT >> gen_ExtStoreAndPopReceiverVariableBytecode [
 DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	"AutoGenerated by Druid"
 
-	| s6 s11 s88 jump5 s55 s4 jump3 jump8 s2 s36 currentBlock s84 s58 s12 s60 t1 jump1 s82 s47 jump6 s10 s5 live jump4 jumpTrue jumpNext jump9 s3 t2 jump2 b613 jump7 t0 s50 |
+	| s11 jump5 s4 jump3 s53 s9 s2 t1 currentBlock jump1 s58 jumpNext jump6 jump8 s10 s5 live jump4 jumpTrue s63 s3 t2 b429 jump2 s43 jump9 s61 jump7 t0 s35 s50 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
-	s3 := byte1.
-	s4 := extA.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extA.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	extA := 0.
 	(self ssValue: 0) copyToReg: t0.
 	self genMoveConstant: methodObj R: t1.
-	s10 := LiteralStart.
-	s11 := s6 + s10.
-	s12 := s11 << 3.
-	self AddCq: s12 R: t1.
+	s9 := LiteralStart.
+	s10 := s5 + s9.
+	s11 := s10 << 3.
+	self AddCq: s11 R: t1.
 	self MoveM64: 8 r: t1 R: t1.
 	self MoveM64: 0 r: t1 R: t2.
 	self AndCq: 16r3FFFF7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump1 := self JumpNonZero: 0.
 	self MoveM64: 8 r: t1 R: t2.
-	b613 := self Label.
+	b429 := self Label.
 	self MoveR: t2 R: t1.
 	self AndCq: 7 R: t1.
 	self CmpCq: 0 R: t1.
@@ -3257,7 +3053,7 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	jump3 := self JumpNonZero: 0.
 	self MoveM64: 8 r: t2 R: t1.
 	self MoveR: t1 R: t2.
-	jump4 := self Jump: b613.
+	jump4 := self Jump: b429.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
@@ -3267,7 +3063,7 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	jump1 jmpTarget: currentBlock.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
-	s36 := ValueIndex.
+	s35 := ValueIndex.
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
@@ -3279,36 +3075,39 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	deadCode := false.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
+	s43 := s35 << 3.
+	self MoveR: t1 R: t2.
+	self AddCq: s43 R: t2.
+	self MoveR: t0 M64: 8 r: t2.
 	self MoveR: t1 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump3 := self JumpNonZero: 0.
-	s47 := objectMemory getMemoryMap getSpaceMaskToUse.
+	s50 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t1 R: t2.
-	self AndCq: s47 R: t2.
-	s50 := objectMemory getMemoryMap getOldSpaceMask.
-	self CmpCq: s50 R: t2.
+	self AndCq: s50 R: t2.
+	s53 := objectMemory getMemoryMap getOldSpaceMask.
+	self CmpCq: s53 R: t2.
 	jump2 := self JumpNonZero: 0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
 	jump5 := self JumpNonZero: 0.
-	s55 := objectMemory getMemoryMap getSpaceMaskToUse.
+	s58 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t0 R: t2.
-	self AndCq: s55 R: t2.
-	s58 := objectMemory getMemoryMap getNewSpaceMask.
-	self CmpCq: s58 R: t2.
+	self AndCq: s58 R: t2.
+	s61 := objectMemory getMemoryMap getNewSpaceMask.
+	self CmpCq: s61 R: t2.
 	jump6 := self JumpNonZero: 0.
-	s60 := objectMemory getMemoryMap getNewSpaceStart.
-	self MoveR: t0 R: t2.
-	self CmpCq: s60 R: t2.
+	s63 := objectMemory getMemoryMap getNewSpaceStart.
+	self CmpCq: s63 R: t0.
 	jumpTrue := self JumpAboveOrEqual: 0.
-	self MoveCq: 0 R: t2.
+	self MoveCq: 0 R: t0.
 	jumpNext := self Jump: 0.
 	jumpTrue jmpTarget: self Label.
-	self MoveCq: 1 R: t2.
+	self MoveCq: 1 R: t0.
 	jumpNext jmpTarget: self Label.
-	self CmpCq: 1 R: t2.
+	self CmpCq: 1 R: t0.
 	jump7 := self JumpNonZero: 0.
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 29 R: t2.
@@ -3316,58 +3115,19 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 	self CmpCq: 0 R: t2.
 	jump8 := self JumpNonZero: 0.
 	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
 	jump9 := self Jump: 0.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
-	jump9 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t1 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump9 := self JumpNonZero: 0.
-	self TstCq: 7 R: t0.
-	jump8 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump7 := self JumpBelow: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t0.
-	jump2 := self JumpBelow: 0.
-	s82 := objectMemory trueObject.
-	self CmpCq: s82 R: t0.
-	jump3 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump2 jmpTarget: currentBlock.
-	s84 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s84 R: t0.
-	jump2 := self JumpBelow: 0.
-	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump9 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	s88 := s36 << 3.
-	self AddCq: s88 R: t1.
-	self MoveR: t0 M64: 8 r: t1.
-	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump2 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
+	jump8 jmpTarget: currentBlock.
+	jump9 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -3375,36 +3135,29 @@ DruidJIT >> gen_ExtStoreLiteralVariableBytecode [
 DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 	"AutoGenerated by Druid"
 
-	| s6 jump5 s4 jump3 s31 s44 s14 s9 s2 t1 currentBlock jump1 s42 s67 jump6 s34 live s5 s39 jump4 s63 s3 t2 jump2 s61 jump7 t0 s11 |
+	| jump5 s4 jump3 jump8 s2 t1 s27 currentBlock s42 jump1 jump6 s34 s47 s10 s5 live jump4 s45 s3 t2 s37 s13 s8 jump7 t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
-	s3 := byte1.
-	s4 := extA.
-	s5 := s4 << 8.
-	s6 := s3 + s5.
+	s2 := byte1.
+	s3 := extA.
+	s4 := s3 << 8.
+	s5 := s2 + s4.
 	(self ssValue: 0) copyToReg: t0.
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t1.
-	s9 := ReceiverIndex.
+	s8 := ReceiverIndex.
 	self ssFlushStackExceptTop: 0.
-	s6 <= s9 ifTrue: [
-		| jump8 |
+	s5 <= s8 ifTrue: [
+		| jump7 jump5 jump3 jump1 jump8 jump6 jump4 jump2 |
 		self MoveM64: 0 r: t1 R: t2.
 		self AndCq: 16r3FFFFF R: t2.
-		s14 := ClassMethodContextCompactIndex.
-		self CmpCq: s14 R: t2.
+		s13 := ClassMethodContextCompactIndex.
+		self CmpCq: s13 R: t2.
 		jump1 := self JumpNonZero: 0.
 		self deoptimize.
 		jump2 := self Jump: 0.
@@ -3421,28 +3174,32 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 		deadCode := false.
 		currentBlock := self Label.
 		jump1 jmpTarget: currentBlock.
+		s27 := s5 << 3.
+		self MoveR: t1 R: t2.
+		self AddCq: s27 R: t2.
+		self MoveR: t0 M64: 8 r: t2.
 		self MoveR: t1 R: t2.
 		self AndCq: 7 R: t2.
 		self CmpCq: 0 R: t2.
 		jump1 := self JumpNonZero: 0.
-		s31 := objectMemory getMemoryMap getSpaceMaskToUse.
+		s34 := objectMemory getMemoryMap getSpaceMaskToUse.
 		self MoveR: t1 R: t2.
-		self AndCq: s31 R: t2.
-		s34 := objectMemory getMemoryMap getOldSpaceMask.
-		self CmpCq: s34 R: t2.
+		self AndCq: s34 R: t2.
+		s37 := objectMemory getMemoryMap getOldSpaceMask.
+		self CmpCq: s37 R: t2.
 		jump4 := self JumpNonZero: 0.
 		self MoveR: t0 R: t2.
 		self AndCq: 7 R: t2.
 		self CmpCq: 0 R: t2.
 		jump5 := self JumpNonZero: 0.
-		s39 := objectMemory getMemoryMap getSpaceMaskToUse.
+		s42 := objectMemory getMemoryMap getSpaceMaskToUse.
 		self MoveR: t0 R: t2.
-		self AndCq: s39 R: t2.
-		s42 := objectMemory getMemoryMap getNewSpaceMask.
-		self CmpCq: s42 R: t2.
+		self AndCq: s42 R: t2.
+		s45 := objectMemory getMemoryMap getNewSpaceMask.
+		self CmpCq: s45 R: t2.
 		jump6 := self JumpNonZero: 0.
-		s44 := objectMemory getMemoryMap getNewSpaceStart.
-		self CmpCq: s44 R: t0.
+		s47 := objectMemory getMemoryMap getNewSpaceStart.
+		self CmpCq: s47 R: t0.
 		jump7 := self JumpBelow: 0.
 		self MoveM64: 0 r: t1 R: t2.
 		self LogicalShiftRightCq: 29 R: t2.
@@ -3450,146 +3207,72 @@ DruidJIT >> gen_ExtStoreReceiverVariableBytecode [
 		self CmpCq: 0 R: t2.
 		jump8 := self JumpNonZero: 0.
 		self MoveR: t1 R: TempReg.
-		backEnd saveAndRestoreLinkRegAround: [
-			self CallRT: ceStoreCheckTrampoline ].
-
+		backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 		self annotateBytecode: self Label.
-
-		currentBlock := self Label.
-		jump1 jmpTarget: currentBlock.
-		jump4 jmpTarget: currentBlock.
-		jump5 jmpTarget: currentBlock.
-		jump6 jmpTarget: currentBlock.
-		jump7 jmpTarget: currentBlock.
-		jump8 jmpTarget: currentBlock.
-		self MoveM64: 0 r: t1 R: t2.
-		self LogicalShiftRightCq: 29 R: t2.
-		self AndCq: 1 R: t2.
-		self CmpCq: 0 R: t2.
-		jump8 := self JumpNonZero: 0.
-		self TstCq: 7 R: t0.
-		jump7 := self JumpNonZero: 0.
-		self CmpCq: 16r20000000000 R: t1.
-		jump6 := self JumpLess: 0.
-		self CmpCq: 16r20000000000 R: t0.
-		jump5 := self JumpGreaterOrEqual: 0.
-		self genMoveConstant: objectMemory nilObject R: t2.
-		self CmpR: t2 R: t0.
-		jump4 := self JumpBelow: 0.
-		s61 := objectMemory trueObject.
-		self CmpCq: s61 R: t0.
-		jump1 := self JumpBelowOrEqual: 0.
-		currentBlock := self Label.
-		jump4 jmpTarget: currentBlock.
-		s63 := objectMemory getMemoryMap getNewSpaceStart.
-		self CmpCq: s63 R: t0.
-		jump4 := self JumpBelow: 0.
-		self MoveR: t1 R: TempReg.
-		backEnd saveAndRestoreLinkRegAround: [
-			self CallRT: ceStoreCheckTrampoline ].
-		currentBlock := self Label.
-		jump8 jmpTarget: currentBlock.
-		jump7 jmpTarget: currentBlock.
-		jump6 jmpTarget: currentBlock.
-		jump5 jmpTarget: currentBlock.
-		jump1 jmpTarget: currentBlock.
-		jump4 jmpTarget: currentBlock.
-		s67 := s6 << 3.
-		self AddCq: s67 R: t1.
-		self MoveR: t0 M64: 8 r: t1.
 		currentBlock := self Label.
 		jump2 jmpTarget: currentBlock.
 		jump3 jmpTarget: currentBlock.
+		jump1 jmpTarget: currentBlock.
+		jump4 jmpTarget: currentBlock.
+		jump5 jmpTarget: currentBlock.
+		jump6 jmpTarget: currentBlock.
+		jump7 jmpTarget: currentBlock.
+		jump8 jmpTarget: currentBlock.
 		extA := 0.
 		^ 0 ].
 	self MoveM64: 0 r: t1 R: t2.
 	self LogicalShiftRightCq: 23 R: t2.
 	self AndCq: 1 R: t2.
 	self CmpCq: 0 R: t2.
-	jump3 := self JumpZero: 0.
+	jump8 := self JumpZero: 0.
 	self deoptimize.
-	jump2 := self Jump: 0.
+	jump7 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
+	jump8 jmpTarget: currentBlock.
+	s27 := s5 << 3.
+	self MoveR: t1 R: t2.
+	self AddCq: s27 R: t2.
+	self MoveR: t0 M64: 8 r: t2.
 	self MoveR: t1 R: t2.
 	self AndCq: 7 R: t2.
+	self CmpCq: 0 R: t2.
+	jump8 := self JumpNonZero: 0.
+	s34 := objectMemory getMemoryMap getSpaceMaskToUse.
+	self MoveR: t1 R: t2.
+	self AndCq: s34 R: t2.
+	s37 := objectMemory getMemoryMap getOldSpaceMask.
+	self CmpCq: s37 R: t2.
+	jump6 := self JumpNonZero: 0.
+	self MoveR: t0 R: t2.
+	self AndCq: 7 R: t2.
+	self CmpCq: 0 R: t2.
+	jump5 := self JumpNonZero: 0.
+	s42 := objectMemory getMemoryMap getSpaceMaskToUse.
+	self MoveR: t0 R: t2.
+	self AndCq: s42 R: t2.
+	s45 := objectMemory getMemoryMap getNewSpaceMask.
+	self CmpCq: s45 R: t2.
+	jump4 := self JumpNonZero: 0.
+	s47 := objectMemory getMemoryMap getNewSpaceStart.
+	self CmpCq: s47 R: t0.
+	jump1 := self JumpBelow: 0.
+	self MoveM64: 0 r: t1 R: t2.
+	self LogicalShiftRightCq: 29 R: t2.
+	self AndCq: 1 R: t2.
 	self CmpCq: 0 R: t2.
 	jump3 := self JumpNonZero: 0.
-	s31 := objectMemory getMemoryMap getSpaceMaskToUse.
-	self MoveR: t1 R: t2.
-	self AndCq: s31 R: t2.
-	s34 := objectMemory getMemoryMap getOldSpaceMask.
-	self CmpCq: s34 R: t2.
-	jump4 := self JumpNonZero: 0.
-	self MoveR: t0 R: t2.
-	self AndCq: 7 R: t2.
-	self CmpCq: 0 R: t2.
-	jump1 := self JumpNonZero: 0.
-	s39 := objectMemory getMemoryMap getSpaceMaskToUse.
-	self MoveR: t0 R: t2.
-	self AndCq: s39 R: t2.
-	s42 := objectMemory getMemoryMap getNewSpaceMask.
-	self CmpCq: s42 R: t2.
-	jump5 := self JumpNonZero: 0.
-	s44 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s44 R: t0.
-	jump6 := self JumpBelow: 0.
-	self MoveM64: 0 r: t1 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
 	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t1 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t0.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump1 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t0.
-	jump4 := self JumpBelow: 0.
-	s61 := objectMemory trueObject.
-	self CmpCq: s61 R: t0.
-	jump3 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump4 jmpTarget: currentBlock.
-	s63 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s63 R: t0.
-	jump4 := self JumpBelow: 0.
-	self MoveR: t1 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
 	currentBlock := self Label.
 	jump7 jmpTarget: currentBlock.
+	jump8 jmpTarget: currentBlock.
 	jump6 jmpTarget: currentBlock.
 	jump5 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	s67 := s6 << 3.
-	self AddCq: s67 R: t1.
-	self MoveR: t0 M64: 8 r: t1.
-	currentBlock := self Label.
-	jump2 jmpTarget: currentBlock.
 	extA := 0.
 	^ 0
 ]
@@ -3689,9 +3372,7 @@ DruidJIT >> gen_LongPushTemporaryVariableBytecode [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: byte1) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -3723,9 +3404,7 @@ DruidJIT >> gen_LongStoreTemporaryVariableBytecode [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: byte1.
@@ -3991,13 +3670,12 @@ DruidJIT >> gen_PrimitiveAt [
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	s73 := 0.
-	self MoveCq: s73 R: SendNumArgsReg.
+	self MoveCq: s73 R: Extra2Reg.
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump9 jmpTarget: currentBlock.
 	self CmpCq: 2 R: Extra1Reg.
 	jump9 := self JumpAboveOrEqual: 0.
-	self MoveR: Extra2Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
 	jump7 := self Jump: 0.
 	currentBlock := self Label.
@@ -4047,8 +3725,8 @@ DruidJIT >> gen_PrimitiveAt [
 	self MoveM64: 24 r: ClassReg R: Extra0Reg.
 	self ArithmeticShiftRightCq: 3 R: Extra0Reg.
 	self AndCq: 16rFFFF R: Extra0Reg.
-	self MoveR: Extra0Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
+	self MoveR: Extra0Reg R: Extra2Reg.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	jump7 jmpTarget: currentBlock.
@@ -4062,7 +3740,7 @@ DruidJIT >> gen_PrimitiveAt [
 	jump6 := self JumpZero: 0.
 	currentBlock := self Label.
 	jump7 jmpTarget: currentBlock.
-	self SubR: SendNumArgsReg R: ClassReg.
+	self SubR: Extra2Reg R: ClassReg.
 	self CmpCq: 24 R: Extra1Reg.
 	jump7 := self JumpAboveOrEqual: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
@@ -4072,7 +3750,7 @@ DruidJIT >> gen_PrimitiveAt [
 	self CmpR: ClassReg R: Extra3Reg.
 	jump4 := self JumpAbove: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self AddR: SendNumArgsReg R: Extra3Reg.
+	self AddR: Extra2Reg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self CmpCq: 5 R: Extra1Reg.
 	jump9 := self JumpAbove: 0.
@@ -4939,15 +4617,13 @@ DruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: Extra0Reg
 		R: SendNumArgsReg
-		Quo: SendNumArgsReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: SendNumArgsReg.
 	s22 := 0.
-	self MoveCq: s22 R: Extra0Reg.
-	self SubR: SendNumArgsReg R: Extra0Reg.
-	self MoveR: Extra0Reg R: SendNumArgsReg.
+	self MoveCq: s22 R: SendNumArgsReg.
+	self SubR: Extra0Reg R: SendNumArgsReg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
-	self MoveR: SendNumArgsReg R: Extra0Reg.
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
@@ -4962,11 +4638,11 @@ DruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: Extra0Reg
-		Rem: ClassReg.
+		Quo: ClassReg
+		Rem: Extra0Reg.
 	s38 := 0.
-	self MoveCq: s38 R: ClassReg.
-	self SubR: Extra0Reg R: ClassReg.
+	self MoveCq: s38 R: Extra0Reg.
+	self SubR: ClassReg R: Extra0Reg.
 	jump4 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
@@ -4976,29 +4652,29 @@ DruidJIT >> gen_PrimitiveDiv [
 	self
 		DivR: ClassReg
 		R: Extra0Reg
-		Quo: ClassReg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
-	self MoveR: ClassReg R: Extra0Reg.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
-	self MoveR: Extra0Reg R: ClassReg.
-	self LogicalShiftRightCq: 60 R: ClassReg.
-	self AddCq: 1 R: ClassReg.
-	self AndCq: 15 R: ClassReg.
-	self CmpCq: 1 R: ClassReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self LogicalShiftRightCq: 60 R: Extra0Reg.
+	self AddCq: 1 R: Extra0Reg.
+	self AndCq: 15 R: Extra0Reg.
+	self CmpCq: 1 R: Extra0Reg.
 	jump5 := self JumpAbove: 0.
-	self MoveR: Extra0Reg R: ClassReg.
-	self LogicalShiftRightCq: 60 R: ClassReg.
-	self AddCq: 1 R: ClassReg.
-	self AndCq: 15 R: ClassReg.
-	self CmpCq: 1 R: ClassReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self LogicalShiftRightCq: 60 R: Extra0Reg.
+	self AddCq: 1 R: Extra0Reg.
+	self AndCq: 15 R: Extra0Reg.
+	self CmpCq: 1 R: Extra0Reg.
 	jump4 := self JumpAbove: 0.
-	self MoveR: Extra0Reg R: ClassReg.
-	self LogicalShiftLeftCq: 3 R: ClassReg.
-	self AddCq: 1 R: ClassReg.
-	self MoveR: ClassReg R: ReceiverResultReg.
+	self MoveR: SendNumArgsReg R: Extra0Reg.
+	self LogicalShiftLeftCq: 3 R: Extra0Reg.
+	self AddCq: 1 R: Extra0Reg.
+	self MoveR: Extra0Reg R: ReceiverResultReg.
 	self genPrimReturn.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
@@ -5027,9 +4703,9 @@ DruidJIT >> gen_PrimitiveDivide [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: Extra1Reg
-		Rem: Extra0Reg.
-	self CmpCq: 0 R: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: Extra1Reg.
+	self CmpCq: 0 R: Extra1Reg.
 	jump4 := self JumpNonZero: 0.
 	self
 		DivR: SendNumArgsReg
@@ -6909,27 +6585,31 @@ DruidJIT >> gen_PrimitiveMod [
 	self
 		DivR: SendNumArgsReg
 		R: ClassReg
-		Quo: Extra0Reg
-		Rem: ClassReg.
+		Quo: ClassReg
+		Rem: Extra0Reg.
 	self CmpCq: 0 R: SendNumArgsReg.
 	jump3 := self JumpGreaterOrEqual: 0.
-	self CmpCq: 0 R: ClassReg.
+	self CmpCq: 0 R: Extra0Reg.
 	jump4 := self JumpLessOrEqual: 0.
-	self AddR: SendNumArgsReg R: ClassReg.
+	self AddR: SendNumArgsReg R: Extra0Reg.
+	self MoveR: Extra0Reg R: ClassReg.
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
+	self MoveR: Extra0Reg R: ClassReg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
-	self CmpCq: 0 R: ClassReg.
+	self CmpCq: 0 R: Extra0Reg.
 	jump3 := self JumpGreaterOrEqual: 0.
-	self AddR: SendNumArgsReg R: ClassReg.
+	self AddR: SendNumArgsReg R: Extra0Reg.
+	self MoveR: Extra0Reg R: ClassReg.
 	jump4 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
+	self MoveR: Extra0Reg R: ClassReg.
 	currentBlock := self Label.
 	jump4 jmpTarget: currentBlock.
 	currentBlock := self Label.
@@ -7226,37 +6906,37 @@ DruidJIT >> gen_PrimitiveNewWithArg [
 	self
 		DivR: Extra0Reg
 		R: ClassReg
-		Quo: Extra2Reg
-		Rem: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	s85 := 4.
-	self MoveCq: s85 R: Extra0Reg.
-	self SubR: SendNumArgsReg R: Extra0Reg.
-	self AndCq: 3 R: Extra0Reg.
-	self AddR: Extra0Reg R: Extra1Reg.
+	self MoveCq: s85 R: ClassReg.
+	self SubR: SendNumArgsReg R: ClassReg.
+	self AndCq: 3 R: ClassReg.
+	self AddR: ClassReg R: Extra1Reg.
 	self MoveCq: s78 R: ClassReg.
-	self MoveR: Extra2Reg R: SendNumArgsReg.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	jump8 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
 	s94 := 0.
 	self CmpCq: 16 R: Extra1Reg.
 	jump3 := self JumpNonZero: 0.
-	self MoveR: SendNumArgsReg R: Extra0Reg.
-	self AddCq: 7 R: Extra0Reg.
+	self MoveR: SendNumArgsReg R: ClassReg.
+	self AddCq: 7 R: ClassReg.
 	s98 := 8.
-	self MoveCq: s98 R: Extra2Reg.
+	self MoveCq: s98 R: Extra0Reg.
 	self
-		DivR: Extra2Reg
-		R: Extra0Reg
-		Quo: Extra0Reg
-		Rem: Extra2Reg.
+		DivR: Extra0Reg
+		R: ClassReg
+		Quo: Extra2Reg
+		Rem: Extra0Reg.
 	s101 := 8.
-	self MoveCq: s101 R: Extra2Reg.
-	self SubR: SendNumArgsReg R: Extra2Reg.
-	self AndCq: 7 R: Extra2Reg.
-	self AddR: Extra2Reg R: Extra1Reg.
+	self MoveCq: s101 R: Extra0Reg.
+	self SubR: SendNumArgsReg R: Extra0Reg.
+	self AndCq: 7 R: Extra0Reg.
+	self AddR: Extra0Reg R: Extra1Reg.
 	self MoveCq: s94 R: ClassReg.
-	self MoveR: Extra0Reg R: SendNumArgsReg.
+	self MoveR: Extra2Reg R: SendNumArgsReg.
 	jump12 := self Jump: 0.
 	currentBlock := self Label.
 	jump3 jmpTarget: currentBlock.
@@ -7572,9 +7252,8 @@ DruidJIT >> gen_PrimitiveQuo [
 	self
 		DivR: ClassReg
 		R: Extra0Reg
-		Quo: ClassReg
-		Rem: Extra0Reg.
-	self MoveR: ClassReg R: Extra0Reg.
+		Quo: Extra0Reg
+		Rem: ClassReg.
 	currentBlock := self Label.
 	jump5 jmpTarget: currentBlock.
 	self MoveR: Extra0Reg R: SendNumArgsReg.
@@ -9379,12 +9058,13 @@ DruidJIT >> gen_PrimitiveStringAt [
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	s73 := 0.
-	self MoveCq: s73 R: Extra2Reg.
+	self MoveCq: s73 R: SendNumArgsReg.
 	jump6 := self Jump: 0.
 	currentBlock := self Label.
 	jump9 jmpTarget: currentBlock.
 	self CmpCq: 2 R: Extra1Reg.
 	jump9 := self JumpAboveOrEqual: 0.
+	self MoveR: Extra2Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
 	jump7 := self Jump: 0.
 	currentBlock := self Label.
@@ -9434,8 +9114,8 @@ DruidJIT >> gen_PrimitiveStringAt [
 	self MoveM64: 24 r: ClassReg R: Extra0Reg.
 	self ArithmeticShiftRightCq: 3 R: Extra0Reg.
 	self AndCq: 16rFFFF R: Extra0Reg.
+	self MoveR: Extra0Reg R: SendNumArgsReg.
 	self MoveR: Extra2Reg R: ClassReg.
-	self MoveR: Extra0Reg R: Extra2Reg.
 	currentBlock := self Label.
 	jump6 jmpTarget: currentBlock.
 	jump7 jmpTarget: currentBlock.
@@ -9449,7 +9129,7 @@ DruidJIT >> gen_PrimitiveStringAt [
 	jump6 := self JumpZero: 0.
 	currentBlock := self Label.
 	jump7 jmpTarget: currentBlock.
-	self SubR: Extra2Reg R: ClassReg.
+	self SubR: SendNumArgsReg R: ClassReg.
 	self CmpCq: 24 R: Extra1Reg.
 	jump7 := self JumpAboveOrEqual: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
@@ -9459,7 +9139,7 @@ DruidJIT >> gen_PrimitiveStringAt [
 	self CmpR: ClassReg R: Extra3Reg.
 	jump4 := self JumpAbove: 0.
 	self MoveMw: 8 r: SPReg R: Extra3Reg.
-	self AddR: Extra2Reg R: Extra3Reg.
+	self AddR: SendNumArgsReg R: Extra3Reg.
 	self MoveR: Extra3Reg Mw: 8 r: SPReg.
 	self CmpCq: 5 R: Extra1Reg.
 	jump9 := self JumpAbove: 0.
@@ -10018,9 +9698,7 @@ DruidJIT >> gen_PushConstantNilBytecode [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: objectMemory nilObject R: t0.
 	self ssPushRegister: t0.
@@ -10077,9 +9755,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode0 [
 
 	| t0 s4 currentBlock live s3 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10095,9 +9771,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode1 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10114,9 +9788,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode10 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10133,9 +9805,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode11 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10152,9 +9822,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode12 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10171,9 +9839,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode13 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10190,9 +9856,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode14 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10209,9 +9873,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode15 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10228,9 +9890,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode16 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10247,9 +9907,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode17 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10266,9 +9924,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode18 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10285,9 +9941,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode19 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10304,9 +9958,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode2 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10323,9 +9975,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode20 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10342,9 +9992,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode21 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10361,9 +10009,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode22 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10380,9 +10026,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode23 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10399,9 +10043,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode24 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10418,9 +10060,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode25 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10437,9 +10077,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode26 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10456,9 +10094,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode27 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10475,9 +10111,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode28 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10494,9 +10128,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode29 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10513,9 +10145,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode3 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10532,9 +10162,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode30 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10551,9 +10179,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode31 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10570,9 +10196,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode4 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10589,9 +10213,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode5 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10608,9 +10230,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode6 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10627,9 +10247,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode7 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10646,9 +10264,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode8 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10665,9 +10281,7 @@ DruidJIT >> gen_PushLiteralConstantBytecode9 [
 
 	| s3 t0 s4 currentBlock live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10684,13 +10298,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode0 [
 
 	| jump1 s3 s28 t1 jump3 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10736,13 +10346,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode1 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10789,13 +10395,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode10 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10842,13 +10444,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode11 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10895,13 +10493,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode12 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -10948,13 +10542,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode13 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11001,13 +10591,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode14 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11054,13 +10640,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode15 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11107,13 +10689,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode2 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11160,13 +10738,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode3 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11213,13 +10787,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode4 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11266,13 +10836,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode5 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11319,13 +10885,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode6 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11372,13 +10934,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode7 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11425,13 +10983,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode8 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11478,13 +11032,9 @@ DruidJIT >> gen_PushLiteralVariable16CasesBytecode9 [
 
 	| jump1 s3 t1 jump3 s5 s30 currentBlock t0 jump2 s4 s29 b233 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	self genMoveConstant: methodObj R: t0.
 	s3 := LiteralStart.
@@ -11531,17 +11081,11 @@ DruidJIT >> gen_PushNewArrayBytecode [
 
 	| s6 s50 s33 s46 s4 s29 s38 b109 s2 s27 currentBlock s20 s19 s42 s7 t1 s34 jump1 s47 s17 s10 live s56 s45 s3 s28 s30 s21 t2 s52 s8 s35 t0 s11 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
 	s2 := byte1.
 	s3 := s2 bitAnd: 127.
@@ -11662,9 +11206,7 @@ DruidJIT >> gen_PushReceiverBytecode [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11678,9 +11220,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode0 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11694,9 +11234,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode1 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11710,9 +11248,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode10 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11726,9 +11262,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode11 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11742,9 +11276,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode12 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11758,9 +11290,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode13 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11774,9 +11304,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode14 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11790,9 +11318,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode15 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11806,9 +11332,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode2 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11822,9 +11346,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode3 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11838,9 +11360,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode4 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11854,9 +11374,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode5 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11870,9 +11388,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode6 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11886,9 +11402,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode7 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11902,9 +11416,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode8 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11918,9 +11430,7 @@ DruidJIT >> gen_PushReceiverVariableBytecode9 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -11934,17 +11444,45 @@ DruidJIT >> gen_PushRemoteTempLongBytecode [
 
 	| t0 s32 s4 s2 currentBlock t1 live s5 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
 	s2 := byte1.
 	(self simStackTempAt: byte2) copyToReg: t0.
-
+	s4 := TempVectReadBarrier.
+	s4 ifTrue: [
+		| jump3 jump1 b199 jump4 jump2 |
+		self MoveM64: 0 r: t0 R: t1.
+		self AndCq: 16r3FFFF7 R: t1.
+		self CmpCq: 0 R: t1.
+		jump1 := self JumpNonZero: 0.
+		self MoveM64: 8 r: t0 R: t1.
+		b199 := self Label.
+		self MoveR: t1 R: t0.
+		self AndCq: 7 R: t0.
+		self CmpCq: 0 R: t0.
+		jump2 := self JumpNonZero: 0.
+		self MoveM64: 0 r: t1 R: t0.
+		self AndCq: 16r3FFFF7 R: t0.
+		self CmpCq: 0 R: t0.
+		jump3 := self JumpNonZero: 0.
+		self MoveM64: 8 r: t1 R: t0.
+		self MoveR: t0 R: t1.
+		jump4 := self Jump: b199.
+		currentBlock := self Label.
+		jump2 jmpTarget: currentBlock.
+		jump3 jmpTarget: currentBlock.
+		self MoveR: t1 R: t0.
+		jump3 := self Jump: 0.
+		currentBlock := self Label.
+		jump1 jmpTarget: currentBlock.
+		currentBlock := self Label.
+		jump3 jmpTarget: currentBlock.
+		s32 := s2 << 3.
+		self AddCq: s32 R: t0.
+		self ssPushBase: t0 offset: 8.
+		^ 0 ].
 	s32 := s2 << 3.
 	self AddCq: s32 R: t0.
 	self ssPushBase: t0 offset: 8.
@@ -11957,9 +11495,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode0 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 0) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -11972,9 +11508,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode1 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 1) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -11987,9 +11521,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode10 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 10) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12002,9 +11534,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode11 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 11) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12017,9 +11547,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode2 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 2) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12032,9 +11560,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode3 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 3) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12047,9 +11573,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode4 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 4) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12062,9 +11586,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode5 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 5) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12077,9 +11599,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode6 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 6) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12092,9 +11612,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode7 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 7) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12107,9 +11625,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode8 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 8) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12122,9 +11638,7 @@ DruidJIT >> gen_PushTemporaryVariableBytecode9 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self simStackTempAt: 9) copyToReg: t0.
 	self ssPushRegister: t0.
@@ -12149,9 +11663,7 @@ DruidJIT >> gen_ReturnNil [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: objectMemory nilObject R: t0.
 	self MoveR: t0 R: ReceiverResultReg.
@@ -12165,9 +11677,7 @@ DruidJIT >> gen_ReturnNilFromBlock [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self genMoveConstant: objectMemory nilObject R: t0.
 	self MoveR: t0 R: ReceiverResultReg.
@@ -12181,9 +11691,7 @@ DruidJIT >> gen_ReturnReceiver [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
@@ -12198,9 +11706,7 @@ DruidJIT >> gen_ReturnTopFromBlock [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
@@ -12215,9 +11721,7 @@ DruidJIT >> gen_ReturnTopFromMethod [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
@@ -12246,10 +11750,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode0 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 0
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 0 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12263,10 +11764,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode1 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 1
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 1 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12280,10 +11778,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode10 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 10
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 10 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12297,10 +11792,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode11 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 11
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 11 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12314,10 +11806,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode12 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 12
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 12 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12331,10 +11820,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode13 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 13
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 13 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12348,10 +11834,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode14 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 14
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 14 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12365,10 +11848,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode15 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 15
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 15 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12382,10 +11862,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode2 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 2
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 2 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12399,10 +11876,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode3 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 3
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 3 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12416,10 +11890,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode4 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 4
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 4 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12433,10 +11904,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode5 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 5
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 5 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12450,10 +11918,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode6 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 6
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 6 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12467,10 +11932,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode7 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 7
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 7 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12484,10 +11946,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode8 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 8
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 8 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12501,10 +11960,7 @@ DruidJIT >> gen_SendLiteralSelector0ArgsBytecode9 [
 	live := 0.
 	self ssFlushStackExceptTop: 1.
 	self marshallSendArgumentsNoPush: 0.
-	self
-		genMarshalledSendNoPush: 9
-		numArgs: 0
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 9 numArgs: 0 sendTable: ordinarySendTrampolines.
 	self ssPop: 1 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12518,10 +11974,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode0 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 0
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 0 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12535,10 +11988,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode1 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 1
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 1 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12552,10 +12002,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode10 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 10
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 10 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12569,10 +12016,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode11 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 11
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 11 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12586,10 +12030,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode12 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 12
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 12 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12603,10 +12044,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode13 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 13
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 13 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12620,10 +12058,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode14 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 14
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 14 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12637,10 +12072,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode15 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 15
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 15 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12654,10 +12086,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode2 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 2
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 2 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12671,10 +12100,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode3 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 3
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 3 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12688,10 +12114,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode4 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 4
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 4 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12705,10 +12128,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode5 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 5
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 5 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12722,10 +12142,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode6 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 6
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 6 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12739,10 +12156,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode7 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 7
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 7 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12756,10 +12170,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode8 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 8
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 8 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12773,10 +12184,7 @@ DruidJIT >> gen_SendLiteralSelector1ArgBytecode9 [
 	live := 0.
 	self ssFlushStackExceptTop: 2.
 	self marshallSendArgumentsNoPush: 1.
-	self
-		genMarshalledSendNoPush: 9
-		numArgs: 1
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 9 numArgs: 1 sendTable: ordinarySendTrampolines.
 	self ssPop: 2 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12790,10 +12198,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode0 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 0
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 0 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12807,10 +12212,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode1 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 1
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 1 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12824,10 +12226,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode10 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 10
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 10 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12841,10 +12240,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode11 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 11
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 11 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12858,10 +12254,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode12 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 12
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 12 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12875,10 +12268,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode13 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 13
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 13 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12892,10 +12282,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode14 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 14
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 14 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12909,10 +12296,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode15 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 15
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 15 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12926,10 +12310,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode2 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 2
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 2 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12943,10 +12324,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode3 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 3
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 3 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12960,10 +12338,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode4 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 4
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 4 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12977,10 +12352,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode5 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 5
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 5 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -12994,10 +12366,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode6 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 6
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 6 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -13011,10 +12380,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode7 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 7
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 7 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -13028,10 +12394,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode8 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 8
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 8 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -13045,10 +12408,7 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode9 [
 	live := 0.
 	self ssFlushStackExceptTop: 3.
 	self marshallSendArgumentsNoPush: 2.
-	self
-		genMarshalledSendNoPush: 9
-		numArgs: 2
-		sendTable: ordinarySendTrampolines.
+	self genMarshalledSendNoPush: 9 numArgs: 2 sendTable: ordinarySendTrampolines.
 	self ssPop: 3 popSpilled: false.
 	self ssPushRegister: ReceiverResultReg.
 	^ 0
@@ -13058,32 +12418,30 @@ DruidJIT >> gen_SendLiteralSelector2ArgsBytecode9 [
 DruidJIT >> gen_ShortConditionalJumpFalse0 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 2.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 2.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13094,32 +12452,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse0 [
 DruidJIT >> gen_ShortConditionalJumpFalse1 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 3.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 3.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13130,32 +12486,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse1 [
 DruidJIT >> gen_ShortConditionalJumpFalse2 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 4.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 4.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13166,32 +12520,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse2 [
 DruidJIT >> gen_ShortConditionalJumpFalse3 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 5.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 5.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13202,32 +12554,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse3 [
 DruidJIT >> gen_ShortConditionalJumpFalse4 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 6.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 6.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13238,32 +12588,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse4 [
 DruidJIT >> gen_ShortConditionalJumpFalse5 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 7.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 7.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13274,32 +12622,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse5 [
 DruidJIT >> gen_ShortConditionalJumpFalse6 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 8.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 8.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13310,32 +12656,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse6 [
 DruidJIT >> gen_ShortConditionalJumpFalse7 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory falseObject.
+	s4 := objectMemory falseObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 9.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 9.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory trueObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory trueObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13346,32 +12690,30 @@ DruidJIT >> gen_ShortConditionalJumpFalse7 [
 DruidJIT >> gen_ShortConditionalJumpTrue0 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 2.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 2.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13382,32 +12724,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue0 [
 DruidJIT >> gen_ShortConditionalJumpTrue1 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 3.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 3.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13418,32 +12758,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue1 [
 DruidJIT >> gen_ShortConditionalJumpTrue2 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 4.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 4.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13454,32 +12792,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue2 [
 DruidJIT >> gen_ShortConditionalJumpTrue3 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 5.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 5.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13490,32 +12826,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue3 [
 DruidJIT >> gen_ShortConditionalJumpTrue4 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 6.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 6.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13526,32 +12860,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue4 [
 DruidJIT >> gen_ShortConditionalJumpTrue5 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 7.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 7.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13562,32 +12894,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue5 [
 DruidJIT >> gen_ShortConditionalJumpTrue6 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 8.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 8.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13598,32 +12928,30 @@ DruidJIT >> gen_ShortConditionalJumpTrue6 [
 DruidJIT >> gen_ShortConditionalJumpTrue7 [
 	"AutoGenerated by Druid"
 
-	| jump1 s10 s8 s5 s2 currentBlock s12 t0 jump2 live s9 |
+	| jump1 s8 currentBlock t0 s7 s4 jump2 s11 live s9 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	self annotateBytecode: self Label.
 	(self ssValue: 0) copyToReg: t0.
 	self ssPop: 1 popSpilled: true.
-	s5 := objectMemory trueObject.
+	s4 := objectMemory trueObject.
 	self ssFlushStackExceptTop: 0.
-	self CmpCq: s5 R: t0.
+	self CmpCq: s4 R: t0.
 	jump1 := self JumpNonZero: 0.
-	s8 := bytecodePC.
-	s9 := s8 + 9.
-	self Jump: (self ensureFixupAt: s9).
+	s7 := bytecodePC.
+	s8 := s7 + 9.
+	self Jump: (self ensureFixupAt: s8).
 	deadCode := true.
 	jump2 := self Jump: 0.
 	deadCode := false.
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
-	s12 := objectMemory falseObject.
-	self CmpCq: s12 R: t0.
+	s11 := objectMemory falseObject.
+	self CmpCq: s11 R: t0.
 	jump1 := self JumpZero: 0.
 	self MoveR: t0 R: TempReg.
 	self CallRT: ceSendMustBeBooleanTrampoline.
+	self annotateBytecode: self Label.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
 	jump1 jmpTarget: currentBlock.
@@ -13746,21 +13074,14 @@ DruidJIT >> gen_ShortUnconditionalJump7 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -13776,6 +13097,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 8 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -13805,53 +13127,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 8 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -13859,21 +13144,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode0 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -13889,6 +13167,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 16 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -13918,53 +13197,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 16 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -13972,21 +13214,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode1 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14002,6 +13237,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 24 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14031,53 +13267,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 24 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14085,21 +13284,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode2 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14115,6 +13307,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 32 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14144,53 +13337,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 32 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14198,21 +13354,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode3 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14228,6 +13377,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 40 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14257,53 +13407,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 40 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14311,21 +13424,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode4 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14341,6 +13447,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 48 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14370,53 +13477,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 48 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14424,21 +13494,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode5 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14454,6 +13517,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 56 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14483,53 +13547,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 56 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14537,21 +13564,14 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode6 [
 DruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 	"AutoGenerated by Druid"
 
-	| jump5 s24 s46 s16 jump3 s29 jump1 t1 s2 currentBlock s19 s27 jump6 live jump4 jump2 t2 jump7 t0 s48 |
+	| jump1 jump7 s19 s16 t1 jump6 jump3 currentBlock s24 t0 s27 jump2 jump5 s29 t2 live jump4 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
 	self ensureReceiverResultRegContainsSelf.
 	self MoveR: ReceiverResultReg R: t0.
 	(self ssValue: 0) copyToReg: t1.
@@ -14567,6 +13587,7 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	self ssPop: 1 popSpilled: true.
+	self MoveR: t1 M64: 64 r: t0.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
@@ -14596,53 +13617,16 @@ DruidJIT >> gen_StoreAndPopReceiverVariableBytecode7 [
 	self CmpCq: 0 R: t2.
 	jump7 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
-	currentBlock := self Label.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump7 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump6 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump5 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump4 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s46 := objectMemory trueObject.
-	self CmpCq: s46 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s48 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s48 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump7 jmpTarget: currentBlock.
-	jump6 jmpTarget: currentBlock.
-	jump5 jmpTarget: currentBlock.
-	jump4 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	self MoveR: t1 M64: 64 r: t0.
 	currentBlock := self Label.
 	jump2 jmpTarget: currentBlock.
+	jump1 jmpTarget: currentBlock.
+	jump3 jmpTarget: currentBlock.
+	jump4 jmpTarget: currentBlock.
+	jump5 jmpTarget: currentBlock.
+	jump6 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	^ 0
 ]
 
@@ -14770,9 +13754,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode0 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 0.
@@ -14787,9 +13769,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode1 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 1.
@@ -14804,9 +13784,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode2 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 2.
@@ -14821,9 +13799,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode3 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 3.
@@ -14838,9 +13814,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode4 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 4.
@@ -14855,9 +13829,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode5 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 5.
@@ -14872,9 +13844,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode6 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 6.
@@ -14889,9 +13859,7 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode7 [
 
 	| live currentBlock t0 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
 	(self ssValue: 0) copyToReg: t0.
 	self ssFlushUpThroughTemporaryVariable: 7.
@@ -14904,117 +13872,154 @@ DruidJIT >> gen_StoreAndPopTemporaryVariableBytecode7 [
 DruidJIT >> gen_StoreRemoteTempLongBytecode [
 	"AutoGenerated by Druid"
 
-	| s6 s79 jump5 s46 jump3 s38 jump8 jump1 s75 t1 s2 currentBlock s51 s49 jump6 s73 jumpNext live s5 jumpTrue s3 t2 jump2 jump7 t0 s41 |
+	| jump5 s33 s4 jump3 s44 jump8 s2 t1 currentBlock s49 jump1 jumpNext jump6 live s5 jumpTrue s54 jump2 t2 s52 jump7 t0 s41 |
 	live := 0.
-	t0 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t0 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t0).
-	t1 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t1 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t1).
-	t2 := self
-		      allocateRegNotConflictingWith: live
-		      ifNone: [ ^ self unknownBytecode ].
+	t2 := self allocateRegNotConflictingWith: live ifNone: [ ^ self unknownBytecode ].
 	live := live bitOr: (self registerMaskFor: t2).
-
-	s3 := byte1.
+	s2 := byte1.
 	(self simStackTempAt: byte2) copyToReg: t0.
-
+	s4 := TempVectReadBarrier.
+	s4 ifTrue: [
+		| jump1 jumpNext jump6 jump3 b366 jump5 jumpTrue jump2 jump8 jump7 jump4 |
+		self MoveM64: 0 r: t0 R: t1.
+		self AndCq: 16r3FFFF7 R: t1.
+		self CmpCq: 0 R: t1.
+		jump1 := self JumpNonZero: 0.
+		self MoveM64: 8 r: t0 R: t1.
+		b366 := self Label.
+		self MoveR: t1 R: t0.
+		self AndCq: 7 R: t0.
+		self CmpCq: 0 R: t0.
+		jump2 := self JumpNonZero: 0.
+		self MoveM64: 0 r: t1 R: t0.
+		self AndCq: 16r3FFFF7 R: t0.
+		self CmpCq: 0 R: t0.
+		jump3 := self JumpNonZero: 0.
+		self MoveM64: 8 r: t1 R: t0.
+		self MoveR: t0 R: t1.
+		jump4 := self Jump: b366.
+		currentBlock := self Label.
+		jump2 jmpTarget: currentBlock.
+		jump3 jmpTarget: currentBlock.
+		self MoveR: t1 R: t0.
+		jump3 := self Jump: 0.
+		currentBlock := self Label.
+		jump1 jmpTarget: currentBlock.
+		currentBlock := self Label.
+		jump3 jmpTarget: currentBlock.
+		(self ssValue: 0) copyToReg: t1.
+		s33 := s2 << 3.
+		self MoveR: t0 R: t2.
+		self AddCq: s33 R: t2.
+		self MoveR: t1 M64: 8 r: t2.
+		self MoveR: t0 R: t2.
+		self AndCq: 7 R: t2.
+		self ssFlushStackExceptTop: 0.
+		self CmpCq: 0 R: t2.
+		jump3 := self JumpNonZero: 0.
+		s41 := objectMemory getMemoryMap getSpaceMaskToUse.
+		self MoveR: t0 R: t2.
+		self AndCq: s41 R: t2.
+		s44 := objectMemory getMemoryMap getOldSpaceMask.
+		self CmpCq: s44 R: t2.
+		jump1 := self JumpNonZero: 0.
+		self MoveR: t1 R: t2.
+		self AndCq: 7 R: t2.
+		self CmpCq: 0 R: t2.
+		jump2 := self JumpNonZero: 0.
+		s49 := objectMemory getMemoryMap getSpaceMaskToUse.
+		self MoveR: t1 R: t2.
+		self AndCq: s49 R: t2.
+		s52 := objectMemory getMemoryMap getNewSpaceMask.
+		self CmpCq: s52 R: t2.
+		jump5 := self JumpNonZero: 0.
+		s54 := objectMemory getMemoryMap getNewSpaceStart.
+		self CmpCq: s54 R: t1.
+		jumpTrue := self JumpAboveOrEqual: 0.
+		self MoveCq: 0 R: t1.
+		jumpNext := self Jump: 0.
+		jumpTrue jmpTarget: self Label.
+		self MoveCq: 1 R: t1.
+		jumpNext jmpTarget: self Label.
+		self CmpCq: 1 R: t1.
+		jump6 := self JumpNonZero: 0.
+		self MoveM64: 0 r: t0 R: t2.
+		self LogicalShiftRightCq: 29 R: t2.
+		self AndCq: 1 R: t2.
+		self CmpCq: 0 R: t2.
+		jump7 := self JumpNonZero: 0.
+		self MoveR: t0 R: TempReg.
+		backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
+		self annotateBytecode: self Label.
+		jump8 := self Jump: 0.
+		currentBlock := self Label.
+		jump5 jmpTarget: currentBlock.
+		currentBlock := self Label.
+		jump3 jmpTarget: currentBlock.
+		jump1 jmpTarget: currentBlock.
+		jump2 jmpTarget: currentBlock.
+		jump6 jmpTarget: currentBlock.
+		jump7 jmpTarget: currentBlock.
+		jump8 jmpTarget: currentBlock.
+		^ 0 ].
 	(self ssValue: 0) copyToReg: t1.
+	s33 := s2 << 3.
+	self MoveR: t0 R: t2.
+	self AddCq: s33 R: t2.
+	self MoveR: t1 M64: 8 r: t2.
 	self MoveR: t0 R: t2.
 	self AndCq: 7 R: t2.
 	self ssFlushStackExceptTop: 0.
-
-	s79 := s3 << 3.
-	self AddCq: s79 R: t0.
-	self MoveR: t1 M64: 8 r: t0.
-
-
 	self CmpCq: 0 R: t2.
-	jump1 := self JumpNonZero: 0.
-	s38 := objectMemory getMemoryMap getSpaceMaskToUse.
+	jump8 := self JumpNonZero: 0.
+	s41 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t0 R: t2.
-	self AndCq: s38 R: t2.
-	s41 := objectMemory getMemoryMap getOldSpaceMask.
-	self CmpCq: s41 R: t2.
-	jump3 := self JumpNonZero: 0.
+	self AndCq: s41 R: t2.
+	s44 := objectMemory getMemoryMap getOldSpaceMask.
+	self CmpCq: s44 R: t2.
+	jump7 := self JumpNonZero: 0.
 	self MoveR: t1 R: t2.
 	self AndCq: 7 R: t2.
 	self CmpCq: 0 R: t2.
-	jump2 := self JumpNonZero: 0.
-	s46 := objectMemory getMemoryMap getSpaceMaskToUse.
-	self MoveR: t1 R: t2.
-	self AndCq: s46 R: t2.
-	s49 := objectMemory getMemoryMap getNewSpaceMask.
-	self CmpCq: s49 R: t2.
 	jump6 := self JumpNonZero: 0.
-	s51 := objectMemory getMemoryMap getNewSpaceStart.
+	s49 := objectMemory getMemoryMap getSpaceMaskToUse.
 	self MoveR: t1 R: t2.
-	self CmpCq: s51 R: t2.
+	self AndCq: s49 R: t2.
+	s52 := objectMemory getMemoryMap getNewSpaceMask.
+	self CmpCq: s52 R: t2.
+	jump2 := self JumpNonZero: 0.
+	s54 := objectMemory getMemoryMap getNewSpaceStart.
+	self CmpCq: s54 R: t1.
 	jumpTrue := self JumpAboveOrEqual: 0.
-	self MoveCq: 0 R: t2.
+	self MoveCq: 0 R: t1.
 	jumpNext := self Jump: 0.
 	jumpTrue jmpTarget: self Label.
-	self MoveCq: 1 R: t2.
+	self MoveCq: 1 R: t1.
 	jumpNext jmpTarget: self Label.
-	self CmpCq: 1 R: t2.
-	jump7 := self JumpNonZero: 0.
+	self CmpCq: 1 R: t1.
+	jump1 := self JumpNonZero: 0.
 	self MoveM64: 0 r: t0 R: t2.
 	self LogicalShiftRightCq: 29 R: t2.
 	self AndCq: 1 R: t2.
 	self CmpCq: 0 R: t2.
-	jump8 := self JumpNonZero: 0.
+	jump3 := self JumpNonZero: 0.
 	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-
+	backEnd saveAndRestoreLinkRegAround: [ self CallRT: ceStoreCheckTrampoline ].
 	self annotateBytecode: self Label.
-
 	jump5 := self Jump: 0.
 	currentBlock := self Label.
+	jump2 jmpTarget: currentBlock.
+	currentBlock := self Label.
+	jump8 jmpTarget: currentBlock.
+	jump7 jmpTarget: currentBlock.
 	jump6 jmpTarget: currentBlock.
-	currentBlock := self Label.
 	jump1 jmpTarget: currentBlock.
 	jump3 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
 	jump5 jmpTarget: currentBlock.
-	self MoveM64: 0 r: t0 R: t2.
-	self LogicalShiftRightCq: 29 R: t2.
-	self AndCq: 1 R: t2.
-	self CmpCq: 0 R: t2.
-	jump5 := self JumpNonZero: 0.
-	self TstCq: 7 R: t1.
-	jump8 := self JumpNonZero: 0.
-	self CmpCq: 16r20000000000 R: t0.
-	jump7 := self JumpLess: 0.
-	self CmpCq: 16r20000000000 R: t1.
-	jump2 := self JumpGreaterOrEqual: 0.
-	self genMoveConstant: objectMemory nilObject R: t2.
-	self CmpR: t2 R: t1.
-	jump3 := self JumpBelow: 0.
-	s73 := objectMemory trueObject.
-	self CmpCq: s73 R: t1.
-	jump1 := self JumpBelowOrEqual: 0.
-	currentBlock := self Label.
-	jump3 jmpTarget: currentBlock.
-	s75 := objectMemory getMemoryMap getNewSpaceStart.
-	self CmpCq: s75 R: t1.
-	jump3 := self JumpBelow: 0.
-	self MoveR: t0 R: TempReg.
-	backEnd saveAndRestoreLinkRegAround: [
-		self CallRT: ceStoreCheckTrampoline ].
-	currentBlock := self Label.
-	jump5 jmpTarget: currentBlock.
-	jump8 jmpTarget: currentBlock.
-	jump7 jmpTarget: currentBlock.
-	jump2 jmpTarget: currentBlock.
-	jump1 jmpTarget: currentBlock.
-	jump3 jmpTarget: currentBlock.
-	
 	^ 0
 ]
 
