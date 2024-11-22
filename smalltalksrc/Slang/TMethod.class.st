@@ -2718,6 +2718,20 @@ TMethod >> renameLabelsUsing: aDictionary [
 ]
 
 { #category : 'transformations' }
+TMethod >> renameVarInDeclarations: varName with: newName [
+
+	| oldDeclaration |
+	(declarations keys includes: varName) ifFalse: [ ^ self ].
+	oldDeclaration := declarations at: varName.
+	"new declaration"
+	declarations at: newName put: (oldDeclaration
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
+	declarations removeKey: varName
+]
+
+{ #category : 'transformations' }
 TMethod >> renameVarInReturnType: varName with: newName [
 	(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
 			ifTrue: [
