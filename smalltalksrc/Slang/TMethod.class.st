@@ -448,55 +448,27 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 			 (VMStructType allSubclasses collect: [ :class | class name ])
 			 in: aCodeGen
 			 collect: changedVariables).
-
+	changedVariables isEmpty ifTrue: [ ^ self ].
+	"no need to changed the locals of the TMethod, if the cache is nil they are retrieve from the parseTree which we will update"
+	cachedLocals := nil.
 	changedVariables do: [ :varName |
-		self locals: (self locals collect: [ :e |
-				 e ~= varName
-					 ifTrue: [ e ]
-					 ifFalse: [ #_ , varName ] ]).
+		| newName |
+		newName := '_' , varName.
 		self args: (self args collect: [ :e |
 				 e ~= varName
 					 ifTrue: [ e ]
-					 ifFalse: [ #_ , varName ] ]).
+					 ifFalse: [ newName ] ]).
+		self renameVarInDeclarations: varName with: newName.
+		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+		self renameVarInReturnType: varName with: newName.
 
 		"update all the parseTree"
 		self parseTree nodesDo: [ :node |
 			node isStatementList ifTrue: [
-				node locals: (node locals collect: [ :e |
-						 e ~= varName
-							 ifTrue: [ e ]
-							 ifFalse: [ #_ , varName ] ]).
-				node setArguments: (node arguments collect: [ :e |
-						 e ~= varName
-							 ifTrue: [ e ]
-							 ifFalse: [ #_ , varName ] ]) ].
+				node renameLocalOrArg: varName with: newName ].
 
 			"rare case but it can happen, see addressIsInFixups:"
-			(node isSend and: [
-				 (node selector beginsWith: #cCode:) and: [
-					 (node arguments first value findString: varName) > 0 ] ])
-				ifTrue: [
-					node arguments first setValue: (node arguments first value
-							 copyReplaceAll: varName
-							 with: #_ , varName
-							 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ] ].
-		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
-		(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
-			ifTrue: [
-				returnType := returnType
-					              copyReplaceAll: varName
-					              with: #_ , varName
-					              tokenish: [ :ch |
-					              ch = $_ or: [ ch isAlphaNumeric ] ] ].
-		(declarations keys includes: varName) ifTrue: [
-			| oldDeclaration |
-			oldDeclaration := declarations at: varName.
-			"new declaration"
-			declarations at: #_ , varName put: (oldDeclaration
-					 copyReplaceAll: varName
-					 with: #_ , varName
-					 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
-			declarations removeKey: varName ] ]
+			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ]
 ]
 
 { #category : 'transformations' }
@@ -2743,6 +2715,17 @@ TMethod >> renameLabelsUsing: aDictionary [
 			[node setLabel: (aDictionary at: node label)].
 		(node isLabel and: [aDictionary includesKey: node label]) ifTrue:
 			[node setLabel: (aDictionary at: node label)]]
+]
+
+{ #category : 'transformations' }
+TMethod >> renameVarInReturnType: varName with: newName [
+	(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
+			ifTrue: [
+				returnType := returnType
+					              copyReplaceAll: varName
+					              with: newName
+					              tokenish: [ :ch |
+					              ch = $_ or: [ ch isAlphaNumeric ] ] ]
 ]
 
 { #category : 'inlining support' }

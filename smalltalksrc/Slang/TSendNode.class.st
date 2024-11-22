@@ -605,6 +605,17 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 ]
 
 { #category : 'transformations' }
+TSendNode >> renameVarInCCode: varName with: newVarName [
+
+	((selector beginsWith: #cCode:) and: [
+		 (arguments first value findString: varName) > 0 ]) ifTrue: [
+		arguments first setValue: (arguments first value
+				 copyReplaceAll: varName
+				 with: #_ , varName
+				 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ]
+]
+
+{ #category : 'transformations' }
 TSendNode >> replaceChild: aNode with: aReplacementNode [
 
 	receiver == aNode ifTrue: [

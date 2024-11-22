@@ -4416,9 +4416,8 @@ CCodeGenerator >> removeAssertions [
 
 { #category : 'utilities' }
 CCodeGenerator >> removeConstant: aName [
-	"Remove the given (class) variable from the code base."
-
-	constants removeKey:  aName ifAbsent: []
+	"mark the given (class) variable as already define."
+	constants at:  aName ifPresent: [ :val | val shouldBeGenerated: false ] ifAbsent: []
 ]
 
 { #category : 'utilities' }

@@ -41,7 +41,7 @@ TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globals
 
 	"all the variable has an '_' first by default except 'nil, 'self' and 'super'"
 
-	((#( #nil #super ) includes: name) or: [
+	((#( #super ) includes: name) or: [
 		 (name beginsWith: #self) or: [ name beginsWith: #cascade ] ])
 		ifTrue: [ ^ self copy ].
 
@@ -51,13 +51,14 @@ TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globals
 		^ self class new setName: name ].
 	globalsVariables do: [ :e |
 		e = name ifTrue: [ ^ self class new setName: e copy ] ].
-	^ (classVariables
-		   at: name
-		   ifAbsent: [ "the variable is local, we update its name with an _ and add it to the changedVariables collection which will change it in the locals, args, declaration and pragmas type declaration"
-			   | newName |
-			   newName := #_ , name.
-			   changedVariables add: name.
-			   ^ self class new setName: newName ]) copy
+	(classVariables
+		 at: name
+		 ifPresent: [ :replacement | replacement shouldBeGenerated ]
+		 ifAbsent: [ false ])
+		ifFalse: [ "the variable is local, we update its name with an _ and add it to the changedVariables collection which will change all its appearance in the TMethods/parseTree "
+			changedVariables add: name.
+			^ self class new setName: #_ , name ]
+		ifTrue: [ ^ classVariables at: name ]
 ]
 
 { #category : 'transformations' }

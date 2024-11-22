@@ -17,8 +17,6 @@ SLNormalizeVariablesTestClass >> methodWithReservedArgumentsName [
 	self.
 	super.
 	cascade.
-	"necessary to get a TVariableNode with a 'nil' in it, the traduction for nil is a TConstantNode except for selectors containing ifNotNil with non empty arguments or certain statements during inlining, this comportement looks like a leftover"
-	nil ifNotNil: [ :arg |  ].
 	var1.
 	var2
 ]
@@ -29,8 +27,6 @@ SLNormalizeVariablesTestClass >> methodWithReservedArgumentsName: cascade arg: a
 	self emptyMethod: self.
 	self emptyMethod: super.
 	self emptyMethod: cascade.
-	"necessary to get a TVariableNode with a 'nil' in it, the traduction for nil is a TConstantNode except for selectors containing ifNotNil with non empty arguments or certain statements during inlining, this comportement looks like a leftover"
-	self emptyMethod: [ nil ifNotNil: [ :arg |  ] ].
 	self emptyMethod: arg1
 ]
 

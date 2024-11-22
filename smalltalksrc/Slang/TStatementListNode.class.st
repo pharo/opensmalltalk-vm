@@ -630,6 +630,19 @@ TStatementListNode >> renameLabelsForInliningInto: aTMethod [
 ]
 
 { #category : 'transformations' }
+TStatementListNode >> renameLocalOrArg: varName with: newName [
+
+	locals := locals collect: [ :e |
+		          e ~= varName
+			          ifTrue: [ e ]
+			          ifFalse: [ newName ] ].
+	arguments := arguments collect: [ :e |
+		             e ~= varName
+			             ifTrue: [ e ]
+			             ifFalse: [ newName ] ]
+]
+
+{ #category : 'transformations' }
 TStatementListNode >> replaceChild: aNode with: bNode [
 
 	self statements: (statements collect: [ :node |
