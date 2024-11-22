@@ -331,7 +331,6 @@ InterpreterPlugin class >> translateInDirectory: directory doInlining: inlineFla
 	"The VM class should be nil for plugins, because there is code that conditionally checks if it is nil or not.
 	A nil VM class is assumed as a plugin context..."
 	cg := self buildCodeGeneratorForVMClass: nil.
-	cg inferTypes.
 	self pruneUnusedInterpreterPluginMethodsIn: cg.
 	cg storeCodeOnFile:  (directory / fname) fullName doInlining: inlineFlag.
 	^cg exportedPrimitiveNames asArray

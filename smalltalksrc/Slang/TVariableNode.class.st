@@ -39,26 +39,27 @@ TVariableNode >> asCASTIn: aBuilder [
 TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
 	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
 
-	"all the variable has an '_' first by default except 'nil, 'self' and 'super'"
+	"all the variable has an '_' first by default except 'self' and 'super'"
 
 	((#( #super ) includes: name) or: [
 		 (name beginsWith: #self) or: [ name beginsWith: #cascade ] ])
-		ifTrue: [ ^ self copy ].
+		ifTrue: [ ^ self ].
 
 	"don't rename variables which reference class name"
-	(classNames includes: name) ifTrue: [ ^ self copy ].
+	(classNames includes: name) ifTrue: [ ^ self ].
 	(aCodeGen isNonArgumentImplicitReceiverVariableName: name) ifTrue: [
 		^ self class new setName: name ].
 	globalsVariables do: [ :e |
-		e = name ifTrue: [ ^ self class new setName: e copy ] ].
-	(classVariables
-		 at: name
-		 ifPresent: [ :replacement | replacement shouldBeGenerated ]
-		 ifAbsent: [ false ])
-		ifFalse: [ "the variable is local, we update its name with an _ and add it to the changedVariables collection which will change all its appearance in the TMethods/parseTree "
+		e = name ifTrue: [ ^ self class new setName: e ] ].
+	classVariables
+		at: name
+		ifPresent: [ :replacement |
+			replacement shouldBeGenerated ifTrue: [ ^ replacement ].
+			"in case of library name don't redefine them"
+			^ self ]
+		ifAbsent: [ "the variable is local, we update its name with an _ and add it to the changedVariables collection which will change all its appearance in the TMethods/parseTree "
 			changedVariables add: name.
 			^ self class new setName: #_ , name ]
-		ifTrue: [ ^ classVariables at: name ]
 ]
 
 { #category : 'transformations' }
