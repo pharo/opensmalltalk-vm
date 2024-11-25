@@ -1,6 +1,17 @@
 Class {
 	#name : 'SLNormalizeVariablesTestClass',
 	#superclass : 'SlangClass',
+	#instVars : [
+		'instanceVariable1',
+		'instanceVariable2'
+	],
+	#classVars : [
+		'constant1',
+		'constant2'
+	],
+	#pools : [
+		'SLNormalizeVariablesTestSharedPoolClass'
+	],
 	#category : 'Slang-Tests',
 	#package : 'Slang-Tests'
 }
@@ -10,15 +21,24 @@ SLNormalizeVariablesTestClass >> emptyMethod: arg [
 	^ arg
 ]
 
-{ #category : 'methods-with-used-locals-and-arguments' }
-SLNormalizeVariablesTestClass >> methodWithReservedArgumentsName [
+{ #category : 'initialization' }
+SLNormalizeVariablesTestClass >> initialize [
 
-	| cascade var1 var2 |
-	self.
-	super.
-	cascade.
-	var1.
-	var2
+	super initialize.
+	instanceVar1 := 3.
+	instanceVar2 := 5
+]
+
+{ #category : 'tests-methods-referencing-struct-classes' }
+SLNormalizeVariablesTestClass >> methodReferencingStructClass [
+	SLNormalizeVariablesTestStructClass
+]
+
+{ #category : 'methods-with-globals-variables' }
+SLNormalizeVariablesTestClass >> methodWithInstancesVariables [
+
+	instanceVariable1.
+	instanceVariable2
 ]
 
 { #category : 'methods-with-used-locals-and-arguments' }
@@ -37,10 +57,14 @@ SLNormalizeVariablesTestClass >> methodWithReservedLocalsName [
 	self.
 	super.
 	cascade.
-	"necessary to get a TVariableNode with a 'nil' in it, the traduction for nil is a TConstantNode except for selectors containing ifNotNil with non empty arguments or certain statements during inlining, this comportement looks like a leftover"
-	nil ifNotNil: [ :arg |  ].
 	var1.
 	var2
+]
+
+{ #category : 'methods-with-globals-variables' }
+SLNormalizeVariablesTestClass >> methodWithSharedVariables [ 
+	constant1. 
+	constant2
 ]
 
 { #category : 'methods-with-unused-locals-and-arguments' }
@@ -78,11 +102,11 @@ SLNormalizeVariablesTestClass >> methodWithUsedAndUnusedLocalsAndArguments: arg1
 ]
 
 { #category : 'methods-with-used-locals-and-arguments' }
-SLNormalizeVariablesTestClass >> methodWithUsedArguments [
+SLNormalizeVariablesTestClass >> methodWithUsedArguments: arg1 arg: arg2 [
 
-	| var1 var2 |
-	var1.
-	var2
+	self emptyMethod: arg1.
+	self emptyMethod: (self emptyMethod: arg2).
+	self emptyMethod: [ :arg3 | arg3 ]
 ]
 
 { #category : 'methods-with-used-locals-and-arguments' }
@@ -94,5 +118,16 @@ SLNormalizeVariablesTestClass >> methodWithUsedLocals [
 	[
 	| var3 var4 |
 	var3.
-	var4 ]
+	var4.
+	[
+	| var5 var6 |
+	var5.
+	var6 ] ]
+]
+
+{ #category : 'methods-with-globals-variables' }
+SLNormalizeVariablesTestClass >> methodWithVariablesFromSharedPools [
+
+	constant3.
+	constant4
 ]

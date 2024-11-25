@@ -136,9 +136,10 @@ TMethod >> allLocals [
 
 	| allLocals |
 	cachedLocals ifNotNil: [ ^ cachedLocals ].
-	
+
 	allLocals := Set new.
-	allLocals addAll: (declarations keys asSet reject: [:k| (declarations at: k) == #implicit]).
+	allLocals addAll: (declarations keys asSet reject: [ :k |
+			 (declarations at: k) == #implicit ]).
 	allLocals addAll: self locals.
 	self nodesDo: [ :node |
 		node isStatementList ifTrue: [ allLocals addAll: node locals ] ].
@@ -453,7 +454,7 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 	cachedLocals := nil.
 	changedVariables do: [ :varName |
 		| newName |
-		newName := '_' , varName.
+		newName := #_ , varName.
 		self args: (self args collect: [ :e |
 				 e ~= varName
 					 ifTrue: [ e ]

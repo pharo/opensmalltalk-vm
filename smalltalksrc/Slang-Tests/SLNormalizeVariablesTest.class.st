@@ -25,45 +25,72 @@ SLNormalizeVariablesTest >> collectVariablesNameIn: aTStatementListNode [
 SLNormalizeVariablesTest >> setUp [ 
 	super setUp. 
 	ccg addClass: SLNormalizeVariablesTestClass.
+	ccg inferTypes.
 	ccg prepareMethods
 ]
 
-{ #category : 'tests-methods-with-used-locals-and-arguments' }
-SLNormalizeVariablesTest >> testMethodWithReservedArgumentsName [
-	"the reserved name self, super, nil and cascade are not modified"
+{ #category : 'tests-methods-with-globals-variables' }
+SLNormalizeVariablesTest >> testMethodWithInstancesVariables [
 
 	| method body |
-	method := ccg methodNamed: #methodWithReservedArgumentsName:arg:.
+	method := ccg methodNamed: #methodWithInstancesVariables.
 	body := method parseTree statements.
-	"the nil variable doesnt appear in allLocals, it doesn't impact its translation "
-	self
-		assert: (self collectArgumentsNameIn: (body at: 1))
-		equals: { #self }.
-	self
-		assert:
-		(self collectVariablesNameIn: (method parseTree statements at: 4))
-		equals: #( #_arg #_arg #nil ).
+	"instances variables are seen as globals"
+	self assert: method allLocals isEmpty.
+	self assert: (body at: 1) name equals: #instanceVariable1.
+	self assert: (body at: 2) name equals: #instanceVariable2.
+
 	self assert: method args isEmpty
 ]
 
 { #category : 'tests-methods-with-used-locals-and-arguments' }
-SLNormalizeVariablesTest >> testMethodWithReservedVariablesName [
-	"the reserved name self, super, nil and cascade are not modified"
+SLNormalizeVariablesTest >> testMethodWithReservedArgumentsName [
+	"the reserved name self, super and cascade are not modified"
+
+	| method body |
+	method := ccg methodNamed: #methodWithReservedArgumentsName:arg:.
+	body := method parseTree statements.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 1))
+		equals: { #self }.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 2))
+		equals: { #super }.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 3))
+		equals: { #cascade }.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 4))
+		equals: { #_arg1 }.
+	self assert: method args asArray equals: { #cascade. #_arg1 }
+]
+
+{ #category : 'tests-methods-with-used-locals-and-arguments' }
+SLNormalizeVariablesTest >> testMethodWithReservedLocalsName [
+	"the reserved name self, super and cascade are not modified"
 
 	| method |
 	method := ccg methodNamed: #methodWithReservedLocalsName.
-
-	"the nil variable doesnt appear in allLocals, it doesn't impact its translation "
-	self assert: method allLocals equals: (Set new
-			 add: #_var1;
-			 add: #_var2;
-			 add: #cascade;
-			 add: #_arg;
-			 yourself).
+	"super is not in the locals"
 	self
-		assert:
-		(self collectVariablesNameIn: (method parseTree statements at: 4))
-		equals: #( #_arg #_arg #nil ).
+		assert: method allLocals
+		equals: { #_var1. #_var2. #cascade } asSet.
+	self assert: (method parseTree statements at: 2) name equals: #super.
+
+	self assert: method args isEmpty
+]
+
+{ #category : 'tests-methods-with-globals-variables' }
+SLNormalizeVariablesTest >> testMethodWithSharedVariables [
+
+	| method body |
+	method := ccg methodNamed: #methodWithSharedVariables.
+	body := method parseTree statements.
+	"sharedVariables variables are seen as globals"
+	self assert: method allLocals isEmpty.
+	self assert: (body at: 1) name equals: #constant1.
+	self assert: (body at: 2) name equals: #constant2.
+
 	self assert: method args isEmpty
 ]
 
@@ -74,34 +101,29 @@ SLNormalizeVariablesTest >> testMethodWithUnusedArguments [
 	| method |
 	method := ccg methodNamed: #methodWithUnusedArguments:arg:.
 	self assert: method allLocals isEmpty.
-	self assert: method args equals: (OrderedCollection new
-			 add: #arg1;
-			 add: #arg2;
-			 yourself)
+	
+	self assert: method args asArray equals: { #arg1. #arg2 }
 ]
 
 { #category : 'tests-methods-with-unused-locals-and-variables' }
 SLNormalizeVariablesTest >> testMethodWithUnusedLocals [
-	"var1 and arg1 doesn't appear in the parseeTree, they doesn't change"
+	"var1 and var2 doesn't appear in the parseeTree, they doesn't change"
+
 	| method |
 	method := ccg methodNamed: #methodWithUnusedLocals.
-	self assert: method allLocals equals: (Set new
-			 add: #var1;
-			 add: #var2;
-			 yourself).
+	self assert: method allLocals equals: { #var1. #var2 } asSet.
+
 	self assert: method args isEmpty
 ]
 
 { #category : 'tests-methods-with-unused-locals-and-variables' }
 SLNormalizeVariablesTest >> testMethodWithUsedAndUnusedArguments [
-	"arg2 doesn't appear in the parseeTree, it doesn't change. Normalize the var2"
+	"arg2 doesn't appear in the parseeTree, it doesn't change."
 
 	| method |
 	method := ccg methodNamed: #methodWithUsedAndUnusedArguments:arg:.
-	self assert: method args equals: (OrderedCollection new
-			 add: #_arg1;
-			 add: #arg2;
-			 yourself).
+	self assert: method args asArray equals: { #_arg1. #arg2 }.
+	
 	self assert: method locals isEmpty
 ]
 
@@ -111,38 +133,74 @@ SLNormalizeVariablesTest >> testMethodWithUsedAndUnusedLocals [
 
 	| method |
 	method := ccg methodNamed: #methodWithUsedAndUnusedLocals.
-	self assert: method allLocals equals: (Set new
-			 add: #var1;
-			 add: #_var2;
-			 yourself).
+	self assert: method allLocals equals: { #var1. #_var2 } asSet.
+
 	self assert: method args isEmpty
 ]
 
 { #category : 'tests-methods-with-unused-locals-and-variables' }
 SLNormalizeVariablesTest >> testMethodWithUsedAndUnusedLocalsAndArgument [
 	"var1 and arg1 doesn't appear in the parseeTree, they doesn't change"
+
 	| method |
-	method := ccg methodNamed: #methodWithUsedAndUnusedLocalsAndArguments:arg:.
-	self assert: method allLocals equals: (Set new
-			 add: #var1;
-			 add: #_var2;
-			 yourself).
-	self assert: method args equals: (OrderedCollection new
-			 add: #arg1;
-			 add: #_arg2;
-			 yourself)
+	method := ccg methodNamed:
+		          #methodWithUsedAndUnusedLocalsAndArguments:arg:.
+	self assert: method allLocals equals: { #var1. #_var2 } asSet.
+	self assert: method args asArray equals: { #arg1. #_arg2 }
 ]
 
 { #category : 'tests-methods-with-used-locals-and-arguments' }
-SLNormalizeVariablesTest >> testMethodWithUsedVariables [
+SLNormalizeVariablesTest >> testMethodWithUsedArguments [
+	"the reserved name self, super and cascade are not modified"
 
-	| method |
+	| method body |
+	method := ccg methodNamed: #methodWithUsedArguments:arg:.
+	body := method parseTree statements.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 1))
+		equals: { #_arg1 }.
+	self
+		assert: (self collectArgumentsNameIn: (body at: 2) arguments first)
+		equals: { #_arg2 }.
+	self
+		assert: (body at: 3) arguments first arguments
+		equals: { #_arg3 }.
+	self assert: method args asArray equals: { #_arg1. #_arg2 }.
+
+	self assert: method allLocals equals: { #_arg3 } asSet
+]
+
+{ #category : 'tests-methods-with-used-locals-and-arguments' }
+SLNormalizeVariablesTest >> testMethodWithUsedLocals [
+
+	| method body subBlock subsubBlock |
 	method := ccg methodNamed: #methodWithUsedLocals.
-	self assert: method allLocals equals: (Set new
-			 add: #_var1;
-			 add: #_var2;
-			 add: #_var3;
-			 add: #_var4;
-			 yourself).
+	body := method parseTree statements.
+	subBlock := body at: 3.
+	subsubBlock := subBlock statements at: 3.
+	self
+		assert: method allLocals
+		equals: { #_var1. #_var2. #_var3. #_var4. #_var5. #_var6 } asSet.
+	self
+		assert: (self collectVariablesNameIn: subBlock)
+		equals: { #_var3. #_var4. #_var5. #_var6 }.
+	self
+		assert: (self collectVariablesNameIn: subsubBlock)
+		equals: { #_var5. #_var6 }.
+
+	self assert: method args isEmpty
+]
+
+{ #category : 'tests-methods-with-globals-variables' }
+SLNormalizeVariablesTest >> testMethodWithVariablesFromSharedPools [
+
+	| method body |
+	method := ccg methodNamed: #methodWithVariablesFromSharedPools.
+	body := method parseTree statements.
+	"sharedVariables variables are seen as globals"
+	self assert: method allLocals isEmpty.
+	self assert: (body at: 1) name equals: #constant3.
+	self assert: (body at: 2) name equals: #constant4.
+
 	self assert: method args isEmpty
 ]
