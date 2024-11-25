@@ -86,10 +86,11 @@ SLNormalizeVariablesTest >> testMethodWithReservedLocalsName [
 
 	| method |
 	method := ccg methodNamed: #methodWithReservedLocalsName.
-	"super is not in the locals"
+	"super and self are not in the locals"
 	self
 		assert: method allLocals
 		equals: { #_var1. #_var2. #cascade } asSet.
+	self assert: (method parseTree statements at: 1) name equals: #self.
 	self assert: (method parseTree statements at: 2) name equals: #super.
 
 	self assert: method args isEmpty

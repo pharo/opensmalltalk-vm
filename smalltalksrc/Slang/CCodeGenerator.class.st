@@ -5046,28 +5046,24 @@ CCodeGenerator >> typeForDereference: sendNode in: aTMethod [
 ]
 
 { #category : 'C code generator' }
-CCodeGenerator >> typeOfVariable: varName [ "<String>"
+CCodeGenerator >> typeOfVariable: varName [
+	"<String>"
+
 	self assert: varName isString.
-	scopeStack reverseDo:
-		[:scope|
-		(scope declarations includesKey: varName) ifTrue:
-			[^self
-				extractTypeFor: varName
-				fromDeclaration: (scope declarations at: varName)]].
-	(variableDeclarations
-		at: varName
-		ifAbsent:
-			[apiVariables
-				ifNotNil: [apiVariables at: varName ifAbsent: []]
-				ifNil: []]) ifNotNil:
-		[:decl| ^self extractTypeFor: varName fromDeclaration: decl].
-	^(constants at: varName "allButFirst" ifAbsent: []) ifNotNil:
-		[:const|
-		const value isInteger
-			ifTrue: [self defaultType]
-			ifFalse:
-				[const value isFloat ifTrue:
-					[#double]]]
+	scopeStack reverseDo: [ :scope |
+		(scope declarations includesKey: varName) ifTrue: [
+			^ self
+				  extractTypeFor: varName
+				  fromDeclaration: (scope declarations at: varName) ] ].
+	(variableDeclarations at: varName ifAbsent: [
+		 apiVariables
+			 ifNotNil: [ apiVariables at: varName ifAbsent: [  ] ]
+			 ifNil: [  ] ]) ifNotNil: [ :decl |
+		^ self extractTypeFor: varName fromDeclaration: decl ].
+	^ (constants at: varName ifAbsent: [  ]) ifNotNil: [ :const |
+		  const value isInteger
+			  ifTrue: [ self defaultType ]
+			  ifFalse: [ const value isFloat ifTrue: [ #double ] ] ]
 ]
 
 { #category : 'utilities' }

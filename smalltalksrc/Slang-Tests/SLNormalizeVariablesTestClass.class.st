@@ -53,6 +53,7 @@ SLNormalizeVariablesTestClass >> methodWithReservedArgumentsName: cascade arg: a
 { #category : 'methods-with-used-locals-and-arguments' }
 SLNormalizeVariablesTestClass >> methodWithReservedLocalsName [
 
+	<var: #var1 type: #implicit>
 	| cascade var1 var2 |
 	self.
 	super.
