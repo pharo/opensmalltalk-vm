@@ -8163,9 +8163,15 @@ SpurMemoryManager >> isValidClassIndex: classIndex [
 ]
 
 { #category : 'class table' }
-SpurMemoryManager >> isValidClassTag: classIndex [
+SpurMemoryManager >> isValidClassTag: classIndexToMask [
 	<api>
-	| classOrNil |
+	| classOrNil classIndex |
+
+	<var: 'classIndexToMask' type: #usqInt>
+	<var: 'classIndex' type: #usqInt>
+	
+	classIndex := classIndexToMask bitAnd: 1 << self classIndexFieldWidth - 1.
+
 	self assert: (classIndex between: 0 and: 1 << self classIndexFieldWidth - 1).
 	classOrNil := self classOrNilAtIndex: classIndex.
 	^classOrNil ~= nilObj
