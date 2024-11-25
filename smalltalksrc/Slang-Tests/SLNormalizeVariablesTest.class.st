@@ -29,6 +29,21 @@ SLNormalizeVariablesTest >> setUp [
 	ccg prepareMethods
 ]
 
+{ #category : 'tests-methods-referencing-struct-classes' }
+SLNormalizeVariablesTest >> testMethodReferencingStructClass [
+
+	| method body |
+	method := ccg methodNamed: #methodReferencingStructClass.
+	body := method parseTree statements.
+
+	self assert: method allLocals isEmpty.
+	self
+		assert: (body at: 1) name
+		equals: #SLNormalizeVariablesTestStructClass.
+
+	self assert: method args isEmpty
+]
+
 { #category : 'tests-methods-with-globals-variables' }
 SLNormalizeVariablesTest >> testMethodWithInstancesVariables [
 
