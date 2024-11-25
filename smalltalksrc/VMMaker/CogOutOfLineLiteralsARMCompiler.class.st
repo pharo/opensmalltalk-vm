@@ -51,8 +51,11 @@ CogOutOfLineLiteralsARMCompiler >> getDefaultCogCodeSize [
 
 { #category : 'inline cacheing' }
 CogOutOfLineLiteralsARMCompiler >> inlineCacheTagAt: callSiteReturnAddress [
-	<inline: true>
-	^objectMemory uint32AtPointer: (self pcRelativeAddressAt: (callSiteReturnAddress - 8) asUnsignedInteger)
+
+	<returnTypeC: #usqInt>
+
+	^(objectMemory uint32AtPointer: (self pcRelativeAddressAt: (callSiteReturnAddress - 8) asUnsignedInteger)) bitAnd:
+		  1 << objectMemory classIndexFieldWidth - 1
 ]
 
 { #category : 'testing' }
