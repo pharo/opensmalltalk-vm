@@ -286,9 +286,9 @@ DruidJIT class >> bytecodeTable [
 		  { 3. 248. 248. #gen_CallPrimitiveBytecode }.
 		  { 3. 249. 249. #genExtPushFullClosureBytecode }.
 		  { 3. 250. 250. #unknownBytecode }.
-		  { 3. 251. 251. #gen_PushRemoteTempLongBytecode }.
-		  { 3. 252. 252. #gen_StoreRemoteTempLongBytecode. #isMapped }.
-		  { 3. 253. 253. #gen_StoreAndPopRemoteTempLongBytecode. #isMapped }.
+		  { 3. 251. 251. #genPushRemoteTempLongBytecode }.
+		  { 3. 252. 252. #genStoreRemoteTempLongBytecode. #isMapped }.
+		  { 3. 253. 253. #genStoreAndPopRemoteTempLongBytecode. #isMapped }.
 		  { 3. 254. 254. #unknownBytecode }.
 		  { 3. 255. 255. #unknownBytecode } }
 ]
