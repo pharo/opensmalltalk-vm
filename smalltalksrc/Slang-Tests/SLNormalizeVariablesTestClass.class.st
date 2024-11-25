@@ -25,11 +25,11 @@ SLNormalizeVariablesTestClass >> emptyMethod: arg [
 SLNormalizeVariablesTestClass >> initialize [
 
 	super initialize.
-	instanceVar1 := 3.
-	instanceVar2 := 5
+	instanceVariable1 := 3.
+	instanceVariable2 := 5
 ]
 
-{ #category : 'tests-methods-referencing-struct-classes' }
+{ #category : 'methods-referencing-struct-classes' }
 SLNormalizeVariablesTestClass >> methodReferencingStructClass [
 	SLNormalizeVariablesTestStructClass
 ]
@@ -133,7 +133,17 @@ SLNormalizeVariablesTestClass >> methodWithVariablesFromSharedPools [
 	constant4
 ]
 
-{ #category : 'tests-methods-with-var-return-type-C' }
+{ #category : 'methods-with-variables-in-cCode' }
+SLNormalizeVariablesTestClass >> methodWithVariablesInCCode [
+
+	| var1 var2 |
+	self cCode: 'var1 *var2'.
+	self cCode: 'var2 *var1' inSmalltalk: [
+		var1.
+		var2 ]
+]
+
+{ #category : 'methods-with-var-return-type-C' }
 SLNormalizeVariablesTestClass >> methodWithVariablesInVarReturnTypeC [
 
 	<returnTypeC: #'var1 *'>
@@ -141,7 +151,7 @@ SLNormalizeVariablesTestClass >> methodWithVariablesInVarReturnTypeC [
 	var1
 ]
 
-{ #category : 'tests-methods-with-var-type-declaration' }
+{ #category : 'methods-with-var-type-declaration' }
 SLNormalizeVariablesTestClass >> methodWithVariablesInVarTypeDeclaration [
 
 	<var: #var1 type: #'char *'>

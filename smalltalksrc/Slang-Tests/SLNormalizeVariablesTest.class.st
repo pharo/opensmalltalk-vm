@@ -35,7 +35,6 @@ SLNormalizeVariablesTest >> testMethodReferencingStructClass [
 	| method body |
 	method := ccg methodNamed: #methodReferencingStructClass.
 	body := method parseTree statements.
-
 	self assert: method allLocals isEmpty.
 	self
 		assert: (body at: 1) name
@@ -103,6 +102,7 @@ SLNormalizeVariablesTest >> testMethodWithSharedVariables [
 	method := ccg methodNamed: #methodWithSharedVariables.
 	body := method parseTree statements.
 	"sharedVariables variables are seen as globals"
+
 	self assert: method allLocals isEmpty.
 	self assert: (body at: 1) name equals: #constant1.
 	self assert: (body at: 2) name equals: #constant2.
@@ -221,9 +221,27 @@ SLNormalizeVariablesTest >> testMethodWithVariablesFromSharedPools [
 	self assert: method args isEmpty
 ]
 
+{ #category : 'tests-methods-with-variables-in-cCode' }
+SLNormalizeVariablesTest >> testMethodWithVariablesInCCode [
+	"rare case but it can happen, see addressIsInFixups:"
+
+	| method body |
+	method := ccg methodNamed: #methodWithVariablesInCCode.
+	body := method parseTree statements.
+
+	self
+		assert: (body at: 1) arguments first value
+		equals: #'_var1 *_var2'.
+	self
+		assert: (body at: 2) arguments first value
+		equals: #'_var2 *_var1'.
+
+	self assert: method args isEmpty
+]
+
 { #category : 'tests-methods-with-var-return-type-C' }
 SLNormalizeVariablesTest >> testMethodWithVariablesInVarReturnTypeC [
-
+	"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
 	| method body |
 	method := ccg methodNamed: #methodWithVariablesInVarReturnTypeC.
 	body := method parseTree statements.
