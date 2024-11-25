@@ -131,3 +131,23 @@ SLNormalizeVariablesTestClass >> methodWithVariablesFromSharedPools [
 	constant3.
 	constant4
 ]
+
+{ #category : 'tests-methods-with-var-return-type-C' }
+SLNormalizeVariablesTestClass >> methodWithVariablesInVarReturnTypeC [
+
+	<returnTypeC: #'var1 *'>
+	| var1 |
+	var1
+]
+
+{ #category : 'tests-methods-with-var-type-declaration' }
+SLNormalizeVariablesTestClass >> methodWithVariablesInVarTypeDeclaration [
+
+	<var: #var1 type: #'char *'>
+	<var: #var2 type: #'var2 *'>
+	<var: #var3 type: #'var1 *'>
+	| var1 var2 var3 |
+	var1.
+	var2.
+	var3
+]

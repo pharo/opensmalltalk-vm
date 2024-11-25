@@ -219,3 +219,36 @@ SLNormalizeVariablesTest >> testMethodWithVariablesFromSharedPools [
 
 	self assert: method args isEmpty
 ]
+
+{ #category : 'tests-methods-with-var-return-type-C' }
+SLNormalizeVariablesTest >> testMethodWithVariablesInVarReturnTypeC [
+
+	| method body |
+	method := ccg methodNamed: #methodWithVariablesInVarReturnTypeC.
+	body := method parseTree statements.
+
+	self assert: (body at: 1) name equals: #_var1.
+
+	self assert: method returnType equals: #'_var1 *'.
+
+	self assert: method args isEmpty
+]
+
+{ #category : 'tests-methods-with-var-type-declaration' }
+SLNormalizeVariablesTest >> testMethodWithVariablesInVarTypeDeclaration [
+
+	| method body |
+	method := ccg methodNamed: #methodWithVariablesInVarTypeDeclaration.
+	body := method parseTree statements.
+
+	self assert: (body at: 1) name equals: #_var1.
+	self assert: (body at: 2) name equals: #_var2.
+	self assert: (body at: 3) name equals: #_var3.
+
+	self assert: (method declarations at: #_var1) equals: #'char *_var1'.
+	self assert: (method declarations at: #_var2) equals: #'_var2 *_var2'.
+	"maybe shouldn't be this way, but doesnt appear in the VM"
+	self assert: (method declarations at: #_var3) equals: #'var1 *_var3'.
+
+	self assert: method args isEmpty
+]
