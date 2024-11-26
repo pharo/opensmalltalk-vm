@@ -1,6 +1,6 @@
 Class {
 	#name : 'SLNormalizeVariablesTestStructClass',
-	#superclass : 'VMStructType',
+	#superclass : 'SlangStructType',
 	#category : 'Slang-Tests',
 	#package : 'Slang-Tests'
 }
