@@ -611,7 +611,7 @@ TSendNode >> renameVarInCCode: varName with: newVarName [
 		 (arguments first value findString: varName) > 0 ]) ifTrue: [
 		arguments first setValue: (arguments first value
 				 copyReplaceAll: varName
-				 with: #_ , varName
+				 with: newVarName
 				 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ]
 ]
 

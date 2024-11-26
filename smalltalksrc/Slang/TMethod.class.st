@@ -442,11 +442,14 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 
 	| changedVariables |
 	changedVariables := Set new.
+	"necessary for implicit variables"
+	aCodeGen pushScope: self.
+	
 	self parseTree: (parseTree
 			 bindClassVariablesIn: classVariables
 			 globalVariablesIn: globalsVariables
 			 classNameIn:
-			 (SlangStructType allSubclasses collect: [ :class | class name ])
+			 (SlangStructType "MockEmptyVMStructWithRedefinedStructName" allSubclasses collect: [ :class | class name ])
 			 in: aCodeGen
 			 collect: changedVariables).
 	changedVariables isEmpty ifTrue: [ ^ self ].
@@ -469,7 +472,8 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 				node renameLocalOrArg: varName with: newName ].
 
 			"rare case but it can happen, see addressIsInFixups:"
-			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ]
+			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ].
+	aCodeGen popScope
 ]
 
 { #category : 'transformations' }

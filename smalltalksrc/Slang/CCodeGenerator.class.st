@@ -4143,6 +4143,12 @@ CCodeGenerator >> outputAsmLabel: selector on: aStream [
 ]
 
 { #category : 'C code generator' }
+CCodeGenerator >> popScope [
+
+	scopeStack removeLast
+]
+
+{ #category : 'C code generator' }
 CCodeGenerator >> preDeclareInterpreterProxyOn: aStream [
 	"Put the necessary #defines needed before interpreterProxy.  Basically
 	 internal plugins use the VM's interpreterProxy variable and external plugins use
