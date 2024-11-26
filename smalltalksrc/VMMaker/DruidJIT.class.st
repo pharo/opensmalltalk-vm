@@ -266,7 +266,7 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 228. 228. #gen_ExtPushLiteralBytecode. #needsFrameNever:. 1 }.
 		  { 2. 229. 229. #gen_LongPushTemporaryVariableBytecode }.
 		  { 2. 230. 230. #unknownBytecode }.
-		  { 2. 231. 231. #gen_PushNewArrayBytecode }.
+		  { 2. 231. 231. #genPushNewArrayBytecode }.
 		  { 2. 232. 232. #gen_ExtPushIntegerBytecode. #needsFrameNever:. 1 }.
 		  { 2. 233. 233. #gen_ExtPushCharacterBytecode. #needsFrameNever:. 1 }.
 		  { 2. 234. 234. #gen_ExtSendBytecode. #isMapped }.
