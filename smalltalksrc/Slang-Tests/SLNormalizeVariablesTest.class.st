@@ -22,9 +22,14 @@ SLNormalizeVariablesTest >> collectVariablesNameIn: aTStatementListNode [
 ]
 
 { #category : 'running' }
-SLNormalizeVariablesTest >> setUp [ 
-	super setUp. 
+SLNormalizeVariablesTest >> setUp [
+
+	super setUp.
+	SLNormalizeVariablesTestClass initializeGlobals.
 	ccg addClass: SLNormalizeVariablesTestClass.
+	ccg removeConstant: #ConstantWithReplacementShouldNotBeGenerated.
+	ccg removeConstant:
+		#ConstantFromPoolWithReplacementShouldNotBeGenerated.
 	ccg inferTypes.
 	ccg prepareMethods
 ]
@@ -98,14 +103,28 @@ SLNormalizeVariablesTest >> testMethodWithReservedLocalsName [
 { #category : 'tests-methods-with-globals-variables' }
 SLNormalizeVariablesTest >> testMethodWithSharedVariables [
 
-	| method body |
+	| method body constant1 constant2 constant3 |
 	method := ccg methodNamed: #methodWithSharedVariables.
 	body := method parseTree statements.
-	"sharedVariables variables are seen as globals"
+	constant1 := body at: 1.
+	constant2 := body at: 2.
+	constant3 := body at: 3.
 
+	"sharedVariables variables are seen as globals"
 	self assert: method allLocals isEmpty.
-	self assert: (body at: 1) name equals: #constant1.
-	self assert: (body at: 2) name equals: #constant2.
+
+	self assert: constant1 isDefine.
+	self assert: constant1 name equals: #ConstantWithNoReplacement.
+	self assert: constant1 value equals: nil.
+	self assert: constant1 shouldBeGenerated equals: true.
+
+	self assert: constant2 isDefine.
+	self assert: constant2 name equals: #ConstantWithReplacementShouldBeGenerated.
+	self assert: constant2 value equals: #replacement.
+	self assert: constant2 shouldBeGenerated equals: true.
+	
+	self assert: constant3 isVariable.
+	self assert: constant3 name equals: #ConstantWithReplacementShouldNotBeGenerated.
 
 	self assert: method args isEmpty
 ]
@@ -210,13 +229,28 @@ SLNormalizeVariablesTest >> testMethodWithUsedLocals [
 { #category : 'tests-methods-with-globals-variables' }
 SLNormalizeVariablesTest >> testMethodWithVariablesFromSharedPools [
 
-	| method body |
+	| method body constant1 constant2 constant3 |
 	method := ccg methodNamed: #methodWithVariablesFromSharedPools.
 	body := method parseTree statements.
+	constant1 := body at: 1.
+	constant2 := body at: 2.
+	constant3 := body at: 3.
+	
 	"sharedVariables variables are seen as globals"
 	self assert: method allLocals isEmpty.
-	self assert: (body at: 1) name equals: #constant3.
-	self assert: (body at: 2) name equals: #constant4.
+
+	self assert: constant1 isDefine.
+	self assert: constant1 name equals: #ConstantFromPoolWithNoReplacement.
+	self assert: constant1 value equals: nil.
+	self assert: constant1 shouldBeGenerated equals: true.
+
+	self assert: constant2 isDefine.
+	self assert: constant2 name equals: #ConstantFromPoolWithReplacementShouldBeGenerated.
+	self assert: constant2 value equals: #'replacement from pool'.
+	self assert: constant2 shouldBeGenerated equals: true.
+	
+	self assert: constant3 isVariable.
+	self assert: constant3 name equals: #ConstantFromPoolWithReplacementShouldNotBeGenerated.
 
 	self assert: method args isEmpty
 ]

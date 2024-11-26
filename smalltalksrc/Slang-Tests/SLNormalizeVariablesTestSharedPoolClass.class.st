@@ -2,8 +2,9 @@ Class {
 	#name : 'SLNormalizeVariablesTestSharedPoolClass',
 	#superclass : 'SharedPool',
 	#classVars : [
-		'constant3',
-		'constant4'
+		'ConstantFromPoolWithNoReplacement',
+		'ConstantFromPoolWithReplacementShouldBeGenerated',
+		'ConstantFromPoolWithReplacementShouldNotBeGenerated'
 	],
 	#category : 'Slang-Tests',
 	#package : 'Slang-Tests'

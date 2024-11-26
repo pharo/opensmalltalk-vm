@@ -6,8 +6,9 @@ Class {
 		'instanceVariable2'
 	],
 	#classVars : [
-		'constant1',
-		'constant2'
+		'ConstantWithNoReplacement',
+		'ConstantWithReplacementShouldBeGenerated',
+		'ConstantWithReplacementShouldNotBeGenerated'
 	],
 	#pools : [
 		'SLNormalizeVariablesTestSharedPoolClass'
@@ -16,17 +17,18 @@ Class {
 	#package : 'Slang-Tests'
 }
 
+{ #category : 'initialization' }
+SLNormalizeVariablesTestClass class >> initializeGlobals [
+
+	ConstantWithReplacementShouldBeGenerated := #replacement.
+	ConstantWithReplacementShouldNotBeGenerated := '#should not be seen'.
+	ConstantFromPoolWithReplacementShouldBeGenerated := #'replacement from pool'.
+	ConstantFromPoolWithReplacementShouldNotBeGenerated := #'should not be seen'
+]
+
 { #category : 'helpers' }
 SLNormalizeVariablesTestClass >> emptyMethod: arg [ 
 	^ arg
-]
-
-{ #category : 'initialization' }
-SLNormalizeVariablesTestClass >> initialize [
-
-	super initialize.
-	instanceVariable1 := 3.
-	instanceVariable2 := 5
 ]
 
 { #category : 'methods-referencing-struct-classes' }
@@ -64,8 +66,9 @@ SLNormalizeVariablesTestClass >> methodWithReservedLocalsName [
 
 { #category : 'methods-with-globals-variables' }
 SLNormalizeVariablesTestClass >> methodWithSharedVariables [ 
-	constant1. 
-	constant2
+	ConstantWithNoReplacement. 
+	ConstantWithReplacementShouldBeGenerated.
+	ConstantWithReplacementShouldNotBeGenerated.
 ]
 
 { #category : 'methods-with-unused-locals-and-arguments' }
@@ -129,8 +132,9 @@ SLNormalizeVariablesTestClass >> methodWithUsedLocals [
 { #category : 'methods-with-globals-variables' }
 SLNormalizeVariablesTestClass >> methodWithVariablesFromSharedPools [
 
-	constant3.
-	constant4
+	ConstantFromPoolWithNoReplacement.
+	ConstantFromPoolWithReplacementShouldBeGenerated.
+	ConstantFromPoolWithReplacementShouldNotBeGenerated
 ]
 
 { #category : 'methods-with-variables-in-cCode' }
