@@ -243,14 +243,14 @@ DruidJIT class >> bytecodeTable [
 		  #needsFrameIfImmutability:.  -1 }.
 		  { 1. 207. 207. #gen_StoreAndPopReceiverVariableBytecode7. #isInstVarRef. #isMapped.
 		  #needsFrameIfImmutability:.  -1 }.
-		  { 1. 208. 208. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 209. 209. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 210. 210. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 211. 211. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 212. 212. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 213. 213. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 214. 214. #genStoreAndPopTemporaryVariableBytecode }.
-		  { 1. 215. 215. #genStoreAndPopTemporaryVariableBytecode }.
+		  { 1. 208. 208. #gen_StoreAndPopTemporaryVariableBytecode0 }.
+		  { 1. 209. 209. #gen_StoreAndPopTemporaryVariableBytecode1 }.
+		  { 1. 210. 210. #gen_StoreAndPopTemporaryVariableBytecode2 }.
+		  { 1. 211. 211. #gen_StoreAndPopTemporaryVariableBytecode3 }.
+		  { 1. 212. 212. #gen_StoreAndPopTemporaryVariableBytecode4 }.
+		  { 1. 213. 213. #gen_StoreAndPopTemporaryVariableBytecode5 }.
+		  { 1. 214. 214. #gen_StoreAndPopTemporaryVariableBytecode6 }.
+		  { 1. 215. 215. #gen_StoreAndPopTemporaryVariableBytecode7 }.
 		  { 1. 216. 216. #gen_PopStackBytecode. #needsFrameNever:.  -1 }.
 		  { 1. 217. 217. #unknownBytecode }.
 		  { 1. 218. 218. #unknownBytecode }.
@@ -275,20 +275,20 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 240. 240. #genExtStoreAndPopReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
-		  { 2. 241. 241. #genExtStoreAndPopLiteralVariableBytecode. #isMappedIfImmutability }.
-		  { 2. 242. 242. #genLongStoreAndPopTemporaryVariableBytecode }.
-		  { 2. 243. 243. #genExtStoreReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
-		  { 2. 244. 244. #genExtStoreLiteralVariableBytecode. #isMappedIfImmutability }.
-		  { 2. 245. 245. #genLongStoreTemporaryVariableBytecode }.
+		  { 2. 240. 240. #gen_ExtStoreAndPopReceiverVariableBytecode. #isInstVarRef. #isMapped }.
+		  { 2. 241. 241. #gen_ExtStoreAndPopLiteralVariableBytecode. #isMapped }.
+		  { 2. 242. 242. #gen_LongStoreAndPopTemporaryVariableBytecode }.
+		  { 2. 243. 243. #gen_ExtStoreReceiverVariableBytecode. #isInstVarRef. #isMapped }.
+		  { 2. 244. 244. #gen_ExtStoreLiteralVariableBytecode. #isMapped }.
+		  { 2. 245. 245. #gen_LongStoreTemporaryVariableBytecode }.
 		  { 2. 246. 246. #unknownBytecode }.
 		  { 2. 247. 247. #unknownBytecode }.
 		  { 3. 248. 248. #gen_CallPrimitiveBytecode }.
-		  { 3. 249. 249. #genExtPushFullClosureBytecode }.
+		  { 3. 249. 249. #gen_ExtPushFullClosureBytecode }.
 		  { 3. 250. 250. #unknownBytecode }.
-		  { 3. 251. 251. #genPushRemoteTempLongBytecode }.
-		  { 3. 252. 252. #genStoreRemoteTempLongBytecode. #isMapped }.
-		  { 3. 253. 253. #genStoreAndPopRemoteTempLongBytecode. #isMapped }.
+		  { 3. 251. 251. #gen_PushRemoteTempLongBytecode }.
+		  { 3. 252. 252. #gen_StoreRemoteTempLongBytecode. #isMapped }.
+		  { 3. 253. 253. #gen_StoreAndPopRemoteTempLongBytecode. #isMapped }.
 		  { 3. 254. 254. #unknownBytecode }.
 		  { 3. 255. 255. #unknownBytecode } }
 ]
