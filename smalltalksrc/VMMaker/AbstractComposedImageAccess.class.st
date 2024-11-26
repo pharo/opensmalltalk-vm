@@ -248,6 +248,26 @@ AbstractComposedImageAccess >> segmentMetadataFile: segmentIndex inImage: imageF
 
 ]
 
+{ #category : 'perm - space' }
+AbstractComposedImageAccess >> snprintf: buffer _: bufferSize _: format _: vararg1 _: vararg2 [
+	"int snprintf(char * restrict str, size_t size, const char * restrict format, ...);"
+
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'perm - space' }
+AbstractComposedImageAccess >> snprintf: buffer _: bufferSize _: format _: vararg1 _: vararg2 _: vararg3 [
+	"int snprintf(char * restrict str, size_t size, const char * restrict format, ...);"
+
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
 { #category : 'file primitives' }
 AbstractComposedImageAccess >> sscanf: aString _: format _: varHolder [
 

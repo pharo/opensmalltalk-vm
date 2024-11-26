@@ -686,23 +686,6 @@ SpurMemoryManager class >> characterObjectOf: characterCode [
 ]
 
 { #category : 'accessing' }
-SpurMemoryManager class >> classIndicesMap [
-	"self classIndicesMap"
-	| map |
-	map := Dictionary new.
-	self selectorsAndMethodsDo:
-		[:s :m| | mn |
-		(('*classindex*' match: s) or: ['*bridge*'match: s])
-		and: [mn := m methodNode block.
-			(mn statements size = 1
-			 and: [mn statements first expr isConstantNumber]) ifTrue:
-				[map at: mn statements first expr key put: s]]].
-	^map keys sort collect:
-		[:n|
-		{ n. map at: n }]
-]
-
-{ #category : 'accessing' }
 SpurMemoryManager class >> classTableBitmapBytes [
 	"Max size of the classTableBitmap.  A liottle too large to contemplate allocating statically."
 	^1 << (self basicNew classIndexFieldWidth - (BitsPerByte log: 2) asInteger)
@@ -986,23 +969,6 @@ SpurMemoryManager class >> mustBeGlobal: var [
 { #category : 'accessing' }
 SpurMemoryManager class >> numSmallIntegerTagBits [
 	^self subclassResponsibility
-]
-
-{ #category : 'accessing' }
-SpurMemoryManager class >> objectFormatsMap [
-	"self objectFormatsMap"
-	| map |
-	map := Dictionary new.
-	self selectorsAndMethodsDo:
-		[:s :m| | mn |
-		('*format*' match: s)
-		and: [mn := m methodNode block.
-			(mn statements size = 1
-			 and: [mn statements first expr isConstantNumber]) ifTrue:
-				[map at: mn statements first expr key put: s]]].
-	^map keys sort collect:
-		[:n|
-		{ n. map at: n }]
 ]
 
 { #category : 'accessing class hierarchy' }
@@ -3481,37 +3447,6 @@ SpurMemoryManager >> checkOkayYoungReferrer: obj [
 
 	^false
 
-]
-
-{ #category : 'debug support' }
-SpurMemoryManager >> checkOopHasOkayClass: obj [
-	"Attempt to verify that the given obj has a reasonable behavior. The class must be a
-	 valid, non-integer oop and must not be nilObj. It must be a pointers object with three
-	 or more fields. Finally, the instance specification field of the behavior must match that
-	 of the instance. If OK answer true.  If  not, print reason and answer false."
-
-	<api>
-	<var: #obj type: #usqInt>
-	| objClass objFormat |
-	<var: #objClass type: #usqInt>
-
-	(self checkOkayOop: obj) ifFalse:
-		[^false].
-	objClass := self cCoerce: (self fetchClassOfNonImm: obj) to: #usqInt.
-
-	(self isImmediate: objClass) ifTrue:
-		[self print: 'obj '; printHex: obj; print: ' an immediate is not a valid class or behavior'; cr. ^false].
-	(self okayOop: objClass) ifFalse:
-		[self print: 'obj '; printHex: obj; print: ' class obj is not ok'; cr. ^false].
-	((self isPointersNonImm: objClass) and: [(self numSlotsOf: objClass) >= 3]) ifFalse:
-		[self print: 'obj '; printHex: obj; print: ' a class (behavior) must be a pointers object of size >= 3'; cr. ^false].
-	objFormat := (self isBytes: obj)
-						ifTrue: [(self formatOf: obj) bitClear: 7]  "ignore extra bytes size bits"
-						ifFalse: [self formatOf: obj].
-
-	(self instSpecOfClass: objClass) ~= objFormat ifTrue:
-		[self print: 'obj '; printHex: obj; print: ' and its class (behavior) formats differ'; cr. ^false].
-	^true
 ]
 
 { #category : 'debug support' }
@@ -8674,54 +8609,66 @@ SpurMemoryManager >> longPrintReferencesTo: anOop [
 SpurMemoryManager >> lookupAddress: address [
 	"If address appears to be that of a Symbol or a few well-known objects (such as classes) answer it, otherwise answer nil.
 	 For code disassembly"
+
 	<doNotGenerate>
 	| fmt size string class classSize maybeThisClass classNameIndex thisClassIndex |
-	((self addressCouldBeObj: address)
-	 and: [(thisClassIndex := self classIndexOf: address) > 0]) ifFalse:
-		[^address = scavengeThreshold ifTrue:
-			['scavengeThreshold']].
-	address - self baseHeaderSize = hiddenRootsObj ifTrue:
-		[^'(hiddenRootsObj+baseHeaderSize)'].
+	((self addressCouldBeObj: address) and: [
+		 (thisClassIndex := self classIndexOf: address) > 0 ]) ifFalse: [
+		^ address = scavengeThreshold ifTrue: [ 'scavengeThreshold' ] ].
+	address - self baseHeaderSize = hiddenRootsObj ifTrue: [
+		^ '(hiddenRootsObj+baseHeaderSize)' ].
 	fmt := self formatOf: address.
 	size := self lengthOf: address format: fmt.
-	size = 0 ifTrue:
-		[^address caseOf: { [nilObj] -> ['nil']. [trueObj] -> ['true']. [falseObj] -> ['false'] } otherwise: []].
-	((fmt between: self firstByteFormat and: self firstCompiledMethodFormat - 1) "indexable byte fields"
-	and: [(size between: 1 and: 64)
-	and: [(Scanner isLiteralSymbol: (string := (0 to: size - 1) collect: [:i| Character value: (self fetchByte: i ofObject: address)]))]])
-		ifTrue: [^'#', (ByteString withAll: string)].
+	size = 0 ifTrue: [
+		^ address
+			  caseOf: {
+					  ([ nilObj ] -> [ 'nil' ]).
+					  ([ trueObj ] -> [ 'true' ]).
+					  ([ falseObj ] -> [ 'false' ]) }
+			  otherwise: [  ] ].
 	class := self noCheckClassAtIndex: thisClassIndex.
-	(class isNil or: [class = nilObj]) ifTrue:
-		[^nil].
+	(class isNil or: [ class = nilObj ]) ifTrue: [ ^ nil ].
 	"address is either a class or a metaclass, or an instance of a class or invalid.  determine which."
 	classNameIndex := coInterpreter classNameIndex.
 	thisClassIndex := coInterpreter thisClassIndex.
-	((classSize := self numSlotsOf: class) <= (classNameIndex max: thisClassIndex)
-	 or: [classSize > 255]) ifTrue:
-		[^nil].
+	((classSize := self numSlotsOf: class)
+	 <= (classNameIndex max: thisClassIndex) or: [ classSize > 255 ])
+		ifTrue: [ ^ nil ].
 	"Address could be a class or a metaclass"
-	(fmt = 1 and: [size > classNameIndex]) ifTrue:
-		["Is address a class? If so class's thisClass is address."
-		 (self lookupAddress: (self fetchPointer: classNameIndex ofObject: address)) ifNotNil:
-			[:maybeClassName|
-			(self fetchPointer: thisClassIndex ofObject: class) = address ifTrue:
-				[^maybeClassName allButFirst]].
+	(fmt = 1 and: [ size > classNameIndex ]) ifTrue: [ "Is address a class? If so class's thisClass is address."
+		(self lookupAddress:
+			 (self fetchPointer: classNameIndex ofObject: address)) ifNotNil: [
+			:maybeClassName |
+			(self fetchPointer: thisClassIndex ofObject: class) = address
+				ifTrue: [ ^ maybeClassName allButFirst ] ].
 		"Is address a Metaclass?  If so class's name is Metaclass and address's thisClass holds the class name"
 		((self isBytes: (self fetchPointer: classNameIndex ofObject: class))
-		 and: [(self lookupAddress: (self fetchPointer: classNameIndex ofObject: class)) = '#Metaclass'
-		 and: [size >= thisClassIndex]]) ifTrue:
-			[maybeThisClass := self fetchPointer: thisClassIndex ofObject: address.
-			(self lookupAddress: (self fetchPointer: classNameIndex ofObject: maybeThisClass)) ifNotNil:
-				[:maybeThisClassName| ^maybeThisClassName allButFirst, ' class']]].
-	^(self lookupAddress: (self fetchPointer: classNameIndex ofObject: class)) ifNotNil:
-		[:maybeClassName|
-		(size = 2
-		 and: [fmt = self nonIndexablePointerFormat
-		 and: ['#ClassBinding' = maybeClassName]]) ifTrue:
-			[^'a ClassBinding '
-				, ((self lookupAddress: (self fetchPointer: KeyIndex ofObject: address)) ifNil: [''])
-				, ((self lookupAddress: (self fetchPointer: ValueIndex ofObject: address)) ifNil: [''] ifNotNil: [:val| ' -> ', val])].
-		'a(n) ', maybeClassName allButFirst]
+			 and: [
+				 (self lookupAddress:
+					  (self fetchPointer: classNameIndex ofObject: class))
+				 = '#Metaclass' and: [ size >= thisClassIndex ] ]) ifTrue: [
+			maybeThisClass := self
+				                  fetchPointer: thisClassIndex
+				                  ofObject: address.
+			(self lookupAddress:
+				 (self fetchPointer: classNameIndex ofObject: maybeThisClass))
+				ifNotNil: [ :maybeThisClassName |
+				^ maybeThisClassName allButFirst , ' class' ] ] ].
+	^ (self lookupAddress:
+		   (self fetchPointer: classNameIndex ofObject: class)) ifNotNil: [
+		  :maybeClassName |
+		  (size = 2 and: [
+			   fmt = self nonIndexablePointerFormat and: [
+				   '#ClassBinding' = maybeClassName ] ]) ifTrue: [
+			  ^ 'a ClassBinding '
+			    ,
+				    ((self lookupAddress:
+					      (self fetchPointer: KeyIndex ofObject: address)) ifNil: [
+					     '' ]) , ((self lookupAddress:
+				      (self fetchPointer: ValueIndex ofObject: address))
+				     ifNil: [ '' ]
+				     ifNotNil: [ :val | ' -> ' , val ]) ].
+		  'a(n) ' , maybeClassName allButFirst ]
 ]
 
 { #category : 'free space' }
@@ -11818,15 +11765,6 @@ SpurMemoryManager >> rtRefCountOf: obj put: refCount [
 	"Set the rt reference count of obj; this is the three bit field comprised
 	 of isGrey,isPinned,isRemembered.  See computeRefCountToShrinkRT."
 	self subclassResponsibility
-]
-
-{ #category : 'debug support' }
-SpurMemoryManager >> runLeakCheckerFor: gcModes [
-	<inline: false>
-	^self
-		inLineRunLeakCheckerFor: gcModes
-		excludeUnmarkedObjs: false
-		classIndicesShouldBeValid: true
 ]
 
 { #category : 'debug support' }

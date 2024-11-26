@@ -1265,13 +1265,13 @@ BitBltSimulation >> copyBitsFastPathSpecialised [
 { #category : 'setup' }
 BitBltSimulation >> copyBitsFrom: startX to: stopX at: yValue [
 	"Support for the balloon engine."
+
 	<export: true>
 	destX := startX.
 	destY := yValue.
 	sourceX := startX.
-	width := (stopX - startX).
-	self copyBits.
-
+	width := stopX - startX.
+	self copyBits
 ]
 
 { #category : 'setup' }
@@ -2989,7 +2989,6 @@ BitBltSimulation >> primitiveCopyBits [
 		[^interpreterProxy primitiveFail].
 	self copyBits.
 	interpreterProxy failed ifTrue: [^nil].
-	interpreterProxy failed ifTrue: [^nil].
 	(combinationRule = 22 or: [combinationRule = 32])
 		ifTrue: [interpreterProxy methodReturnInteger: bitCount]
 		ifFalse: [interpreterProxy methodReturnReceiver]
@@ -3081,15 +3080,16 @@ BitBltSimulation >> primitiveDisplayString [
 { #category : 'primitives' }
 BitBltSimulation >> primitiveDrawLoop [
 	"Invoke the line drawing primitive."
-	| rcvr xDelta yDelta |
+
 	<export: true>
+	| rcvr xDelta yDelta |
 	rcvr := interpreterProxy stackValue: 2.
 	xDelta := interpreterProxy stackIntegerValue: 1.
 	yDelta := interpreterProxy stackIntegerValue: 0.
-	(self loadBitBltFrom: rcvr) ifFalse:[^interpreterProxy primitiveFail].
-	interpreterProxy failed ifFalse:[
-		self drawLoopX: xDelta Y: yDelta].
-	interpreterProxy failed ifFalse:[interpreterProxy pop: 2].
+	(self loadBitBltFrom: rcvr) ifFalse: [
+		^ interpreterProxy primitiveFail ].
+	interpreterProxy failed ifFalse: [ self drawLoopX: xDelta Y: yDelta ].
+	interpreterProxy failed ifFalse: [ interpreterProxy pop: 2 ]
 ]
 
 { #category : 'primitives' }
@@ -3147,8 +3147,6 @@ BitBltSimulation >> primitiveWarpBits [
 	(self loadWarpBltFrom: rcvr) 
 		ifFalse:[^interpreterProxy primitiveFail].
 	self warpBits.
-	interpreterProxy failed ifTrue:[^nil].
-
 	interpreterProxy failed ifTrue:[^nil].
 	interpreterProxy methodReturnReceiver
 ]

@@ -12,9 +12,9 @@ Class {
 		'imageFormatName',
 		'options'
 	],
-	#category : 'VMMakerCompatibilityForPharo6-CommandLine',
-	#package : 'VMMakerCompatibilityForPharo6',
-	#tag : 'CommandLine'
+	#category : 'VMMaker-Generation',
+	#package : 'VMMaker',
+	#tag : 'Generation'
 }
 
 { #category : 'defaults' }
@@ -214,6 +214,18 @@ PharoVMMaker >> initialize [
 PharoVMMaker >> initializeOutputDirectory [
 
 	^ outputDirectory := self class defaultOutputDirectory
+]
+
+{ #category : 'as yet unclassified' }
+PharoVMMaker >> options [
+
+	^ options
+]
+
+{ #category : 'as yet unclassified' }
+PharoVMMaker >> options: anObject [
+
+	options := anObject
 ]
 
 { #category : 'accessing' }

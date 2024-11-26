@@ -201,6 +201,22 @@ FilePluginSimulator >> recordStateOf: file [
 ]
 
 { #category : 'simulation' }
+FilePluginSimulator >> sqConnect: file To: cfile File: writeFlag [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+FilePluginSimulator >> sqConnect: file ToFile: fd Descriptor: writeFlag [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 FilePluginSimulator >> sqFile: file Read: countArg Into: byteArrayIndexArg At: startIndex [
 	| byteArrayIndex count |
 	count := file isFakeStdinStream
@@ -266,6 +282,14 @@ FilePluginSimulator >> sqFileClose: file [
 ]
 
 { #category : 'simulation' }
+FilePluginSimulator >> sqFileDeleteName: nameIndex Size: nameSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 FilePluginSimulator >> sqFileFlush: file [
 	^file flush
 ]
@@ -285,6 +309,12 @@ FilePluginSimulator >> sqFileInit [
 	states := IdentityDictionary new.
 	maxOpenFiles := VMClass initializationOptions at: #MaxFileDescriptors ifAbsent: [1024].
 	^true
+]
+
+{ #category : 'simulation' }
+FilePluginSimulator >> sqFileRenameOld: oldNameIndex Size: oldNameSize New: newNameIndex Size: newNameSize [
+
+	self notYetImplemented
 ]
 
 { #category : 'simulation' }

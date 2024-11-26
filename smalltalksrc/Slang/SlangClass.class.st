@@ -30,6 +30,12 @@ SlangClass class >> defineAtCompileTime: anObject [
 	^ false
 ]
 
+{ #category : 'initialization' }
+SlangClass class >> initializeWithOptions: optionsDictionaryOrArray [
+
+	self initialize
+]
+
 { #category : 'translation' }
 SlangClass class >> isStructClass [
 	"The various VMStructType classes override this."

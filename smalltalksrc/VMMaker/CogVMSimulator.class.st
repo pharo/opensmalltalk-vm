@@ -186,6 +186,18 @@ CogVMSimulator >> atEachStepBlock: aBlock [
 	atEachStepBlock := aBlock
 ]
 
+{ #category : 'other primitives' }
+CogVMSimulator >> attributeSize: index [
+
+	<doNotGenerate>
+	| attribute |
+	attribute := systemAttributes
+		             at: index
+		             ifAbsent: [ Smalltalk vm getSystemAttribute: index ].
+	attribute ifNil: [ ^ self primitiveFail ].
+	^ attribute size
+]
+
 { #category : 'initialization' }
 CogVMSimulator >> basicInitialize [
 	"Initialize the CogVMSimulator when running the interpreter inside Smalltalk.  The
@@ -621,6 +633,21 @@ CogVMSimulator >> functionPointerForCompiledMethod: methodObj primitiveIndex: pr
 	^self mapFunctionToAddress: (super functionPointerForCompiledMethod: methodObj primitiveIndex: primIndex)
 ]
 
+{ #category : 'other primitives' }
+CogVMSimulator >> getAttribute: index Into: objectBody Length: sz [
+
+	1 to: sz do: [ :i |
+		| attribute |
+		attribute := systemAttributes
+			             at: index
+			             ifAbsent: [ Smalltalk vm getSystemAttribute: index ].
+		attribute ifNil: [ ^ self primitiveFail ].
+
+		objectMemory
+			byteAt: objectBody + i - 1
+			put: (attribute at: i) asciiValue ]
+]
+
 { #category : 'memory access' }
 CogVMSimulator >> halfWordHighInLong32: long32 [
 	^self subclassResponsibility
@@ -629,12 +656,6 @@ CogVMSimulator >> halfWordHighInLong32: long32 [
 { #category : 'memory access' }
 CogVMSimulator >> halfWordLowInLong32: long32 [
 	^self subclassResponsibility
-]
-
-{ #category : 'debug support' }
-CogVMSimulator >> headerStart: oop [
-
-	^ (objectMemory extraHeaderBytes: oop) negated
 ]
 
 { #category : 'debug support' }
@@ -941,16 +962,6 @@ CogVMSimulator >> ioRelinquishProcessorForMicroseconds: microseconds [
 	self incrementByteCount
 ]
 
-{ #category : 'I/O primitives' }
-CogVMSimulator >> ioScreenDepth [
-	^DisplayScreen actualScreenDepth.
-]
-
-{ #category : 'I/O primitives support' }
-CogVMSimulator >> ioScreenScaleFactor [
-	^ 1.0
-]
-
 { #category : 'process primitive support' }
 CogVMSimulator >> ioSetMaxExtSemTableSize: anInteger [
 	"Inform the VM of the maximum size the image will grow the exernal semaphore table (specialObjectsArray at: 39) to.
@@ -984,10 +995,10 @@ CogVMSimulator >> ioUTCMicroseconds [
 CogVMSimulator >> ioUTCStartMicroseconds [
 	"Answer the value of the microsecond clock at startup."
 
-	^startMicroseconds ifNil:
-		[self class initializationOptions
-			at: #startMicroseconds
-			ifAbsent: [[Time utcMicrosecondClock] on: Error do: [Time totalSeconds * 1000000]]]
+	^ startMicroseconds ifNil: [
+		  self class initializationOptions
+			  at: #startMicroseconds
+			  ifAbsent: [ Time primUTCMicrosecondsClock ] ]
 ]
 
 { #category : 'rump c stack' }
@@ -1368,21 +1379,6 @@ CogVMSimulator >> primitiveForceMachineCodeCompaction [
 	self commenceCogCompiledCodeCompaction.
 	self pop: 2 thenPushBool: true.
 
-]
-
-{ #category : 'other primitives' }
-CogVMSimulator >> primitiveGetAttribute [
-	"Fetch the system attribute with the given integer ID. The result is a string, which will be empty if the attribute is not defined."
-
-	| index s attribute |
-	index := self stackIntegerValue: 0.
-	self successful ifTrue: [
-		attribute := systemAttributes at: index ifAbsent: [Smalltalk vm getSystemAttribute: index].
-		attribute ifNil: [ ^self primitiveFail ].
-		s := objectMemory instantiateClass: (objectMemory splObj: ClassByteString) indexableSize: attribute size.
-		1 to: attribute size do: [ :i |
-			objectMemory storeByte: i-1 ofObject: s withValue: (attribute at: i) asciiValue].
-		self pop: 2 "rcvr, attr" thenPush: s]
 ]
 
 { #category : 'debugging traps' }
@@ -1985,15 +1981,6 @@ CogVMSimulator >> windowIsClosing [
 		[effectiveQuitBlock value]
 			on: BlockCannotReturn
 			do: [:ex|]]	"Cause return from #test, et al"
-]
-
-{ #category : 'debug printing' }
-CogVMSimulator >> withMemoryProtectionDo: aBlock [
-	objectMemory writeProtectMemory.
-	stackPages writeProtectMemory.
-	^aBlock ensure:
-		[objectMemory writeEnableMemory.
-		 stackPages writeEnableMemory]
 ]
 
 { #category : 'frame access' }

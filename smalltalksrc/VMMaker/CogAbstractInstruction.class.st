@@ -337,29 +337,6 @@ CogAbstractInstruction class >> unimplementedOpcodes [
 		yourself
 ]
 
-{ #category : 'verification' }
-CogAbstractInstruction class >> usedUnimplementedOpcodes [
-	"Check for uses of unimplemented opcodes"
-	"self subclasses collect: [:compiler| {compiler. compiler usedUnimplementedOpcodes}]"
-	| genericUnimplementedOpcodeBindings specificUnimplementedOpcodeBindings |
-	genericUnimplementedOpcodeBindings := Set new.
-	specificUnimplementedOpcodeBindings := Set new.
-	self unimplementedOpcodes do:
-		[:arrayOfOpcodes|
-		arrayOfOpcodes do:
-			[:opcode|
-			(self bindingOf: opcode)
-				ifNotNil: [:b| specificUnimplementedOpcodeBindings add: b]
-				ifNil: [genericUnimplementedOpcodeBindings add: (CogRTLOpcodes bindingOf: opcode)]]].
-	^ { (SystemNavigation new allCallsOn: genericUnimplementedOpcodeBindings localToPackage: #VMMaker)
-			inject: Set new
-			into:  [:them :methodRef| "These should be in Cogit's abstract instructions category"
-				them
-					addAll: (SystemNavigation new allCallsOn: methodRef method selector localToPackage: #VMMaker);
-					yourself].
-		SystemNavigation new allCallsOn: specificUnimplementedOpcodeBindings localToPackage: #VMMaker }
-]
-
 { #category : 'translation' }
 CogAbstractInstruction class >> wordSize [
 	"Answer either 4 or 8 depending on the processor's basic architacture."
@@ -709,22 +686,6 @@ CogAbstractInstruction >> dependent [
 { #category : 'accessing' }
 CogAbstractInstruction >> dependent: anInstruction [
 	^dependent := anInstruction
-]
-
-{ #category : 'full transfer run-time support' }
-CogAbstractInstruction >> disassemble [
-	<doNotGenerate>
-	self disassembleOn: Transcript
-]
-
-{ #category : 'full transfer run-time support' }
-CogAbstractInstruction >> disassembleOn: aStream [
-	<doNotGenerate>
-	cogit processor
-		disassembleFrom: 0
-		to: machineCodeSize - 1
-		in: machineCode object
-		on: aStream
 ]
 
 { #category : 'accessing' }

@@ -35,6 +35,14 @@ SurfacePlugin class >> requiresCrossPlatformFiles [
 	^true
 ]
 
+{ #category : 'primitives' }
+SurfacePlugin >> destroyManualSurface [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
 { #category : 'private - utils' }
 SurfacePlugin >> dispatchOf: aSurface [
 	<cmacro: '(aSurface) aSurface->dispatch'>

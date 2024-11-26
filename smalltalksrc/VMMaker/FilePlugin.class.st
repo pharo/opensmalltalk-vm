@@ -559,21 +559,17 @@ FilePlugin >> primitiveFileClose [
 { #category : 'file primitives' }
 FilePlugin >> primitiveFileDelete [
 
-	| namePointer nameIndex nameSize  okToDelete |
 	<var: 'nameIndex' type: 'char *'>
 	<export: true>
-
+	| namePointer nameIndex nameSize |
 	namePointer := interpreterProxy stackValue: 0.
-	(interpreterProxy isBytes: namePointer)
-		ifFalse: [^ interpreterProxy primitiveFail].
+	(interpreterProxy isBytes: namePointer) ifFalse: [
+		^ interpreterProxy primitiveFail ].
 	nameIndex := interpreterProxy firstIndexableField: namePointer.
 	nameSize := interpreterProxy byteSizeOf: namePointer.
 
-	self
-		sqFileDeleteName: nameIndex
-		Size: nameSize.
-	interpreterProxy failed
-		ifFalse: [interpreterProxy pop: 1]
+	self sqFileDeleteName: nameIndex Size: nameSize.
+	interpreterProxy failed ifFalse: [ interpreterProxy pop: 1 ]
 ]
 
 { #category : 'file primitives' }

@@ -126,6 +126,22 @@ SocketPluginSimulator >> netAddressAsByteArrayFromInt: netAddress [
 		with:  (netAddress bitAnd: 16rFF)
 ]
 
+{ #category : 'simulation' }
+SocketPluginSimulator >> primitiveSocketListenOnPort [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> primitiveSocketListenOnPortBacklog [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
 { #category : 'simulation support' }
 SocketPluginSimulator >> simSocketHandleFrom: socketHandleCArray [
 	| simSocket |
@@ -171,6 +187,142 @@ SocketPluginSimulator >> sqNetworkInit: resolverSemaIndex [
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqResolverAbort [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverAddrLookup: s Result: sz [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'as yet unclassified' }
+SocketPluginSimulator >> sqResolverAddrLookupResultSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverError [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoFamily [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoHost: hostName Size: hostSize Service: servName Size: servSize Flags: flags Family: family Type: type Protocol: protocol [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoNext [	
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoProtocol [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoResult: socketAddress Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'as yet unclassified' }
+SocketPluginSimulator >> sqResolverGetAddressInfoSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetAddressInfoType [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetNameInfo: addrBase Size: addrSize Flags: flags [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetNameInfoHostResult: socketName Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetNameInfoHostSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverGetNameInfoServiceResult: socketName Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'as yet unclassified' }
+SocketPluginSimulator >> sqResolverGetNameInfoServiceSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqResolverHostNameResult: nameString Size: nameSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqResolverHostNameSize [
 	ipv6support ifTrue: [^NetNameResolver primHostNameSize].
 	interpreterProxy primitiveFail
@@ -201,6 +353,14 @@ SocketPluginSimulator >> sqResolverNameLookupResult [
 		((addressForName at: 1) <<24)
 ]
 
+{ #category : 'as yet unclassified' }
+SocketPluginSimulator >> sqResolverStartAddrLookup: addr [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
 { #category : 'simulation' }
 SocketPluginSimulator >> sqResolverStartName: aCArray Lookup: size [
 	"For now don't simulate the implicit semaphore."
@@ -218,6 +378,38 @@ SocketPluginSimulator >> sqResolverStatus [
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s AcceptFrom: serverSocket RecvBytes: recvBufSize SendBytes: sendBufSize SemaID: semaIndex [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s AcceptFrom: serverSocket RecvBytes: recvBufSize SendBytes: sendBufSize SemaID: semaIndex ReadSemaID: aReadSema WriteSemaID: aWriteSema [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s BindTo: addr Port: port [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s BindToAddress: addrBase Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqSocket: socketHandle ConnectTo: addr Port: port [
 	^[Socket basicNew
 			primSocket: ((self hostSocketHandleFromSimSocketHandle: socketHandle) ifNil: [^self])
@@ -227,6 +419,22 @@ SocketPluginSimulator >> sqSocket: socketHandle ConnectTo: addr Port: port [
 		do: [:ex|
 			interpreterProxy primitiveFail.
 			0]
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ConnectToAddress: addrBase Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s CreateNetType: netType SocketType: socketType RecvBytes: recvBufSize SendBytes: sendBufSize SemaID: semaIndex [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
 ]
 
 { #category : 'simulation' }
@@ -264,6 +472,54 @@ SocketPluginSimulator >> sqSocket: sockPtr CreateNetType: netType SocketType: so
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s CreateRaw: netType ProtoType: protoType RecvBytes: recvBufSize SendBytes: sendBufSize SemaID: semaIndex ReadSemaID: aReadSema WriteSemaID: aWriteSema [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ListenBacklog: backlogSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ListenOnPort: port [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ListenOnPort: port BacklogSize: backlog [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ListenOnPort: port BacklogSize: backlog Interface: addr [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s LocalAddressResult: addrBase Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqSocket: socketHandleCArray ReceiveDataBuf: bufferStartCArray Count: numBytes [
 	^[| buffer n |
 	  buffer := ByteArray new: numBytes.
@@ -280,6 +536,22 @@ SocketPluginSimulator >> sqSocket: socketHandleCArray ReceiveDataBuf: bufferStar
 		do: [:ex|
 			interpreterProxy primitiveFail.
 			0]
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s ReceiveUDPDataBuf: bufStart Count: count address: address port: port moreFlag: flags [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s RemoteAddressResult: addrBase Size: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
 ]
 
 { #category : 'simulation' }
@@ -300,6 +572,14 @@ SocketPluginSimulator >> sqSocket: socketHandleCArray SendDataBuf: bufferStartCA
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqSocket: s toHost: address port: portNumber SendDataBuf: bufStart Count: count [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqSocketAbortConnection: socketHandleCArray [
 	^[Socket basicNew
 			primSocketAbortConnection: ((self hostSocketHandleFromSimSocketHandle: socketHandleCArray) ifNil: [^false])]
@@ -307,6 +587,22 @@ SocketPluginSimulator >> sqSocketAbortConnection: socketHandleCArray [
 		do: [:ex|
 			interpreterProxy primitiveFail.
 			false]
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketAddress: addrBase Size: addrSize SetPort: portNumber [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketAddress: addrBase SizeGetPort: addrSize [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
 ]
 
 { #category : 'simulation' }
@@ -345,6 +641,46 @@ SocketPluginSimulator >> sqSocketDestroy: socketHandleCArray [
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqSocketError: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketGetOptions: s optionNameStart: optionNameStart optionNameSize: optionNameSize returnedValue: value [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketLocalAddress: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketLocalAddressSize: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketLocalPort: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqSocketReceiveDataAvailable: socketHandleCArray [ 
 	^[Socket basicNew
 			primSocketReceiveDataAvailable: ((self hostSocketHandleFromSimSocketHandle: socketHandleCArray) ifNil: [^false])]
@@ -355,6 +691,30 @@ SocketPluginSimulator >> sqSocketReceiveDataAvailable: socketHandleCArray [
 ]
 
 { #category : 'simulation' }
+SocketPluginSimulator >> sqSocketRemoteAddress: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketRemoteAddressSize: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketRemotePort: s [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'simulation' }
 SocketPluginSimulator >> sqSocketSendDone: socketHandleCArray [
 	^[Socket basicNew
 			primSocketSendDone: ((self hostSocketHandleFromSimSocketHandle: socketHandleCArray) ifNil: [^false])]
@@ -362,4 +722,12 @@ SocketPluginSimulator >> sqSocketSendDone: socketHandleCArray [
 		do: [:ex|
 			interpreterProxy primitiveFail.
 			false]
+]
+
+{ #category : 'simulation' }
+SocketPluginSimulator >> sqSocketSetOptions: s optionNameStart: optionNameStart optionNameSize: optionNameSize optionValueStart: optionValueStart optionValueSize: optionValueSize returnedValue: value [
+	"Defined in C code"
+
+	<doNotGenerate>
+	self notYetImplemented
 ]

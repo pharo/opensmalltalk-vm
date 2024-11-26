@@ -32,6 +32,34 @@ AsynchFilePlugin class >> requiresPlatformFiles [
 ]
 
 { #category : 'primitives' }
+AsynchFilePlugin >> async: f File: fPosition Write: bufferPtr Start: count [
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'primitives' }
+AsynchFilePlugin >> asyncFile: f Read: bufferPtr Result: count [
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'primitives' }
+AsynchFilePlugin >> asyncFile: f Read: fPosition Start: count [
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'primitives' }
+AsynchFilePlugin >> asyncFileClose: f [
+
+	<doNotGenerate>
+	self notYetImplemented
+]
+
+{ #category : 'primitives' }
 AsynchFilePlugin >> asyncFileValueOf: oop [
 	"Answer a pointer to the first byte of the async file record within the given
 	 Smalltalk bytes object, or fail and answer nil if oop is not an async file record."
@@ -42,6 +70,13 @@ AsynchFilePlugin >> asyncFileValueOf: oop [
 		[^self cCoerceSimple: (interpreterProxy firstIndexableField: oop) to: 'AsyncFile *'].
 	interpreterProxy primitiveFailFor: PrimErrBadArgument.
 	^nil
+]
+
+{ #category : 'primitives' }
+AsynchFilePlugin >> asyncFileWriteResult: f [
+
+	<doNotGenerate>
+	self notYetImplemented
 ]
 
 { #category : 'initialize-release' }

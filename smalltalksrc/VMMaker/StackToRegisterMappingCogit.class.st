@@ -935,7 +935,6 @@ StackToRegisterMappingCogit >> compileAbstractInstructionsFrom: start through: e
 	| nextOpcodeIndex descriptor nExts fixup result |
 	<var: #descriptor type: #'BytecodeDescriptor *'>
 	<var: #fixup type: #'BytecodeFixup *'>
-	self traceSimStack.
 	bytecodePC := start.
 	nExts := result := 0.
 	descriptor := nil.
@@ -948,7 +947,6 @@ StackToRegisterMappingCogit >> compileAbstractInstructionsFrom: start through: e
 				ifTrue: [self mapDeadDescriptorIfNeeded: descriptor]
 				ifFalse: [self perform: descriptor generator].
 	 result = 0 ifTrue: [self assertExtsAreConsumed: descriptor].
-	 self traceDescriptor: descriptor; traceSimStack.
 	 self patchFixupTargetIfNeeded: fixup nextOpcodeIndex: nextOpcodeIndex.
 	 self maybeDumpLiterals: descriptor.
 	 bytecodePC := self nextBytecodePCFor: descriptor exts: nExts.
@@ -1137,7 +1135,6 @@ StackToRegisterMappingCogit >> ensureFixupAt: targetPC withStackPointer: aStackP
 	| fixup |
 	<var: #fixup type: #'BytecodeFixup *'>
 	fixup := self fixupAt:  targetPC.
-	self traceFixup: fixup merge: true.
 	self cCode: '' inSmalltalk:
 		[self assert: aStackPointer = (self debugStackPointerFor: targetPC).
 		 (fixup isMergeFixupOrIsFixedUp
@@ -1168,7 +1165,6 @@ StackToRegisterMappingCogit >> ensureNonMergeFixupAt: targetPC [
 	| fixup |
 	<var: #fixup type: #'BytecodeFixup *'>
 	fixup := self fixupAt:  targetPC.
-	self traceFixup: fixup merge: true.
 	fixup notAFixup ifTrue:
 		[fixup becomeNonMergeFixup].
 	self cCode: '' inSmalltalk:
@@ -3616,7 +3612,6 @@ StackToRegisterMappingCogit >> mergeWithFixupIfRequired: fixup [
 
 	"cases 3 and 4"
 	self assert: fixup isMergeFixup.
-	self traceMerge: fixup.
 	deadCode
 		ifTrue: "case 3"
 			["Would like to assert fixup simStackPtr >= methodOrBlockNumTemps
@@ -3839,35 +3834,36 @@ StackToRegisterMappingCogit >> printSimStack: aSimStackOrFixup [
 
 { #category : 'simulation only' }
 StackToRegisterMappingCogit >> printSimStack: aSimStack toDepth: limit spillBase: spillBase on: aStream [
+
 	<doNotGenerate>
-	| tempNames width tabWidth |
 	aStream newLine.
-	limit < 0 ifTrue:
-		[^aStream nextPutAll: 'simStackEmpty'; cr; flush].
-	aSimStack ifNil:
-		[^aStream nextPutAll: 'nil simStack'; cr; flush].
-	(self class initializationOptions at: #tempNames ifAbsent: nil) ifNotNil:
-		[:tempNamesDictOrNil |	 | tab longest |
-		 tempNames := tempNamesDictOrNil at: (self class initializationOptions at: #startpc ifAbsent: [initialPC]) + 1.
-		 longest := tempNames inject: '' into: [:m :t| m size >= t size ifTrue: [m] ifFalse: [t]].
-		 tabWidth := self widthInDefaultFontOf: (tab := String with: Character tab).
-		 width := self widthInDefaultFontOf: longest, tab.
-		 width <= ((self widthInDefaultFontOf: longest, (String with: Character space)) + 4) ifTrue:
-			[width := width + tabWidth]].
-	0 to: limit do:
-		[:i|
-		width ifNotNil:
-			[self put: (tempNames at: i ifAbsent: [i = 0 ifTrue: ['self'] ifFalse: ['']]) paddedTo: width tabWidth: tabWidth on: aStream].
+	limit < 0 ifTrue: [
+		^ aStream
+			  nextPutAll: 'simStackEmpty';
+			  cr;
+			  flush ].
+	aSimStack ifNil: [
+		^ aStream
+			  nextPutAll: 'nil simStack';
+			  cr;
+			  flush ].
+	0 to: limit do: [ :i |
 		aStream print: i.
-		i = simStackPtr ifTrue:
-			[aStream nextPutAll: '<-' ].
-		i = spillBase ifTrue:
-			[aStream nextPutAll: '(sb)'].
-		aStream tab: (i = spillBase ifTrue: [1] ifFalse: [2]).
-		(aSimStack at: i) printStateOn: aStream.
-		aStream cr; flush].
-	simSpillBase > limit ifTrue:
-		[aStream nextPutAll: '(sb: '; print: simSpillBase; nextPut: $); cr; flush]
+		i = simStackPtr ifTrue: [ aStream nextPutAll: '<-' ].
+		i = spillBase ifTrue: [ aStream nextPutAll: '(sb)' ].
+		aStream tab: (i = spillBase
+				 ifTrue: [ 1 ]
+				 ifFalse: [ 2 ]).
+		aStream
+			cr;
+			flush ].
+	simSpillBase > limit ifTrue: [
+		aStream
+			nextPutAll: '(sb: ';
+			print: simSpillBase;
+			nextPut: $);
+			cr;
+			flush ]
 ]
 
 { #category : 'method introspection' }
@@ -4020,20 +4016,6 @@ StackToRegisterMappingCogit >> profilingDataForSendTo: cogCodeSendTarget methodC
 StackToRegisterMappingCogit >> pushNilSize: aMethodObj numInitialNils: numInitialNils [
 	<inline: true>
 	^self perform: pushNilSizeFunction with: aMethodObj with: numInitialNils
-]
-
-{ #category : 'simulation only' }
-StackToRegisterMappingCogit >> put: aString paddedTo: compositionWidth tabWidth: tabWidth on: aStream [
-	<doNotGenerate>
-	| fittedString size width |
-	fittedString := aString.
-	size := fittedString size.
-	[(width := self widthInDefaultFontOf: fittedString) > compositionWidth] whileTrue:
-		[size := size - 2.
-		 fittedString := aString contractTo: size].
-	aStream
-		nextPutAll: fittedString;
-		tab: compositionWidth - width + (width \\ tabWidth) // tabWidth + 1
 ]
 
 { #category : 'bytecode generator support' }
@@ -4700,43 +4682,6 @@ StackToRegisterMappingCogit >> traceDescriptor: descriptor [
 		[coInterpreter transcript cr; print: bytecodePC; space; nextPutAll: descriptor generator.
 		 deadCode ifTrue: [coInterpreter transcript nextPutAll: ' => deadCode'].
 		 coInterpreter flush]
-]
-
-{ #category : 'simulation only' }
-StackToRegisterMappingCogit >> traceFixup: fixup merge: isMerge [
-	<cmacro: '(igu,ana) 0'>
-	| index |
-	(compilationTrace anyMask: 32) ifTrue:
-		[index := (fixups object identityIndexOf: fixup) - 1.
-		 coInterpreter transcript
-			newLine;
-			print: bytecodePC; nextPutAll: ' -> '; print: index; nextPut: $/; print: index + initialPC;
-			nextPut: $:; space.
-		 isMerge
-			ifTrue: [fixup printStateOn: coInterpreter transcript]
-			ifFalse: [coInterpreter transcript nextPutAll: 'non-merge'].
-		 coInterpreter transcript cr; flush]
-]
-
-{ #category : 'simulation only' }
-StackToRegisterMappingCogit >> traceMerge: fixup [
-	<cmacro: '(ign) 0'>
-	| index |
-	(compilationTrace anyMask: 16) ifTrue:
-		[index := (fixups object identityIndexOf: fixup) - 1.
-		 coInterpreter transcript
-			newLine;
-			print: index; nextPut: $/; print: index + initialPC;
-			nextPut: $:; space.
-			fixup printStateOn: coInterpreter transcript.
-			coInterpreter transcript cr; flush]
-]
-
-{ #category : 'simulation only' }
-StackToRegisterMappingCogit >> traceSimStack [
-	<cmacro: '() 0'>
-	(compilationTrace anyMask: 4) ifTrue:
-		[self printSimStack]
 ]
 
 { #category : 'simulation only' }
