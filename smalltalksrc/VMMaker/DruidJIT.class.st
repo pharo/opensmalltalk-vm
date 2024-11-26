@@ -275,11 +275,11 @@ DruidJIT class >> bytecodeTable [
 		  { 2. 237. 237. #gen_ExtUnconditionalJump. #branch. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 238. 238. #gen_ExtJumpIfTrue. #branch. #isBranchTrue. #isMapped. #v4:Long:Branch:Distance: }.
 		  { 2. 239. 239. #gen_ExtJumpIfFalse. #branch. #isBranchFalse. #isMapped. #v4:Long:Branch:Distance: }.
-		  { 2. 240. 240. #gen_ExtStoreAndPopReceiverVariableBytecode. #isInstVarRef. #isMapped }.
-		  { 2. 241. 241. #gen_ExtStoreAndPopLiteralVariableBytecode. #isMapped }.
+		  { 2. 240. 240. #genExtStoreAndPopReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
+		  { 2. 241. 241. #genExtStoreAndPopLiteralVariableBytecode. #isMappedIfImmutability }.
 		  { 2. 242. 242. #genLongStoreAndPopTemporaryVariableBytecode }.
-		  { 2. 243. 243. #gen_ExtStoreReceiverVariableBytecode. #isInstVarRef. #isMapped }.
-		  { 2. 244. 244. #gen_ExtStoreLiteralVariableBytecode. #isMapped }.
+		  { 2. 243. 243. #genExtStoreReceiverVariableBytecode. #isInstVarRef. #isMappedIfImmutability }.
+		  { 2. 244. 244. #genExtStoreLiteralVariableBytecode. #isMappedIfImmutability }.
 		  { 2. 245. 245. #genLongStoreTemporaryVariableBytecode }.
 		  { 2. 246. 246. #unknownBytecode }.
 		  { 2. 247. 247. #unknownBytecode }.
