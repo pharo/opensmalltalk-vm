@@ -39,18 +39,19 @@ TVariableNode >> asCASTIn: aBuilder [
 TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
 	"Answer either the receiver, if it is not a reference to one of the given variables, or the replacement if it is. classVariables is a Dictionary and globalsVariables is a collection"
 
-	"all the variable has an '_' first by default except 'self' and 'super'"
-
-	((#( #super ) includes: name) or: [
+	"'self', 'self_in...', 'super' and 'cascade are reserved variable names"
+	(name = #super or: [
 		 (name beginsWith: #self) or: [ name beginsWith: #cascade ] ])
 		ifTrue: [ ^ self ].
 
 	"don't rename variables which reference class name"
 	(classNames includes: name) ifTrue: [ ^ self ].
+
+	"don't rename implicit arguments, 'self' is only include in the implicit variables of MLVMCCodeGenerator hence the check at the top of the method"
 	(aCodeGen isNonArgumentImplicitReceiverVariableName: name) ifTrue: [
-		^ self class new setName: name ].
-	globalsVariables do: [ :e |
-		e = name ifTrue: [ ^ self class new setName: e ] ].
+		^ self ].
+
+	(globalsVariables includes: name) ifTrue: [ ^ self ].
 	classVariables
 		at: name
 		ifPresent: [ :replacement |

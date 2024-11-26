@@ -88,14 +88,21 @@ SLNormalizeVariablesTest >> testMethodWithReservedArgumentsName [
 SLNormalizeVariablesTest >> testMethodWithReservedLocalsName [
 	"the reserved name self, super and cascade are not modified"
 
-	| method |
+	| method body |
 	method := ccg methodNamed: #methodWithReservedLocalsName.
+	body := method parseTree statements.
 	"super and self are not in the locals"
 	self
 		assert: method allLocals
-		equals: { #_var1. #_var2. #cascade } asSet.
-	self assert: (method parseTree statements at: 1) name equals: #self.
-	self assert: (method parseTree statements at: 2) name equals: #super.
+		equals: { #_var1. #_var2. #cascade. #self_in_methodWithReservedLocalsName. #interpreterProxy} asSet.
+	
+	self assert: (body at: 1) name equals: #self.
+	self assert: (body at: 2) name equals: #self_in_methodWithReservedLocalsName.
+	self assert: (body at: 3) name equals: #super.
+	self assert: (body at: 4) name equals: #cascade.
+	self assert: (body at: 5) name equals: #interpreterProxy.
+	self assert: (body at: 6) name equals: #_var1.
+	self assert: (body at: 7) name equals: #_var2.	
 
 	self assert: method args isEmpty
 ]

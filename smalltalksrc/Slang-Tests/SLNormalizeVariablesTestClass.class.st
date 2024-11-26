@@ -28,7 +28,6 @@ SLNormalizeVariablesTestClass class >> initializeGlobals [
 
 { #category : 'helpers' }
 SLNormalizeVariablesTestClass >> emptyMethod: arg [ 
-	^ arg
 ]
 
 { #category : 'methods-referencing-struct-classes' }
@@ -56,10 +55,14 @@ SLNormalizeVariablesTestClass >> methodWithReservedArgumentsName: cascade arg: a
 SLNormalizeVariablesTestClass >> methodWithReservedLocalsName [
 
 	<var: #var1 type: #implicit>
-	| cascade var1 var2 |
+	| cascade var1 var2 self_in_methodWithReservedLocalsName interpreterProxy |
 	self.
+	"would be generated if SLNormalizeVariablesTestClass was a subclass of SlangStructType, here we simulate it to simplify all the other test"
+	self_in_methodWithReservedLocalsName.
 	super.
 	cascade.
+	"reserved name for MLVMCCodeGenerator"
+	interpreterProxy.
 	var1.
 	var2
 ]
