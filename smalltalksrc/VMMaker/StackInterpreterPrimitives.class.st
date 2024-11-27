@@ -1699,7 +1699,9 @@ StackInterpreterPrimitives >> primitiveGetVMParameter: index [
 			[84] ->  [^objectMemory integerObjectOf: 
 								objectMemory getFromPermToNewSpaceRememberedSet rememberedSetSize].
 			[85] ->  [^objectMemory integerObjectOf: 
-								objectMemory getFromPermToNewSpaceRememberedSet rememberedSetLimit]}
+								objectMemory getFromPermToNewSpaceRememberedSet rememberedSetLimit].
+			[86] ->	[^self getMethodCompilationSize]. 
+			[87] ->	[^self getBlockCompilationSize]. }
 		otherwise: [^nil]
 ]
 
@@ -3990,7 +3992,7 @@ StackInterpreterPrimitives >> primitiveVMParameter [
 	Otherwise the *real* list is in the code: `StackInterpreterPrimitives>>#primitiveGetVMParameter:`"
 
 	| paramsArraySize index |
-	paramsArraySize := 85.
+	paramsArraySize := 87.
 	argumentCount = 0 ifTrue: [^self primitiveAllVMParameters: paramsArraySize].
 	argumentCount > 2 ifTrue: [^self primitiveFailFor: PrimErrBadNumArgs].
 	

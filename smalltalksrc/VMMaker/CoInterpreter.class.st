@@ -3174,6 +3174,13 @@ CoInterpreter >> getBlockCompilationMSecs [
 	^ cogit getBlockCompilationMSecs
 ]
 
+{ #category : #statistics }
+CoInterpreter >> getBlockCompilationSize [
+
+	<doNotGenerate>
+	^ cogit getBlockCompilationSize
+]
+
 { #category : #'cog jit support' }
 CoInterpreter >> getCheckAllocFiller [
 	<api>
@@ -3269,6 +3276,13 @@ CoInterpreter >> getMethodCompilationMSecs [
 
 	<doNotGenerate>
 	^ cogit getMethodCompilationMSecs
+]
+
+{ #category : #statistics }
+CoInterpreter >> getMethodCompilationSize [
+
+	<doNotGenerate>
+	^ cogit getMethodCompilationSize
 ]
 
 { #category : #'message sending' }

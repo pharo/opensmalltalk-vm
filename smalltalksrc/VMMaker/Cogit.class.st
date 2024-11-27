@@ -268,7 +268,9 @@ Class {
 		'statCompileMethodUsecs',
 		'ceSendMustBeBooleanTrampoline',
 		'jitCodeZoneWriteEnabled',
-		'ceDeoptimiseFrameTrampoline'
+		'ceDeoptimiseFrameTrampoline',
+		'statCompileMethodSize',
+		'statCompileFullBlockSize'
 	],
 	#classVars : [
 		'AnnotationConstantNames',
@@ -7804,6 +7806,10 @@ Cogit >> generateCogFullBlock [
 		mapSize := self generateMapAt: nil start: methodLabel address + cbNoSwitchEntryOffset.
 	].
 
+
+
+
+
 	totalSize := methodZone roundUpLength: headerSize + codeSize + mapSize.
 	totalSize > MaxMethodSize ifTrue:
 		[^self cCoerceSimple: MethodTooBig to: #'CogMethod *'].
@@ -7812,6 +7818,11 @@ Cogit >> generateCogFullBlock [
 		[^self cCoerceSimple: InsufficientCodeSpace to: #'CogMethod *'].
 	self assert: startAddress + cbEntryOffset = fullBlockEntry address.
 	self assert: startAddress + cbNoSwitchEntryOffset = fullBlockNoContextSwitchEntry address.
+	
+	
+	statCompileFullBlockSize := statCompileFullBlockSize + totalSize.
+	
+	
 	
 	self 
 		enableCodeZoneWriteDuring: [   
@@ -7853,6 +7864,8 @@ Cogit >> generateCogMethod: selector [
 		codeSize := self generateInstructionsAt: methodLabel address + headerSize.
 		mapSize := self generateMapAt: nil start: methodLabel address + cmNoCheckEntryOffset].
 
+
+
 	totalSize := methodZone roundUpLength: headerSize + codeSize + mapSize.
 	totalSize > MaxMethodSize ifTrue:
 		[^self cCoerceSimple: MethodTooBig to: #'CogMethod *'].
@@ -7861,6 +7874,11 @@ Cogit >> generateCogMethod: selector [
 		[^self cCoerceSimple: InsufficientCodeSpace to: #'CogMethod *'].
 	self assert: startAddress + cmEntryOffset = entry address.
 	self assert: startAddress + cmNoCheckEntryOffset = noCheckEntry address.
+
+	statCompileMethodSize := 	statCompileMethodSize + totalSize.
+
+
+
 
 	self 
 		enableCodeZoneWriteDuring: [  
@@ -8249,6 +8267,14 @@ Cogit >> getBlockCompilationMSecs [
 	^ objectMemory integerObjectOf: statCompileFullBlockUsecs  + 500 // 1000
 ]
 
+{ #category : #statistics }
+Cogit >> getBlockCompilationSize [
+
+	<api>
+
+	^ objectMemory integerObjectOf: statCompileFullBlockSize 
+]
+
 { #category : #accessing }
 Cogit >> getCFramePointer [
 	<api>
@@ -8299,6 +8325,12 @@ Cogit >> getMethodCompilationCount [
 Cogit >> getMethodCompilationMSecs [
 	<api>
 	^ objectMemory integerObjectOf: statCompileMethodUsecs  + 500 // 1000
+]
+
+{ #category : #statistics }
+Cogit >> getMethodCompilationSize [
+	<api>
+	^ objectMemory integerObjectOf: statCompileMethodSize 
 ]
 
 { #category : #accessing }
@@ -8628,8 +8660,10 @@ Cogit >> initialize [
 											ifFalse: [CogMethodSurrogate64].	
 	statCompileFullBlockCount := 0.
 	statCompileFullBlockUsecs := 0.
+	statCompileFullBlockSize := 0.
 	statCompileMethodCount := 0.
 	statCompileMethodUsecs := 0.
+	statCompileMethodSize := 0.
 	jitCodeZoneWriteEnabled := false.
 ]
 

@@ -2831,6 +2831,9 @@ StackInterpreter >> bytecodePrimBitShift [
 { #category : #'common selector sends' }
 StackInterpreter >> bytecodePrimClass [
 
+	<compilationInfo: #isMapped>
+	<druidInfo: #hasSend>
+
 	| rcvr |
 	rcvr := self stackTop.
 	(objectMemory isOopForwarded: rcvr) ifTrue: [ 
@@ -6786,6 +6789,12 @@ StackInterpreter >> getBlockCompilationMSecs [
 	^objectMemory nilObject
 ]
 
+{ #category : #statistics }
+StackInterpreter >> getBlockCompilationSize [
+	"This is nil in the StackVM"
+	^objectMemory nilObject
+]
+
 { #category : #'internal interpreter access' }
 StackInterpreter >> getCodeCompactionCount [
 	"This is nil in the StackVM"
@@ -6941,6 +6950,12 @@ StackInterpreter >> getMethodCompilationCount [
 
 { #category : #'internal interpreter access' }
 StackInterpreter >> getMethodCompilationMSecs [
+	"This is nil in the StackVM"
+	^objectMemory nilObject
+]
+
+{ #category : #statistics }
+StackInterpreter >> getMethodCompilationSize [
 	"This is nil in the StackVM"
 	^objectMemory nilObject
 ]
