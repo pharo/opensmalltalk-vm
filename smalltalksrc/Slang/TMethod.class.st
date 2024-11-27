@@ -240,7 +240,7 @@ TMethod >> argConversionExprFor: varName stackIndex: stackIndex [
 	| exprList decl type stmtList |
 	exprList := OrderedCollection new.
 	((decl := declarations at: varName ifAbsent: []) notNil
-	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') withBlanksTrimmed)])
+	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') trimBoth)])
 		ifTrue:
 			[(decl includes: $*) ifTrue: "array"
 				[(decl includesSubstring: 'char')
@@ -821,39 +821,6 @@ TMethod >> emitCFunctionPrototype: aStream generator: aCodeGen isPrototype: isPr
 			[aCodeGen maybeEmitPrimitiveFailureDefineFor: selector on: aStream.
 			 self terminateConditionalDefineFor: compileTimeOptionPragmas on: aStream]].
 	^compileTimeOptionPragmas notEmpty
-]
-
-{ #category : 'C code generation' }
-TMethod >> emitCLocalsOn: aStream generator: aCodeGen [
-	"Emit a C function header for this method onto the given stream."
-
-	| volatileVariables maybeExternFunctions |
-	volatileVariables := properties includesKey: #volatile.
-	self refersToGlobalStruct ifTrue:
-		[aStream
-			next: 3 put: Character space; "there's already an opening ${ on this line; see sender"
-			nextPutAll: (volatileVariables
-						ifTrue: ['DECL_MAYBE_VOLATILE_SQ_GLOBAL_STRUCT']
-						ifFalse: ['DECL_MAYBE_SQ_GLOBAL_STRUCT'])].
-	aStream cr.
-	maybeExternFunctions := (declarations select: [:decl| decl beginsWith: 'extern']) keys.
-	(locals isEmpty and: [maybeExternFunctions isEmpty]) ifFalse:
-		[(aCodeGen sortStrings: locals, maybeExternFunctions) do:
-			[ :var | | decl |
-			decl := self declarationAt: var
-							ifAbsent: [aCodeGen defaultType, ' ', var].
-			(volatileVariables
-			 or: [(decl beginsWith: 'static')
-			 or: [(decl beginsWith: 'extern')
-			 or: [usedVariablesCache includes: var]]]) ifTrue:
-				[aStream next: 4 put: Character space.
-				 volatileVariables ifTrue:
-					[aStream nextPutAll: #volatile; space].
-				 aStream
-					nextPutAll: decl;
-					nextPut: $;;
-					cr]].
-		 aStream cr]
 ]
 
 { #category : 'C code generation' }

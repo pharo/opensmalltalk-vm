@@ -10583,7 +10583,7 @@ Cogit >> promptForBreakPC [
 	<doNotGenerate>
 	| s first pc |
 	s := UIManager default request: 'Break pc (hex, + to add, - to remove)'.
-	s := s withBlanksTrimmed.
+	s := s trimBoth.
 	s isEmpty ifTrue: [^self].
 	('+-' includes: s first) ifTrue: [first := s first. s := s allButFirst].
 	(s isEmpty and: [first = $-]) ifTrue:

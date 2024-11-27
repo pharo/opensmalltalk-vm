@@ -937,8 +937,8 @@ VMMaker >> isFor64BitVM [
 VMMaker >> logDateAndTime [
 	| now |
 	"do it this way since Time now includes milliseconds in some versions."
-	now := Time dateAndTimeNow.
-	logger print: now first; space; print: now last; cr; flush
+	now := DateAndTime now.
+	logger print: now asDate; space; print: now asTime; cr; flush
 ]
 
 { #category : 'generate sources' }
