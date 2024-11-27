@@ -204,9 +204,12 @@ Class {
 		'ceEnterCogCodePopReceiverReg',
 		'ceCallCogCodePopReceiverReg',
 		'ceCallCogCodePopReceiverAndClassRegs',
+		'cePrimReturnEnterCogCode',
+		'cePrimReturnEnterCogCodeProfiling',
 		'ceNonLocalReturnTrampoline',
 		'ceFetchContextInstVarTrampoline',
 		'ceStoreContextInstVarTrampoline',
+		'ceEnclosingObjectTrampoline',
 		'ceFlushICache',
 		'ceCheckFeaturesFunction',
 		'ceTraceLinkedSendTrampoline',
@@ -255,9 +258,7 @@ Class {
 		'statCompileFullBlockUsecs',
 		'statCompileMethodCount',
 		'statCompileMethodUsecs',
-		'jitCodeZoneWriteEnabled',
-		'cePrimReturnEnterCogCode',
-		'cePrimReturnEnterCogCodeProfiling'
+		'jitCodeZoneWriteEnabled'
 	],
 	#classVars : [
 		'AnnotationConstantNames',
@@ -287,8 +288,7 @@ Class {
 		'NumObjRefsInRuntime',
 		'NumSpecialSelectors',
 		'NumTrampolines',
-		'ProcessorClass',
-		'RRRName'
+		'ProcessorClass'
 	],
 	#pools : [
 		'CogAbstractRegisters',

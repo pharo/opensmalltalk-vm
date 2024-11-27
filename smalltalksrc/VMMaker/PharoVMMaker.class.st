@@ -229,18 +229,6 @@ PharoVMMaker >> options: anObject [
 ]
 
 { #category : 'accessing' }
-PharoVMMaker >> options [
-
-	^ options
-]
-
-{ #category : 'accessing' }
-PharoVMMaker >> options: anObject [
-
-	options := anObject
-]
-
-{ #category : 'accessing' }
 PharoVMMaker >> outputDirectory [
 	^ outputDirectory ifNil: [ self initializeOutputDirectory ]
 ]
