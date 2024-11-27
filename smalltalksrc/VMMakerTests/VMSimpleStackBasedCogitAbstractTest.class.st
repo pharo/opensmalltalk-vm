@@ -466,7 +466,6 @@ VMSimpleStackBasedCogitAbstractTest >> executePrimitiveWithReceiver: receiverOop
 		arguments: (aCollection collect: [ :arg | self twoComplementFor: arg ])
 		method: aMethod.
 
-"self openMachineDebugger . 1halt."
 
 	self runUntilReturn
 ]
