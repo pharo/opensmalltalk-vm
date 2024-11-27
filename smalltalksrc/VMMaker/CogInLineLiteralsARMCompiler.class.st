@@ -14,7 +14,7 @@ CogInLineLiteralsARMCompiler >> callFullTargetFromReturnAddress: callSiteReturnA
 	call := self instructionBeforeAddress: callSiteReturnAddress.
 	self assert: ((self instructionIsBX: call) or: [self instructionIsBLX: call]).
 	"A Long Call/Jump. Extract the value saved to RISCTempReg from all the instructions before."
-	^self extract32BitOperandFrom4Instructionspreceding: callSiteReturnAddress - 4
+	^self extract32BitOperandFrom4InstructionsPreceding: callSiteReturnAddress - 4
 ]
 
 { #category : 'accessing' }

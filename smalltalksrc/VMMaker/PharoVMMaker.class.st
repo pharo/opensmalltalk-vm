@@ -30,12 +30,6 @@ PharoVMMaker class >> default64BitsMemoryManagerClass [
 ]
 
 { #category : 'defaults' }
-PharoVMMaker class >> defaultImageFormatName [
-
-	^ #SpurFormat
-]
-
-{ #category : 'defaults' }
 PharoVMMaker class >> defaultInterpreterClass [
 
 	^ CoInterpreter
@@ -74,15 +68,6 @@ PharoVMMaker class >> generate: anInterpreterClass outputDirectory: aDirectory [
 		flush.
 
 	self new
-		outputDirectory: aDirectory;
-		perform: #generate , anInterpreterClass asSymbol
-]
-
-{ #category : 'generation' }
-PharoVMMaker class >> generate: anInterpreterClass outputDirectory: aDirectory options: options [
-
-	self new
-		options: options;
 		outputDirectory: aDirectory;
 		perform: #generate , anInterpreterClass asSymbol
 ]

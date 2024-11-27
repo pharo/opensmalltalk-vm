@@ -4588,18 +4588,27 @@ CoInterpreter >> remapInstructionPointerInFrame: theFP inSavedInstructionPointer
 { #category : 'debug support' }
 CoInterpreter >> reportMinimumUnusedHeadroom [
 	"Report the stack page size and minimum unused headroom to stdout."
+
 	<api>
-	self cCode:
-			[self vm_printf: 'stack page bytes %lld available headroom %lld minimum unused headroom %lld\n'
-				_: self stackPageByteSize asUnsignedLongLong
-				_: (self stackPageByteSize - self stackLimitBytes - self stackLimitOffset) asUnsignedLongLong
-				_: self minimumUnusedHeadroom asUnsignedLongLong]
-		inSmalltalk:
-			["CogVMSimulator new initStackPagesForTests reportMinimumUnusedHeadroom"
-			 self print: 'stack page bytes '; printNum: self stackPageByteSize;
-				print: ' available headroom '; printNum: self stackPageByteSize - self stackLimitBytes - self stackLimitOffset;
-				print: ' minimum unused headroom '; printNum: self minimumUnusedHeadroom;
-				cr]
+	self
+		cCode: [
+			self cCall: 'vm_printf' withArguments: {
+					'stack page bytes %lld available headroom %lld minimum unused headroom %lld\n'.
+					self stackPageByteSize asUnsignedLongLong.
+					(self stackPageByteSize - self stackLimitBytes
+					 - self stackLimitOffset) asUnsignedLongLong.
+					self minimumUnusedHeadroom asUnsignedLongLong } ]
+		inSmalltalk: [ "CogVMSimulator new initStackPagesForTests reportMinimumUnusedHeadroom"
+			self
+				print: 'stack page bytes ';
+				printNum: self stackPageByteSize;
+				print: ' available headroom ';
+				printNum:
+					self stackPageByteSize - self stackLimitBytes
+					- self stackLimitOffset;
+				print: ' minimum unused headroom ';
+				printNum: self minimumUnusedHeadroom;
+				cr ]
 ]
 
 { #category : 'callback support' }

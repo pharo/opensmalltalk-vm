@@ -864,7 +864,7 @@ StackToRegisterMappingCogit >> callCogCodePopReceiverArg0Regs [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverArg0Regs]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverArg0Regs']
 		inSmalltalk: [self ceCallCogCodePopReceiverArg0Regs]
 ]
 
@@ -875,7 +875,7 @@ StackToRegisterMappingCogit >> callCogCodePopReceiverArg1Arg0Regs [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverArg1Arg0Regs]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverArg1Arg0Regs']
 		inSmalltalk: [self ceCallCogCodePopReceiverArg1Arg0Regs]
 ]
 

@@ -21,8 +21,8 @@ AbstractComposedImageAccess >> createImageDirectory: imageFileName [
 		cCode: [ 
 			self
 				cppIf: ((self defined: #_WIN32) or: [(self defined: #_WIN64)])
-				ifTrue: [ self mkdir: imageFileName ]
-				ifFalse: [ self mkdir: imageFileName _: 8r777 ] ]
+				ifTrue: [ self cCall: 'mkdir' withArguments: {imageFileName} ]
+				ifFalse: [ self cCall: 'mkdir' withArguments: {imageFileName . 8r777} ] ]
 		inSmalltalk: [ 
 			imageFileName asFileReference ensureDeleteAll.
 			imageFileName asFileReference ensureCreateDirectory ]
@@ -56,14 +56,15 @@ AbstractComposedImageAccess >> fieldFormat [
 { #category : 'file operations' }
 AbstractComposedImageAccess >> fileExists: fileName [
 
-	| sb |
-
 	<inline: false>
 	<var: #fileName type: 'char *'>
 	<var: #sb type: 'struct stat'>
-
+	| sb |
 	^ self
-		  cCode: [ (self stat: fileName _: (self addressOf: sb)) = 0]
+		  cCode: [
+			  (self cCall: 'stat' withArguments: {
+					   fileName.
+					   (self addressOf: sb) }) = 0 ]
 		  inSmalltalk: [ fileName asFileReference exists ]
 ]
 
@@ -173,37 +174,34 @@ AbstractComposedImageAccess >> readLineFrom: file into: lineBuffer ofSize: buffe
 
 	<var: #lineBuffer type: 'char*'>
 	<var: #file type: #sqImageFile>
-
-	self 
-		cCode: [ 
+	self
+		cCode: [
 			| idx aCharacter |
-			
 			idx := 0.
-			
+
 			aCharacter := self fgetc: file.
-			
-			[ aCharacter = -1 ] 
-				whileFalse: [
-					aCharacter = 10 
-						ifTrue: [ aCharacter := -1 ]
-						ifFalse: [ 
-							aCharacter = 13 
-								ifTrue: [ 
-									aCharacter := self fgetc: file.
-									aCharacter ~= 13 ifTrue: [ self ungetc: aCharacter _: file  ].
-									aCharacter := -1 ]
-								ifFalse: [ 
-									lineBuffer at: idx put: aCharacter.
-									idx := idx + 1.
-									bufferSize = (idx + 1) 
-										ifTrue: [ aCharacter := -1 ]
-										ifFalse: [ aCharacter := self fgetc: file].
-								]
-							 ]].
-			
-				lineBuffer at: idx put: 0.
-			 ]
-		inSmalltalk: [ lineBuffer contents: file nextLine].
+
+			[ aCharacter = -1 ] whileFalse: [
+				aCharacter = 10
+					ifTrue: [ aCharacter := -1 ]
+					ifFalse: [
+						aCharacter = 13
+							ifTrue: [
+								aCharacter := self fgetc: file.
+								aCharacter ~= 13 ifTrue: [
+									self cCall: 'ungetc' withArguments: {
+											aCharacter.
+											file } ].
+								aCharacter := -1 ]
+							ifFalse: [
+								lineBuffer at: idx put: aCharacter.
+								idx := idx + 1.
+								bufferSize = (idx + 1)
+									ifTrue: [ aCharacter := -1 ]
+									ifFalse: [ aCharacter := self fgetc: file ] ] ] ].
+
+			lineBuffer at: idx put: 0 ]
+		inSmalltalk: [ lineBuffer contents: file nextLine ]
 ]
 
 { #category : 'segments' }

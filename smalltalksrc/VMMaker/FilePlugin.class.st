@@ -304,7 +304,7 @@ FilePlugin >> primitiveDirectoryCreate [
 	dirNameIndex := interpreterProxy firstIndexableField: dirName.
 	dirNameSize := interpreterProxy byteSizeOf: dirName.
 
-	(self dir_Create: dirNameIndex _: dirNameSize) ifFalse:
+	(self cCall: 'dir_Create' withArguments: {dirNameIndex . dirNameSize}) ifFalse:
 		[^interpreterProxy primitiveFail].
 	interpreterProxy pop: 1
 ]

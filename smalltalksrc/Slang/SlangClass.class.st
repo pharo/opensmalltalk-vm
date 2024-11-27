@@ -78,6 +78,26 @@ SlangClass class >> typeForSelf [
 ]
 
 { #category : 'translation support' }
+SlangClass >> cCall: function [
+	"Support for Smalltalk-to-C translation.
+	 For translation only; fail when running in Smalltalk.
+	 The first argument is called with the said arguments when generating C code."
+	<doNotGenerate>
+	
+	self cCall: function withArguments: #()
+]
+
+{ #category : 'translation support' }
+SlangClass >> cCall: function withArguments: arguments [
+	"Support for Smalltalk-to-C translation.
+	 For translation only; fail when running in Smalltalk.
+	 The first argument is called with the said arguments when generating C code."
+	<doNotGenerate>
+	
+	self error: 'Cannot simulate generic C Call'
+]
+
+{ #category : 'translation support' }
 SlangClass >> cCode: codeString [
 	"Support for Smalltalk-to-C translation.
 	 For translation only; noop when running in Smalltalk.

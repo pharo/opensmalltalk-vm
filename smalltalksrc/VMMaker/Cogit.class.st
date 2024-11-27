@@ -3630,7 +3630,7 @@ Cogit >> callCogCodePopReceiver [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverReg]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverReg']
 		inSmalltalk: [self ceCallCogCodePopReceiverReg].
 	"(and this exists only to reference Debug)"
 	Debug ifFalse: [self error: 'what??']
@@ -3643,7 +3643,7 @@ Cogit >> callCogCodePopReceiverAndClassRegs [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverAndClassRegs]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverAndClassRegs']
 		inSmalltalk: [self ceCallCogCodePopReceiverAndClassRegs]
 ]
 
@@ -5772,7 +5772,7 @@ Cogit >> disableCodeZoneWrite [
 	
 	self 
 		cppIf: #'READ_ONLY_CODE_ZONE'
-		ifTrue:[	self pthread_jit_write_protect_np: true ].
+		ifTrue:[	self cCall: 'pthread_jit_write_protect_np' withArguments: {true} ].
 	
 	jitCodeZoneWriteEnabled := false
 ]
@@ -5804,7 +5804,7 @@ Cogit >> enableCodeZoneWrite [
 	
 	self 
 		cppIf: #'READ_ONLY_CODE_ZONE'
-		ifTrue:[	self pthread_jit_write_protect_np: false ].
+		ifTrue:[	self cCall: 'pthread_jit_write_protect_np' withArguments: {false} ].
 			
 	jitCodeZoneWriteEnabled := true.
 
@@ -5857,29 +5857,40 @@ Cogit >> endPCOf: aMethod [
 { #category : 'initialization' }
 Cogit >> ensureAndClearAbstractOpcodes: numberOfAbstractOpcodes [
 
-	| opcodeBytes fixupBytes allocBytes clearFixupsBytes clearOpcodesBytes|
+	| opcodeBytes fixupBytes allocBytes clearFixupsBytes clearOpcodesBytes |
 	numAbstractOpcodes := numberOfAbstractOpcodes.
-	
-	opcodeBytes := (self sizeof: CogAbstractInstruction) * MaxNumberOfAbstractOpcodes.
-	fixupBytes := (self sizeof: CogBytecodeFixup) * MaxNumberOfAbstractOpcodes.
-	allocBytes := opcodeBytes + fixupBytes.
-	
-	clearOpcodesBytes := (self sizeof: CogAbstractInstruction) * numberOfAbstractOpcodes.
-	clearFixupsBytes := (self sizeof: CogBytecodeFixup) * numberOfAbstractOpcodes.
-		
-	self
-		cCode:
-			[abstractOpcodes 
-				ifNil: [
-					abstractOpcodes := self malloc: allocBytes.
-					fixups := (abstractOpcodes asUnsignedInteger + opcodeBytes) asVoidPointer].
-				
-			 self b: abstractOpcodes zero: clearOpcodesBytes.
-			 self b: fixups zero: clearFixupsBytes]
-		inSmalltalk:
-			[abstractOpcodes := CArrayAccessor on: ((1 to: numAbstractOpcodes) collect: [:ign| CogCompilerClass for: self]).
-			 fixups := CArrayAccessor on: ((1 to: numAbstractOpcodes) collect: [:ign| self bytecodeFixupClass for: self])].
 
+	opcodeBytes := (self sizeof: CogAbstractInstruction)
+	               * MaxNumberOfAbstractOpcodes.
+	fixupBytes := (self sizeof: CogBytecodeFixup)
+	              * MaxNumberOfAbstractOpcodes.
+	allocBytes := opcodeBytes + fixupBytes.
+
+	clearOpcodesBytes := (self sizeof: CogAbstractInstruction)
+	                     * numberOfAbstractOpcodes.
+	clearFixupsBytes := (self sizeof: CogBytecodeFixup)
+	                    * numberOfAbstractOpcodes.
+
+	self
+		cCode: [
+			abstractOpcodes ifNil: [
+				abstractOpcodes := self malloc: allocBytes.
+				fixups := (abstractOpcodes asUnsignedInteger + opcodeBytes)
+					          asVoidPointer ].
+
+			self cCall: 'bzero' withArguments: {
+					abstractOpcodes.
+					clearOpcodesBytes }.
+			self cCall: 'bzero' withArguments: {
+					fixups.
+					clearFixupsBytes } ]
+		inSmalltalk: [
+			abstractOpcodes := CArrayAccessor on:
+				                   ((1 to: numAbstractOpcodes) collect: [ :ign |
+					                    CogCompilerClass for: self ]).
+			fixups := CArrayAccessor on:
+				          ((1 to: numAbstractOpcodes) collect: [ :ign |
+					           self bytecodeFixupClass for: self ]) ]
 ]
 
 { #category : 'compile abstract instructions' }
@@ -5903,7 +5914,7 @@ Cogit >> enterCogCodePopReceiver [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCEEnterCogCodePopReceiverReg]
+	self cCode: [self cCall: 'realCEEnterCogCodePopReceiverReg']
 		inSmalltalk: [self ceEnterCogCodePopReceiverReg].
 	"(and this exists only to reference Debug)"
 	Debug ifFalse: [self error: 'what??']
@@ -8334,19 +8345,25 @@ Cogit >> initializeBackend [
 
 { #category : 'initialization' }
 Cogit >> initializeCodeZoneFrom: startAddress upTo: endAddress [
+
 	<api>
 	self initializeBackend.
-	
-	self enableCodeZoneWriteDuring: [backEnd stopsFrom: startAddress to: endAddress - 1].
 
-	self cCode: [self sqMakeMemoryExecutableFrom: startAddress To: endAddress]
-		inSmalltalk:
-			[startAddress = self class guardPageSize ifTrue:
-				[backEnd stopsFrom: 0 to: endAddress - 1].
-			 self initializeProcessor].
+	self enableCodeZoneWriteDuring: [
+		backEnd stopsFrom: startAddress to: endAddress - 1 ].
+
+	self
+		cCode: [
+			self cCall: 'sqMakeMemoryExecutableFromTo' withArguments: {
+					startAddress.
+					endAddress } ]
+		inSmalltalk: [
+			startAddress = self class guardPageSize ifTrue: [
+				backEnd stopsFrom: 0 to: endAddress - 1 ].
+			self initializeProcessor ].
 	codeBase := methodZoneBase := startAddress.
 	minValidCallAddress := (codeBase min: coInterpreter interpretAddress)
-								min: coInterpreter primitiveFailAddress.
+		                       min: coInterpreter primitiveFailAddress.
 	methodZone manageFrom: methodZoneBase to: endAddress.
 	self enableCodeZoneWriteDuring: [
 		self maybeGenerateCheckFeatures.
@@ -11587,17 +11604,26 @@ Cogit >> trampolineName: routinePrefix numArgs: numArgs [
 { #category : 'initialization' }
 Cogit >> trampolineName: routinePrefix numArgs: numArgs limit: argsLimit [
 	"Malloc a string with the contents for the trampoline table"
+
 	<inline: true>
 	<returnTypeC: #'char *'>
 	<var: #routinePrefix type: #'char *'>
 	<var: #numArgs type: #int>
-	| theString |
 	<var: #theString type: #'char *'>
-	self cCode: '' inSmalltalk:
-		[^routinePrefix, (numArgs <= argsLimit ifTrue: [numArgs printString] ifFalse: ['N']), 'Args'].
+	| theString |
+	self cCode: '' inSmalltalk: [
+		^ routinePrefix , (numArgs <= argsLimit
+			   ifTrue: [ numArgs printString ]
+			   ifFalse: [ 'N' ]) , 'Args' ].
 	theString := self malloc: (self strlen: routinePrefix) + 6.
-	self s: theString pr: '%s%cArgs' in: routinePrefix tf: (numArgs <= argsLimit ifTrue: [$0 + numArgs] ifFalse: [$N]).
-	^theString
+	self cCall: 'sprintf' withArguments: {
+			theString.
+			'%s%cArgs'.
+			routinePrefix.
+			(numArgs <= argsLimit
+				 ifTrue: [ $0 + numArgs ]
+				 ifFalse: [ $N ]) }.
+	^ theString
 ]
 
 { #category : 'initialization' }

@@ -48,9 +48,11 @@ SocketPluginSimulator >> cCoerce: value to: cTypeString [
 ]
 
 { #category : 'initialize-release' }
-SocketPluginSimulator >> close [  "close any sockets that ST may have opened"
-	openSocketHandles do: [:h | self closeAndDestroy: h].
-	Smalltalk unregisterExternalObjects: externalSemaphores
+SocketPluginSimulator >> close [
+	"close any sockets that ST may have opened"
+
+	openSocketHandles do: [ :h | self closeAndDestroy: h ].
+	externalSemaphores do: [ :s | Smalltalk unregisterExternalObject: s ]
 ]
 
 { #category : 'initialize-release' }
@@ -166,8 +168,6 @@ SocketPluginSimulator >> socketInit [
 	hostSocketToSimSocketMap := Dictionary new.
 	simSocketToHostSocketMap := Dictionary new.
 	fakeAddressCounter := 16r50C4E70. "Socket, if you squint at it right..."
-	"Set all the security functions to zero so simulation does't need to work fully."
-	sDSAfn := sHSAfn := sCCTPfn := sCCLOPfn := sCCSOTfn := 0.
 	"for now..."
 	ipv6support := false.
 	resolverStatus := ResolverUninitialized.
@@ -441,34 +441,50 @@ SocketPluginSimulator >> sqSocket: s CreateNetType: netType SocketType: socketTy
 SocketPluginSimulator >> sqSocket: sockPtr CreateNetType: netType SocketType: socketType RecvBytes: recvBufSize SendBytes: sendBufSize SemaID: semaIndex ReadSemaID: readSemaIndex WriteSemaID: writeSemaIndex [
 	"Simulate the sqSocketCreateNetTypeSocketTypeRecvBytesSendBytesSemaIDReadSemaIDWriteSemaID function.
 	 We descend beneath the Socket abstraftion to simulate as accurately as possible."
+
 	| semaphoresAndIndexes semaphores indexes socketHandle |
-	semaphoresAndIndexes := Smalltalk newExternalSemaphores: 3.
+	semaphores := (1 to: 3) collect: [ :i | Semaphore new ].
+	semaphoresAndIndexes := semaphores collect: [ :e |
+		                        {
+			                        e.
+			                        (ExternalSemaphoreTable
+				                         registerExternalObject: e) } ].
 	semaphores := semaphoresAndIndexes first.
 	indexes := semaphoresAndIndexes second.
-	socketHandle := [Socket basicNew
-						primSocketCreateNetwork: netType
-						type: socketType
-						receiveBufferSize: recvBufSize
-						sendBufSize: sendBufSize
-						semaIndex: indexes first
-						readSemaIndex: indexes second
-						writeSemaIndex: indexes third]
-			on: SocketPrimitiveFailed
-			do: [:ex|
-				#failed].
-	socketHandle == #failed ifTrue:
-		[interpreterProxy primitiveFail.
-		 Smalltalk unregisterExternalObjects: semaphores.
-		 ^self].
+	socketHandle := [
+	                Socket basicNew
+		                primSocketCreateNetwork: netType
+		                type: socketType
+		                receiveBufferSize: recvBufSize
+		                sendBufSize: sendBufSize
+		                semaIndex: indexes first
+		                readSemaIndex: indexes second
+		                writeSemaIndex: indexes third ]
+		                on: SocketPrimitiveFailed
+		                do: [ :ex | #failed ].
+	socketHandle == #failed ifTrue: [
+		interpreterProxy primitiveFail.
+		externalSemaphores do: [ :s | Smalltalk unregisterExternalObject: s ].
+		^ self ].
 	"N.B. There is now a Processor yield in doSignalExternalSemaphores: every 100 virtual microseconds.
 	 This allows these to make progress.  Their job is to map a host signal into a signal of the relevant index."
-	self map:		socketHandle
-		to:			sockPtr
-		type:		socketType
-		register:	semaphores
-		spawning:	[[semaphores first wait. interpreterProxy  signalSemaphoreWithIndex: semaIndex] repeat]
-		and:		[[semaphores second wait. interpreterProxy  signalSemaphoreWithIndex: readSemaIndex] repeat]
-		and:		[[semaphores third wait. interpreterProxy  signalSemaphoreWithIndex: writeSemaIndex] repeat]
+	self
+		map: socketHandle
+		to: sockPtr
+		type: socketType
+		register: semaphores
+		spawning: [
+			[
+			semaphores first wait.
+			interpreterProxy signalSemaphoreWithIndex: semaIndex ] repeat ]
+		and: [
+			[
+			semaphores second wait.
+			interpreterProxy signalSemaphoreWithIndex: readSemaIndex ] repeat ]
+		and: [
+			[
+			semaphores third wait.
+			interpreterProxy signalSemaphoreWithIndex: writeSemaIndex ] repeat ]
 ]
 
 { #category : 'simulation' }

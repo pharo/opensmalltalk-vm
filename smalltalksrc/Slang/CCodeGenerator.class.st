@@ -1754,6 +1754,28 @@ CCodeGenerator >> generateCASTBytesPerWord: tast [
 ]
 
 { #category : 'CAST translation' }
+CCodeGenerator >> generateCASTCCallAsArgument: aTSendNode [
+	"Support only calls where the first arg (the function name) is a constant string"
+
+	| functionNameNode callArguments |
+	functionNameNode := aTSendNode arguments first.
+	(functionNameNode isConstant and: [ functionNameNode value isString ])
+		ifFalse: [ self error: 'unsupported' ].
+
+	callArguments := aTSendNode arguments size > 1
+		                 ifFalse: [ #(  ) ]
+		                 ifTrue: [ "Only accept literal statement lists as second argument"
+			                 self assert:
+				                 aTSendNode arguments second isStatementList.
+			                 aTSendNode arguments second statements collect: [
+				                 :e | e asCASTExpressionIn: self ] ].
+
+	^ CCallNode
+		  identifier: (CIdentifierNode name: functionNameNode value)
+		  arguments: callArguments
+]
+
+{ #category : 'CAST translation' }
 CCodeGenerator >> generateCASTCCoercion: tast [
 
 	| expr cType literal |
@@ -3330,6 +3352,8 @@ CCodeGenerator >> initializeCASTTranslationDictionary [
 	#ifNil:ifNotNil:			#generateCASTIfNilIfNotNilAsArgument:
 	#cCode:				#generateCASTInlineCCodeAsArgument:
 	#cCode:inSmalltalk:		#generateCASTInlineCCodeAsArgument:
+	#cCall:                  #generateCASTCCallAsArgument:
+	#cCall:withArguments:    #generateCASTCCallAsArgument:
 	#cppIf:ifTrue:ifFalse:	#generateCASTInlineCppIfElseAsArgument:
 	#cppIf:ifTrue:			#generateCASTInlineCppIfElseAsArgument:
 				

@@ -793,13 +793,14 @@ InterpreterPrimitives >> primitiveAllObjects [
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveArctan [
 	"N.B. IMO we should be able to assume the receiver is a float because this primitive is specific to floats. eem 2/13/2017"
-	| rcvr |
+
 	<var: #rcvr type: #double>
+	| rcvr |
 	rcvr := self stackFloatValue: 0.
-	self successful ifTrue:
-		[self stackTopPut: (objectMemory floatObjectOf:
-								(self cCode: [rcvr atan]
-									inSmalltalk: [rcvr arcTan]))]
+	self successful ifTrue: [
+		self stackTopPut: (objectMemory floatObjectOf: (self
+					  cCode: [ self cCall: 'atan' withArguments: { rcvr } ]
+					  inSmalltalk: [ rcvr arcTan ])) ]
 ]
 
 { #category : 'object access primitives' }
@@ -1434,15 +1435,19 @@ InterpreterPrimitives >> primitiveExp [
 InterpreterPrimitives >> primitiveExponent [
 	"Exponent part of this float.
 	 N.B. IMO we should be able to assume the receiver is a float because this primitive is specific to floats. eem 2/13/2017"
-	| rcvr pwr |
+
 	<var: #rcvr type: #double>
 	<var: #pwr type: #int>
+	| rcvr pwr |
 	rcvr := self stackFloatValue: 0.
-	self successful ifTrue:
-		["rcvr = frac * 2^pwr, where frac is in [0.5..1.0)"
-		 self cCode: [self fr: rcvr exp: (self addressOf: pwr)]
-			inSmalltalk: [pwr := rcvr exponent].
-		 self stackTopPut: (objectMemory integerObjectOf: pwr - 1)]
+	self successful ifTrue: [ "rcvr = frac * 2^pwr, where frac is in [0.5..1.0)"
+		self
+			cCode: [
+				self cCall: 'frexp' withArguments: {
+						rcvr.
+						(self addressOf: pwr) } ]
+			inSmalltalk: [ pwr := rcvr exponent ].
+		self stackTopPut: (objectMemory integerObjectOf: pwr - 1) ]
 ]
 
 { #category : 'primitive support' }
@@ -1664,14 +1669,18 @@ InterpreterPrimitives >> primitiveFormat [
 InterpreterPrimitives >> primitiveFractionalPart [
 	"Fractional part of this float.
 	 N.B. IMO we should be able to assume the receiver is a float because this primitive is specific to floats. eem 2/13/2017"
-	| rcvr trunc |
+
 	<var: #rcvr type: #double>
 	<var: #trunc type: #double>
+	| rcvr trunc |
 	rcvr := self stackFloatValue: 0.
-	self successful ifTrue:
-		[self stackTopPut: (objectMemory floatObjectOf:
-							(self cCode: [self mod: rcvr f: (self addressOf: trunc)]
-								inSmalltalk: [rcvr fractionPart]))]
+	self successful ifTrue: [
+		self stackTopPut: (objectMemory floatObjectOf: (self
+					  cCode: [
+						  self cCall: 'modf' withArguments: {
+								  rcvr.
+								  (self addressOf: trunc) } ]
+					  inSmalltalk: [ rcvr fractionPart ])) ]
 ]
 
 { #category : 'control primitives' }
@@ -1907,7 +1916,7 @@ InterpreterPrimitives >> primitiveHeartbeatFrequency [
 	| reset |
 	reset := argumentCount = 1 and: [self stackTop = objectMemory trueObject].
 	self pop: argumentCount + 1
-		thenPush: (self positive32BitIntegerFor: (self ioHeartbeatFrequency: reset))
+		thenPush: (self positive32BitIntegerFor: (self cCall: 'ioHeartbeatFrequency' withArguments: {reset}))
 ]
 
 { #category : 'system control primitives' }
@@ -2350,7 +2359,7 @@ InterpreterPrimitives >> primitiveListBuiltinModule [
 	self methodArgumentCount = 1 ifFalse:[^self primitiveFail].
 	index := self stackIntegerValue: 0.
 	index <= 0 ifTrue:[^self primitiveFail].
-	moduleName := self ioListBuiltinModule: index.
+	moduleName := self cCall: 'ioListBuiltinModule' withArguments: { index }.
 	moduleName == nil ifTrue:[
 		self pop: 2. "arg+rcvr"
 		^self push: objectMemory nilObject].
@@ -2370,7 +2379,7 @@ InterpreterPrimitives >> primitiveListExternalModule [
 	self methodArgumentCount = 1 ifFalse:[^self primitiveFail].
 	index := self stackIntegerValue: 0.
 	index <= 0 ifTrue:[^self primitiveFail].
-	moduleName := self ioListLoadedModule: index.
+	moduleName := self cCall: 'ioListLoadedModule' withArguments: { index }.
 	moduleName == nil ifTrue:[
 		self pop: 2. "arg+rcvr"
 		^self push: objectMemory nilObject].
@@ -3394,12 +3403,14 @@ InterpreterPrimitives >> primitiveSmallFloatAdd [
 
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveSmallFloatArctan [
+
 	<option: #Spur64BitMemoryManager>
-	| rcvr |
 	<var: #rcvr type: #double>
+	| rcvr |
 	rcvr := objectMemory smallFloatValueOf: self stackTop.
-	self stackTopPut: (objectMemory floatObjectOf: (self cCode: [rcvr atan]
-														inSmalltalk: [rcvr arcTan]))
+	self stackTopPut: (objectMemory floatObjectOf: (self
+				  cCode: [ self cCall: 'atan' withArguments: { rcvr } ]
+				  inSmalltalk: [ rcvr arcTan ]))
 ]
 
 { #category : 'arithmetic float primitives' }
@@ -3451,14 +3462,19 @@ InterpreterPrimitives >> primitiveSmallFloatExponent [
 
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveSmallFloatFractionalPart [
+
 	<option: #Spur64BitMemoryManager>
-	| rcvr frac trunc |
 	<var: #rcvr type: #double>
 	<var: #frac type: #double>
 	<var: #trunc type: #double>
+	| rcvr frac trunc |
 	rcvr := objectMemory smallFloatValueOf: self stackTop.
-	frac := self cCode: [self mod: rcvr f: (self addressOf: trunc)]
-				inSmalltalk: [rcvr fractionPart].
+	frac := self
+		        cCode: [
+			        self cCall: 'modf' withArguments: {
+					        rcvr.
+					        (self addressOf: trunc) } ]
+		        inSmalltalk: [ rcvr fractionPart ].
 	self stackTopPut: (objectMemory floatObjectOf: frac)
 ]
 
@@ -3600,46 +3616,59 @@ InterpreterPrimitives >> primitiveSmallFloatSubtract [
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveSmallFloatTimesTwoPower [
 	"Multiply the receiver by the power of the argument."
+
 	<option: #Spur64BitMemoryManager>
 	| rcvr result arg twiceMaxExponent |
 	arg := self stackTop.
-	(objectMemory isIntegerObject: arg) ifFalse:
-		[^self primitiveFailFor: PrimErrBadArgument].
+	(objectMemory isIntegerObject: arg) ifFalse: [
+		^ self primitiveFailFor: PrimErrBadArgument ].
 	rcvr := self stackValue: 1.
 	"N.B. SmallFloats are finite.  NaN and Infinity overflow into boxed floats.
 	 This is doing range checking work that is done in ldexp, but we include
 	 it explicitly to exemplify bit manipulation of SmallFloats."
 	(objectMemory isSmallFloatZero: rcvr)
-		ifTrue:
-			[result := rcvr]
-		ifFalse:
-			[arg := objectMemory integerValueOf: arg.
-			 twiceMaxExponent := 2 * (1 << self floatExponentBits).
-			 arg < twiceMaxExponent negated
-				ifTrue:
-					[result := objectMemory mapSignedSmallFloatToSignedSmallFloatZero: rcvr]
-				ifFalse:
-					["clip arg to at most int range; ldexp's last arg is of type int"
-					 arg > twiceMaxExponent ifTrue: [arg := twiceMaxExponent].
-					 result := objectMemory floatObjectOf: (self cCode: [self ld: (objectMemory smallFloatValueOf: rcvr)
-																				exp: (self cCoerceSimple: arg to: #int)]
-																inSmalltalk: [(objectMemory smallFloatValueOf: rcvr) timesTwoPower: arg])]].
+		ifTrue: [ result := rcvr ]
+		ifFalse: [
+			arg := objectMemory integerValueOf: arg.
+			twiceMaxExponent := 2 * (1 << self floatExponentBits).
+			arg < twiceMaxExponent negated
+				ifTrue: [
+					result := objectMemory
+						          mapSignedSmallFloatToSignedSmallFloatZero: rcvr ]
+				ifFalse: [ "clip arg to at most int range; ldexp's last arg is of type int"
+					arg > twiceMaxExponent ifTrue: [ arg := twiceMaxExponent ].
+					result := objectMemory floatObjectOf: (self
+							           cCode: [
+								           self cCall: 'ldexp' withArguments: {
+										           (objectMemory smallFloatValueOf: rcvr).
+										           (self cCoerceSimple: arg to: #int) } ]
+							           inSmalltalk: [
+							           (objectMemory smallFloatValueOf: rcvr)
+								           timesTwoPower: arg ]) ] ].
 	self pop: 2 thenPush: result
 ]
 
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveSmallFloatTruncated [
+
 	<option: #Spur64BitMemoryManager>
-	| rcvr trunc |
 	<var: #rcvr type: #double>
 	<var: #trunc type: #double>
+	| rcvr trunc |
 	rcvr := objectMemory smallFloatValueOf: self stackTop.
-	self cCode: [self mod: rcvr f: (self addressOf: trunc)]
-		inSmalltalk: [trunc := rcvr truncated].
-	((trunc between: objectMemory minSmallInteger asFloat and: objectMemory maxSmallInteger asFloat)
-	 and: [objectMemory isIntegerValue: trunc asInteger])
-		ifTrue: [self stackTopPut: (objectMemory integerObjectOf: trunc asInteger)]
-		ifFalse: [self primitiveFail]
+	self
+		cCode: [
+			self cCall: 'modf' withArguments: {
+					rcvr.
+					(self addressOf: trunc) } ]
+		inSmalltalk: [ trunc := rcvr truncated ].
+	((trunc
+		  between: objectMemory minSmallInteger asFloat
+		  and: objectMemory maxSmallInteger asFloat) and: [
+		 objectMemory isIntegerValue: trunc asInteger ])
+		ifTrue: [
+		self stackTopPut: (objectMemory integerObjectOf: trunc asInteger) ]
+		ifFalse: [ self primitiveFail ]
 ]
 
 { #category : 'system control primitives' }
@@ -3690,44 +3719,6 @@ InterpreterPrimitives >> primitiveSquareRoot [
 InterpreterPrimitives >> primitiveStartVMProfiling [
 	"Primitive. Start the VM profiler."
 	self cCode: 'ioControlProfile(1,0,0,0,0)'.
-	self pop: argumentCount
-]
-
-{ #category : 'process primitives' }
-InterpreterPrimitives >> primitiveStopVMProfiling [
-	"Primitive. Stop the VM profiler and either copy the histogram data into the
-	 supplied arguments, if they're non-nil.  Fail if the arguments are not of the right type or size."
-	| vmHistArrayOrNil vmHist vmBins easHistArrayOrNil easHist easBins |
-	<var: #vmHist type: #'long *'>
-	<var: #vmBins type: #long>
-	<var: #easHist type: #'long *'>
-	<var: #easBins type: #long>
-	self success: argumentCount = 2.
-	vmHistArrayOrNil := self stackObjectValue: 1.
-	easHistArrayOrNil := self stackObjectValue: 0.
-	self successful ifFalse:
-		[^nil].
-	"Both args must be either nil or arrays.  If they're arrays and the wrong size we incorrectly stop profiling."
-	((vmHistArrayOrNil = objectMemory nilObject or: [(objectMemory fetchClassOfNonImm: vmHistArrayOrNil) = (objectMemory splObj: ClassArray)])
-	 and: [(objectMemory fetchClassOfNonImm: vmHistArrayOrNil) = (objectMemory fetchClassOfNonImm: easHistArrayOrNil)]) ifFalse:
-		[^self primitiveFail].
-	
-	self cCode: [ self ioControlProfile: 0 _: (self addressOf: vmHist) _: (self addressOf: vmBins) _: (self addressOf: easHist) _: (self addressOf: easBins) ]
-		inSmalltalk: [vmHist := vmBins := easHist := easBins := 0].
-	vmHistArrayOrNil ~= objectMemory nilObject ifTrue:
-		[((objectMemory numSlotsOf: vmHistArrayOrNil) = vmBins
-		  and: [(objectMemory numSlotsOf: easHistArrayOrNil) = easBins]) ifFalse:
-			[^self primitiveFail].
-		0 to: vmBins - 1 do:
-			[:i|
-			objectMemory storePointerUnchecked: i
-				ofObject: vmHistArrayOrNil
-				withValue: (objectMemory integerObjectOf: (vmHist at: i))].
-		0 to: easBins - 1 do:
-			[:i|
-			objectMemory storePointerUnchecked: i
-				ofObject: easHistArrayOrNil
-				withValue: (objectMemory integerObjectOf: (easHist at: i))]].
 	self pop: argumentCount
 ]
 
@@ -3992,39 +3983,53 @@ InterpreterPrimitives >> primitiveTestShortenIndexableSize [
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveTimesTwoPower [
 	"Multiply the receiver by the power of the argument."
-	| rcvr result arg |
+
 	<var: #rcvr type: #double>
 	<var: #result type: #double>
+	| rcvr result arg |
 	arg := self stackTop.
-	(objectMemory isIntegerObject: arg) ifFalse:
-		[^self primitiveFailFor: PrimErrBadArgument].
+	(objectMemory isIntegerObject: arg) ifFalse: [
+		^ self primitiveFailFor: PrimErrBadArgument ].
 	arg := objectMemory integerValueOf: arg.
-	objectMemory bytesPerOop > 4 ifTrue:
-		[| twiceMaxExponent | "clip arg to at most int range; ldexp's last arg is of type int"
-		 twiceMaxExponent := 2 * (1 << self floatExponentBits).
-	 	 arg < twiceMaxExponent negated
-			ifTrue: [arg := twiceMaxExponent negated]
-			ifFalse: [arg > twiceMaxExponent ifTrue:
-						[arg := twiceMaxExponent]]].
+	objectMemory bytesPerOop > 4 ifTrue: [
+		| twiceMaxExponent |
+		"clip arg to at most int range; ldexp's last arg is of type int"
+		twiceMaxExponent := 2 * (1 << self floatExponentBits).
+		arg < twiceMaxExponent negated
+			ifTrue: [ arg := twiceMaxExponent negated ]
+			ifFalse: [
+			arg > twiceMaxExponent ifTrue: [ arg := twiceMaxExponent ] ] ].
 	rcvr := objectMemory floatValueOf: (self stackValue: 1).
-	result := self cCode: [self ld: rcvr exp: (self cCoerceSimple: arg to: #int)]
-					inSmalltalk: [rcvr timesTwoPower: arg].
+	result := self
+		          cCode: [
+			          self cCall: 'ldexp' withArguments: {
+					          rcvr.
+					          (self cCoerceSimple: arg to: #int) } ]
+		          inSmalltalk: [ rcvr timesTwoPower: arg ].
 	self pop: 2 thenPushFloat: result
 ]
 
 { #category : 'arithmetic float primitives' }
 InterpreterPrimitives >> primitiveTruncated [
 	"N.B. IMO we should be able to assume the receiver is a float because this primitive is specific to floats. eem 2/13/2017"
-	| rcvr trunc |
+
 	<var: #rcvr type: #double>
 	<var: #trunc type: #double>
+	| rcvr trunc |
 	rcvr := self stackFloatValue: 0.
-	self successful ifTrue:
-		[self cCode: [self mod: rcvr f: (self addressOf: trunc)]
-			inSmalltalk: [trunc := rcvr truncated].
-		 (trunc between: objectMemory minSmallInteger asFloat and: objectMemory maxSmallInteger asFloat)
-			ifTrue: [self stackTopPut: (objectMemory integerObjectOf: trunc asInteger)]
-			ifFalse: [self primitiveFail]]
+	self successful ifTrue: [
+		self
+			cCode: [
+				self cCall: 'modf' withArguments: {
+						rcvr.
+						(self addressOf: trunc) } ]
+			inSmalltalk: [ trunc := rcvr truncated ].
+		(trunc
+			 between: objectMemory minSmallInteger asFloat
+			 and: objectMemory maxSmallInteger asFloat)
+			ifTrue: [
+			self stackTopPut: (objectMemory integerObjectOf: trunc asInteger) ]
+			ifFalse: [ self primitiveFail ] ]
 ]
 
 { #category : 'system control primitives' }
