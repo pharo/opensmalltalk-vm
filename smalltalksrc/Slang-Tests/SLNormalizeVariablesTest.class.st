@@ -94,14 +94,16 @@ SLNormalizeVariablesTest >> testMethodWithReservedLocalsName [
 	"super and self are not in the locals"
 	self
 		assert: method allLocals
-		equals: { #_var1. #_var2. #cascade. #self_in_methodWithReservedLocalsName. #interpreterProxy} asSet.
+		equals: { #var1. #_var2. #cascade. #self_in_methodWithReservedLocalsName. #interpreterProxy} asSet.
 	
 	self assert: (body at: 1) name equals: #self.
 	self assert: (body at: 2) name equals: #self_in_methodWithReservedLocalsName.
 	self assert: (body at: 3) name equals: #super.
 	self assert: (body at: 4) name equals: #cascade.
+	"implicit variable, they won't appear in the C code but might be hard coded somewhere in Slang"
 	self assert: (body at: 5) name equals: #interpreterProxy.
-	self assert: (body at: 6) name equals: #_var1.
+	"implicit variable"
+	self assert: (body at: 6) name equals: #var1.
 	self assert: (body at: 7) name equals: #_var2.	
 
 	self assert: method args isEmpty
@@ -303,12 +305,10 @@ SLNormalizeVariablesTest >> testMethodWithVariablesInVarTypeDeclaration [
 
 	self assert: (body at: 1) name equals: #_var1.
 	self assert: (body at: 2) name equals: #_var2.
-	self assert: (body at: 3) name equals: #_var3.
 
 	self assert: (method declarations at: #_var1) equals: #'char *_var1'.
-	self assert: (method declarations at: #_var2) equals: #'_var2 *_var2'.
 	"maybe shouldn't be this way, but doesnt appear in the VM"
-	self assert: (method declarations at: #_var3) equals: #'var1 *_var3'.
+	self assert: (method declarations at: #_var2) equals: #'var1 *_var2'.
 
 	self assert: method args isEmpty
 ]
