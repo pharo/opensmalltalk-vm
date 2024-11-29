@@ -47,7 +47,7 @@ TVariableNode >> bindClassVariablesIn: classVariables globalVariablesIn: globals
 	"don't rename variables which reference class name"
 	(classNames includes: name) ifTrue: [ ^ self ].
 
-	"don't rename implicit arguments, 'self' is only include in the implicit variables of MLVMCCodeGenerator hence the check at the top of the method"
+	"don't rename implicit arguments, they do not appear in the C code but some of them are hard coded in Slang"
 	(aCodeGen isNonArgumentImplicitReceiverVariableName: name) ifTrue: [
 		^ self ].
 
