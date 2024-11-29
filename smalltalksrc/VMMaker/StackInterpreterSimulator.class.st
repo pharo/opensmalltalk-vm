@@ -572,6 +572,13 @@ StackInterpreterSimulator >> endPCOf: aMethod [
 	^end
 ]
 
+{ #category : 'initialization' }
+StackInterpreterSimulator >> ensureMemoryMap [
+
+	objectMemory ensureMemoryMap.
+	memoryManager := objectMemory memoryManager
+]
+
 { #category : 'interpreter shell' }
 StackInterpreterSimulator >> fetchByte [
 	^objectMemory byteAt: (instructionPointer := instructionPointer + 1).

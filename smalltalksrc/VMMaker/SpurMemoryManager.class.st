@@ -4771,7 +4771,7 @@ SpurMemoryManager >> ensureMemoryManager [
 
 	<doNotGenerate>
 
-	memoryManager ifNil: [ 
+	^ memoryManager ifNil: [ 
 		memoryManager := SlangMemoryManager new.
 		memoryManager wordSize: self wordSize ]
 
@@ -4787,7 +4787,7 @@ SpurMemoryManager >> ensureMemoryMap [
 		inSmalltalk: [ 
 			memoryMap := VMMemoryMap new.
 			memoryMap objectMemory: self.
-			memoryMap memoryManager: memoryManager ].
+			memoryMap memoryManager: self ensureMemoryManager ].
 		
 	memoryMap initializeMemoryMap.
 ]
