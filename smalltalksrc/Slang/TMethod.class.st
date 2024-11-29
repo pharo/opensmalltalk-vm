@@ -449,7 +449,7 @@ TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVar
 			 bindClassVariablesIn: classVariables
 			 globalVariablesIn: globalsVariables
 			 classNameIn:
-			 (SlangStructType "MockEmptyVMStructWithRedefinedStructName" allSubclasses collect: [ :class | class name ])
+			 (SlangStructType allSubclasses collect: [ :class | class name ])
 			 in: aCodeGen
 			 collect: changedVariables).
 	changedVariables isEmpty ifTrue: [ ^ self ].
