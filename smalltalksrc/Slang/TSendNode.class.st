@@ -612,7 +612,8 @@ TSendNode >> renameVarInCCode: varName with: newVarName [
 		arguments first setValue: (arguments first value
 				 copyReplaceAll: varName
 				 with: newVarName
-				 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]) ]
+				 tokenish: [ :ch |
+				 ch = $_ or: [ ch isAlphaNumeric or: [ ch = $\ ] ] ]) ]
 ]
 
 { #category : 'transformations' }

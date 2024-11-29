@@ -150,6 +150,17 @@ SLNormalizeVariablesTestClass >> methodWithVariablesInCCode [
 		var2 ]
 ]
 
+{ #category : 'methods-with-variables-in-cCode' }
+SLNormalizeVariablesTestClass >> methodWithVariablesInCCodePrint [
+	"same case as printMethodCacheFor:, we have to be careful of n and s"
+
+	| n s |
+	self cCode:
+		'vm_printf("%" PRIxSQPTR " %.*s\n", s, (int)(numBytesOf(s)), (char *)firstIndexableField(s))'.
+	n.
+	s
+]
+
 { #category : 'methods-with-var-return-type-C' }
 SLNormalizeVariablesTestClass >> methodWithVariablesInVarReturnTypeC [
 

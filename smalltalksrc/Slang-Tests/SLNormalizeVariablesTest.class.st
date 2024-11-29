@@ -282,6 +282,22 @@ SLNormalizeVariablesTest >> testMethodWithVariablesInCCode [
 	self assert: method args isEmpty
 ]
 
+{ #category : 'tests-methods-with-variables-in-cCode' }
+SLNormalizeVariablesTest >> testMethodWithVariablesInCCodePrint [
+	"rare case but it can happen, see printMethodCacheFor:, s need to be kept intact in some place of the print and n should't be modified in it"
+
+	| method body |
+	method := ccg methodNamed: #methodWithVariablesInCCodePrint.
+	body := method parseTree statements.
+
+	self
+		assert: (body at: 1) arguments first value
+		equals:
+		#'vm_printf("%" PRIxSQPTR " %.*s\n", _s, (int)(numBytesOf(_s)), (char *)firstIndexableField(_s))'.
+
+	self assert: method args isEmpty
+]
+
 { #category : 'tests-methods-with-var-return-type-C' }
 SLNormalizeVariablesTest >> testMethodWithVariablesInVarReturnTypeC [
 	"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
