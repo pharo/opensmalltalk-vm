@@ -14852,8 +14852,15 @@ StackInterpreter >> storePopMaybeContext: obj receiverVariable: fieldIndex withV
 			ifTrue: [
 				self pop: 1.
 				^ self instVar: fieldIndex ofContext: obj put: anOop ] ] ].
-	self pop: 1.
-	objectMemory storePointerImmutabilityCheck: fieldIndex ofObject: obj withValue: anOop
+	
+	self druidIgnore: [ 
+		"Interpreter needs to do the pop before check immutability because it is resolved with a message send"
+		self pop: 1 ].
+	objectMemory storePointerImmutabilityCheck: fieldIndex ofObject: obj withValue: anOop.
+	self interpreterIgnore: [ 
+		"Druid resolves it with a deoptimization to the interpreter, so the we cannot modify the stack until be sure."
+		self pop: 1 ].
+
 ]
 
 { #category : #'stack bytecodes' }
