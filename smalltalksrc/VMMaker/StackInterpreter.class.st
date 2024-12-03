@@ -9306,11 +9306,6 @@ StackInterpreter >> mapProfileState [
 StackInterpreter >> mapStackPages [
 
 	<inline: #never>
-	<var: #thePage type: #'StackPage *'>
-	<var: #theSP type: #'char *'>
-	<var: #theFP type: #'char *'>
-	<var: #frameRcvrOffset type: #'char *'>
-	<var: #callerFP type: #'char *'>
 	<var: #theIPPtr type: #'char *'>
 	| numLivePages |
 	numLivePages := 0.
