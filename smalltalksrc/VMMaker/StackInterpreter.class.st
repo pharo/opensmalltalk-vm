@@ -2037,6 +2037,16 @@ StackInterpreter >> allOnesAsCharStar [
 		to: #'char *')
 ]
 
+{ #category : 'enumerating' }
+StackInterpreter >> allStackPagesDo: aBlock [
+
+	<var: #thePage type: #'StackPage *'>
+	0 to: numStackPages - 1 do: [ :i |
+		| thePage |
+		thePage := stackPages stackPageAt: i.
+		aBlock value: thePage ]
+]
+
 { #category : 'image save/restore' }
 StackInterpreter >> allocateMemoryForImage: f withHeader: header [
 
@@ -2221,19 +2231,16 @@ StackInterpreter >> baseFrameReturn [
 		ifTrue: [
 			theFP := self frameOfMarriedContext: contextToReturnTo.
 			thePage := stackPages stackPageFor: theFP.
-			theFP = thePage headFP
-				ifTrue: [ theSP := thePage headSP ]
-				ifFalse: [ "Returning to some interior frame, presumably because of a sender assignment.
+			theFP = thePage headFP ifFalse: [ "Returning to some interior frame, presumably because of a sender assignment.
 					  Move the frames above to another page (they may be in use, e.g. via coroutining).
 					  Make the interior frame the top frame."
-					frameAbove := self findFrameAbove: theFP inPage: thePage.
-					"Since we've just deallocated a page we know that newStackPage won't deallocate an existing one."
-					newPage := stackPages newStackPage.
-					self assert: newPage = stackPage.
-					self moveFramesIn: thePage through: frameAbove toPage: newPage.
-					stackPages markStackPageMostRecentlyUsed: newPage.
-					theFP := thePage headFP.
-					theSP := thePage headSP ] ]
+				frameAbove := self findFrameAbove: theFP inPage: thePage.
+				"Since we've just deallocated a page we know that newStackPage won't deallocate an existing one."
+				newPage := stackPages newStackPage.
+				self assert: newPage = stackPage.
+				self moveFramesIn: thePage through: frameAbove toPage: newPage.
+				stackPages markStackPageMostRecentlyUsed: newPage.
+				theFP := thePage headFP ] ]
 		ifFalse: [
 			(retToContext and: [
 				 objectMemory isIntegerObject: (objectMemory
@@ -2244,8 +2251,8 @@ StackInterpreter >> baseFrameReturn [
 			  cogs a method, which may cause a code compaction."
 			instructionPointer := 0.
 			thePage := self makeBaseFrameFor: contextToReturnTo.
-			theFP := thePage headFP.
-			theSP := thePage headSP ].
+			theFP := thePage headFP ].
+	theSP := thePage headSP.
 	self setStackPageAndLimit: thePage.
 	self assert: (stackPages stackPageFor: theFP) = stackPage.
 
@@ -6873,15 +6880,11 @@ StackInterpreter >> freeUnmarkedMachineCode [
 StackInterpreter >> freeUntracedStackPages [
 	"Free any untraced stack pages."
 
-	<var: #thePage type: #'StackPage *'>
 	<inline: false>
-	0 to: numStackPages - 1 do: [ :i | "Invalidate the trace state for assertion checks"
-		| thePage |
-		thePage := stackPages stackPageAt: i.
-		(thePage isFree not and: [ thePage trace = StackPageUnreached ])
-			ifTrue: [
-				self assert: (self noMarkedContextsOnPage: thePage).
-				stackPages freeStackPage: thePage ].
+	self usedStackPagesDo: [ :thePage | "Invalidate the trace state for assertion checks"
+		thePage trace = StackPageUnreached ifTrue: [
+			self assert: (self noMarkedContextsOnPage: thePage).
+			stackPages freeStackPage: thePage ].
 		self assert: (thePage trace: StackPageTraceInvalid) ~= 0 ]
 ]
 
@@ -7511,16 +7514,13 @@ StackInterpreter >> initStackPageGC [
 	 eagerly trace the active page and the page reachable from its bottom context
 	 if any, and so on.  Other pages can be marked when we encounter a married
 	 context."
-	<var: #thePage type: #'StackPage *'>
-	<inline: true>
-	"Need to write back the frame pointers unless all pages are free (as in snapshot)"
-	stackPage ~= 0 ifTrue:
-		[self writeBackHeadFramePointers].
 
-	0 to: numStackPages - 1 do:
-		[:i| | thePage |
-		thePage := stackPages stackPageAt: i.
-		thePage trace: StackPageUnreached]
+	"Need to write back the frame pointers unless all pages are free (as in snapshot)"
+
+	<inline: true>
+	stackPage ~= 0 ifTrue: [ self writeBackHeadFramePointers ].
+
+	self allStackPagesDo: [ :thePage | thePage trace: StackPageUnreached ]
 ]
 
 { #category : 'initialization' }
@@ -9541,14 +9541,12 @@ StackInterpreter >> mappedInlinePrimitive: primIndex [
 StackInterpreter >> markAndTraceAndMaybeFreeStackPages: fullGCFlag [
 	"Read markAndTraceStackPages:'s comment.  Finish tracing to-be-traced pages.
 	 Then free any untraced pages."
-	<var: #thePage type: #'StackPage *'>
+
 	<inline: false>
-	fullGCFlag ifFalse:
-		[0 to: numStackPages - 1 do:
-			[:i| | thePage |
-			thePage := stackPages stackPageAt: i.
-			self assert: (thePage trace: -1) ~= 0]. "Invalidate the trace state for assertion checks"
-		^nil].
+	fullGCFlag ifFalse: [
+		self allStackPagesDo: [ :thePage |
+			self assert: (thePage trace: -1) ~= 0 ]. "Invalidate the trace state for assertion checks"
+		^ nil ].
 
 	self markAndTraceUntracedReachableStackPages.
 	self freeUntracedStackPages
@@ -9709,15 +9707,12 @@ StackInterpreter >> markAndTraceTraceLog [
 StackInterpreter >> markAndTraceUntracedReachableStackPages [
 	"Trace any untraced pages"
 
-	<var: #thePage type: #'StackPage *'>
 	<inline: false>
-	| thePage foundToBeTracedPage |
+	| foundToBeTracedPage |
 	[
 	foundToBeTracedPage := false.
-	0 to: numStackPages - 1 do: [ :i |
-		thePage := stackPages stackPageAt: i.
-		(thePage isFree not and: [
-			 thePage trace = StackPageReachedButUntraced ]) ifTrue: [
+	self usedStackPagesDo: [ :thePage |
+		thePage trace = StackPageReachedButUntraced ifTrue: [
 			foundToBeTracedPage := true.
 			self markAndTraceStackPage: thePage ] ].
 	foundToBeTracedPage ] whileTrue
@@ -12545,10 +12540,10 @@ StackInterpreter >> printStackPageListInUse [
 
 { #category : 'debug printing' }
 StackInterpreter >> printStackPages [
-	0 to: numStackPages - 1 do:
-		[:i|
-		self printStackPage: (stackPages stackPageAt: i).
-		self cr]
+
+	self allStackPagesDo: [ :aPage |
+		self printStackPage: aPage.
+		self cr ]
 ]
 
 { #category : 'debug printing' }
@@ -12556,48 +12551,63 @@ StackInterpreter >> printStackPagesInUse [
 
 	| n |
 	n := 0.
-	0 to: numStackPages - 1 do: [ :i |
-		(stackPages stackPageAt: i) isFree ifFalse: [
-			self
-				printStackPage: (stackPages stackPageAt: i)
-				useCount: (n := n + 1);
-				cr ] ]
+	self usedStackPagesDo: [ :thePage |
+		self
+			printStackPage: thePage useCount: (n := n + 1);
+			cr ]
 ]
 
 { #category : 'object memory support' }
 StackInterpreter >> printStackReferencesTo: oop [
+
 	<api>
 	<var: #thePage type: #'StackPage *'>
 	<var: #theSP type: #'char *'>
 	<var: #theFP type: #'char *'>
 	<var: #callerFP type: #'char *'>
-	0 to: numStackPages - 1 do:
-		[:i| | thePage theSP theFP callerFP |
-		thePage := stackPages stackPageAt: i.
-		thePage isFree ifFalse:
-			[theSP := thePage headSP.
-			 theFP := thePage headFP.
-			 "Skip the instruction pointer on top of stack of inactive pages."
-			 thePage = stackPage ifFalse:
-				[theSP := theSP + objectMemory wordSize].
-			 [[theSP <= (self frameReceiverLocation: theFP)] whileTrue:
-				[oop = (stackPages unsignedLongAt: theSP) ifTrue:
-					[self print: 'FP: '; printHexnp: theFP; print: ' @ '; printHexnp: theSP; cr].
-				 theSP := theSP + objectMemory wordSize].
-			  (self frameHasContext: theFP) ifTrue:
-				[oop = (self frameContext: theFP) ifTrue:
-					[self print: 'FP: '; printHexnp: theFP; print: ' CTXT'; cr]].
-			  oop = (self iframeMethod: theFP) ifTrue:
-				[self print: 'FP: '; printHexnp: theFP; print: ' MTHD'; cr].
-			  (callerFP := self frameCallerFP: theFP) ~= 0]
-				whileTrue:
-					[theSP := (theFP + FoxCallerSavedIP) + objectMemory wordSize.
-					 theFP := callerFP].
-			 theSP := theFP + FoxCallerSavedIP. "a.k.a. FoxCallerContext"
-			 [theSP <= thePage baseAddress] whileTrue:
-				[oop = (stackPages unsignedLongAt: theSP) ifTrue:
-					[self print: 'FP: '; printHexnp: theFP; print: ' @ '; printHexnp: theSP; cr].
-				 theSP := theSP + objectMemory wordSize]]]
+	self usedStackPagesDo: [ :thePage |
+		| theSP theFP callerFP |
+		theSP := thePage headSP.
+		theFP := thePage headFP.
+		"Skip the instruction pointer on top of stack of inactive pages."
+		thePage = stackPage ifFalse: [
+			theSP := theSP + objectMemory wordSize ].
+		[
+		[ theSP <= (self frameReceiverLocation: theFP) ] whileTrue: [
+			oop = (stackPages unsignedLongAt: theSP) ifTrue: [
+				self
+					print: 'FP: ';
+					printHexnp: theFP;
+					print: ' @ ';
+					printHexnp: theSP;
+					cr ].
+			theSP := theSP + objectMemory wordSize ].
+		(self frameHasContext: theFP) ifTrue: [
+			oop = (self frameContext: theFP) ifTrue: [
+				self
+					print: 'FP: ';
+					printHexnp: theFP;
+					print: ' CTXT';
+					cr ] ].
+		oop = (self iframeMethod: theFP) ifTrue: [
+			self
+				print: 'FP: ';
+				printHexnp: theFP;
+				print: ' MTHD';
+				cr ].
+		(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
+			theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
+			theFP := callerFP ].
+		theSP := theFP + FoxCallerSavedIP. "a.k.a. FoxCallerContext"
+		[ theSP <= thePage baseAddress ] whileTrue: [
+			oop = (stackPages unsignedLongAt: theSP) ifTrue: [
+				self
+					print: 'FP: ';
+					printHexnp: theFP;
+					print: ' @ ';
+					printHexnp: theSP;
+					cr ].
+			theSP := theSP + objectMemory wordSize ] ]
 ]
 
 { #category : 'debug printing' }
@@ -13853,7 +13863,6 @@ StackInterpreter >> setNextWakeupUsecs: value [
 
 { #category : 'stack pages' }
 StackInterpreter >> setNumStackPages: requestedNumPages [
-
 	"4 stack pages is small.  Should be able to run with as few as
 	 three. 4 should be comfortable but slow.  8 is a reasonable
 	 default.  Can be changed via vmParameterAt: 43 put: n.
@@ -13863,16 +13872,15 @@ StackInterpreter >> setNumStackPages: requestedNumPages [
 
 	numStackPages := desiredNumStackPages ~= 0
 		                 ifTrue: [ desiredNumStackPages ]
-		                 ifFalse: [ 
+		                 ifFalse: [
 			                 requestedNumPages = 0
 				                 ifTrue: [ self defaultNumStackPages ]
 				                 ifFalse: [ requestedNumPages ] ].
 
 	desiredNumStackPages := requestedNumPages.
 
-	
 	desiredStackPageBytes = 0 ifTrue: [
-		self setDesiredStackPageBytes: 256 * objectMemory wordSize ].
+		self setDesiredStackPageBytes: 256 * objectMemory wordSize ]
 ]
 
 { #category : 'process primitive support' }
@@ -16167,10 +16175,7 @@ StackInterpreter >> updateStateOfSpouseContextForFrame: theFP WithSP: theSP [
 { #category : 'enumerating' }
 StackInterpreter >> usedStackPagesDo: aBlock [
 
-	<var: #thePage type: #'StackPage *'>
-	0 to: numStackPages - 1 do: [ :i |
-		| thePage |
-		thePage := stackPages stackPageAt: i.
+	self allStackPagesDo: [ :thePage |
 		thePage isFree ifFalse: [ aBlock value: thePage ] ]
 ]
 
