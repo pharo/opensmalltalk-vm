@@ -2198,6 +2198,20 @@ StackInterpreter >> assertValidStackLimits: ln [
 		l: ln
 ]
 
+{ #category : 'object memory support' }
+StackInterpreter >> baseFrameArguments: baseFrameFP inPage: thePage do: aBlock [
+	"In base frames the caller saved ip field holds the caller context."
+
+	| baseFrameArgumentSP |
+	baseFrameArgumentSP := baseFrameFP + FoxCallerSavedIP
+	                       + objectMemory wordSize.
+	[ baseFrameArgumentSP <= thePage baseAddress ] whileTrue: [
+		| oop |
+		oop := stackPages unsignedLongAt: baseFrameArgumentSP.
+		aBlock value: baseFrameArgumentSP value: oop.
+		baseFrameArgumentSP := baseFrameArgumentSP + objectMemory wordSize ]
+]
+
 { #category : 'return bytecodes' }
 StackInterpreter >> baseFrameCannotReturnTo: contextToReturnTo [
 
@@ -4170,16 +4184,13 @@ StackInterpreter >> checkOkayStackPage: thePage [
 StackInterpreter >> checkOkayStackZone: writeBack [
 	"Check that all objects in the stack zone are okay"
 
-	<var: #thePage type: #'StackPage *'>
 	<inline: false>
-	| ok |
 	writeBack ifTrue: [ self writeBackHeadFramePointers ].
-	ok := true.
 
 	self usedStackPagesDo: [ :thePage |
-		ok := ok and: [ self checkOkayStackPage: thePage ] ].
+		(self checkOkayStackPage: thePage) ifFalse: [ ^ false ] ].
 
-	^ ok
+	^ true
 ]
 
 { #category : 'process primitive support' }
@@ -4205,86 +4216,70 @@ StackInterpreter >> checkStackIntegrity [
 	 dangling pointers were detected."
 
 	<inline: false>
-	<var: #thePage type: #'StackPage *'>
-	<var: #theSP type: #'char *'>
-	<var: #theFP type: #'char *'>
-	<var: #callerFP type: #'char *'>
-	<var: #frameRcvrOffset type: #'char *'>
 	| ok methodOk |
 	ok := true.
+	self writeBackHeadFramePointers.
 	self usedStackPagesDo: [ :thePage |
-		| theSP theFP frameRcvrOffset callerFP oop |
-		thePage = stackPage
-			ifTrue: [
-				theSP := stackPointer.
-				theFP := framePointer ]
-			ifFalse: [
-				theSP := thePage headSP.
-				theFP := thePage headFP ].
-		"Skip the instruction pointer on top of stack of inactive pages."
-		thePage = stackPage ifFalse: [
-			theSP := theSP + objectMemory wordSize ].
-		[
-		frameRcvrOffset := self frameReceiverLocation: theFP.
-		[ theSP <= frameRcvrOffset ] whileTrue: [
-			oop := stackPages unsignedLongAt: theSP.
-			((objectMemory isNonImmediate: oop) and: [
-				 (objectMemory heapMapAtWord: (self pointerForOop: oop)) = 0 ])
-				ifTrue: [
-					self
-						printFrameThing: 'object leak in frame temp'
-						andFrame: theFP
-						at: theSP.
-					ok := false ].
-			theSP := theSP + objectMemory wordSize ].
-		(self frameHasContext: theFP) ifTrue: [
-			oop := self frameContext: theFP.
-			((objectMemory isImmediate: oop) or: [
-				 (objectMemory heapMapAtWord: (self pointerForOop: oop)) = 0 ])
-				ifTrue: [
-					self
-						printFrameThing: 'object leak in frame ctxt'
-						andFrame: theFP
-						at: theFP + FoxThisContext.
-					ok := false ].
-			(objectMemory isContext: oop) ifFalse: [
-				self
-					printFrameThing: 'frame ctxt should be context'
-					andFrame: theFP
-					at: theFP + FoxThisContext.
-				ok := false ].
-			((objectMemory isContext: oop) and: [
-				 self isMarriedOrWidowedContext: oop ]) ifFalse: [
-				self
-					printFrameThing: 'frame ctxt should be married'
-					andFrame: theFP
-					at: theFP + FoxThisContext.
-				ok := false ].
-			((objectMemory isContext: oop) and: [
-				 (self isMarriedOrWidowedContext: oop) and: [
-					 (self frameOfMarriedContext: oop) = theFP ] ]) ifFalse: [
-				self
-					printFrameThing: 'frame ctxt should be married to this frame '
-					andFrame: theFP
-					at: theFP + FoxThisContext.
-				ok := false ] ].
-		methodOk := self checkMethodIntegrityInFrame: theFP.
-		methodOk ifFalse: [ ok := false ].
-		(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
-			theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
-			theFP := callerFP ].
-		theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
-		[ theSP <= thePage baseAddress ] whileTrue: [
-			oop := stackPages unsignedLongAt: theSP.
+		| baseFrameFP |
+		baseFrameFP := self framesInPage: thePage do: [ :theFP :theSP |
+			               | oop |
+			               self
+				               frameStackValuesWithFP: theFP
+				               withSP: theSP
+				               do: [ :theOop |
+					               ((objectMemory isNonImmediate: theOop) and: [
+						                (objectMemory heapMapAtWord:
+							                 (self pointerForOop: theOop)) = 0 ]) ifTrue: [
+						               self
+							               printFrameThing: 'object leak in frame temp'
+							               andFrame: theFP
+							               at: theSP.
+						               ok := false ] ].
+			               (self frameHasContext: theFP) ifTrue: [
+				               oop := self frameContext: theFP.
+				               ((objectMemory isImmediate: oop) or: [
+					                (objectMemory heapMapAtWord:
+						                 (self pointerForOop: oop)) = 0 ]) ifTrue: [
+					               self
+						               printFrameThing: 'object leak in frame ctxt'
+						               andFrame: theFP
+						               at: (self frameContextLocation: theFP).
+					               ok := false ].
+				               (objectMemory isContext: oop) ifFalse: [
+					               self
+						               printFrameThing: 'frame ctxt should be context'
+						               andFrame: theFP
+						               at: (self frameContextLocation: theFP).
+					               ok := false ].
+				               ((objectMemory isContext: oop) and: [
+					                self isMarriedOrWidowedContext: oop ]) ifFalse: [
+					               self
+						               printFrameThing: 'frame ctxt should be married'
+						               andFrame: theFP
+						               at: (self frameContextLocation: theFP).
+					               ok := false ].
+				               ((objectMemory isContext: oop) and: [
+					                (self isMarriedOrWidowedContext: oop) and: [
+						                (self frameOfMarriedContext: oop) = theFP ] ])
+					               ifFalse: [
+						               self
+							               printFrameThing:
+							               'frame ctxt should be married to this frame '
+							               andFrame: theFP
+							               at: (self frameContextLocation: theFP).
+						               ok := false ] ].
+			               methodOk := self checkMethodIntegrityInFrame: theFP.
+			               methodOk ifFalse: [ ok := false ] ].
+
+	self baseFrameArguments: baseFrameFP inPage: thePage do: [ :baseFrameArgumentSP :oop |
 			((objectMemory isNonImmediate: oop) and: [
 				 (objectMemory heapMapAtWord: (self pointerForOop: oop)) = 0 ])
 				ifTrue: [
 					self
 						printFrameThing: 'object leak in frame arg'
-						andFrame: theFP
-						at: theSP.
-					ok := false ].
-			theSP := theSP + objectMemory wordSize ] ].
+						andFrame: baseFrameFP
+						at: baseFrameArgumentSP.
+					ok := false ] ] ].
 	^ ok
 ]
 
@@ -6749,7 +6744,13 @@ StackInterpreter >> frameCallerStackPointer: theFP [
 StackInterpreter >> frameContext: theFP [
 	<inline: true>
 	<var: #theFP type: #'char *'>
-	^stackPages unsignedLongAt: theFP + FoxThisContext
+	^stackPages unsignedLongAt: (self frameContextLocation: theFP)
+]
+
+{ #category : 'frame access' }
+StackInterpreter >> frameContextLocation: theFP [
+
+	^ theFP + FoxThisContext
 ]
 
 { #category : 'frame access' }
@@ -6839,6 +6840,21 @@ StackInterpreter >> frameReceiverLocation: theFP [
 	^self iframeReceiverLocation: theFP
 ]
 
+{ #category : 'object memory support' }
+StackInterpreter >> frameStackValuesWithFP: theFP withSP: theSP do: aBlock [
+
+	<var: #theSP type: #'char *'>
+	<var: #theFP type: #'char *'>
+	<var: #frameRcvrOffset type: #'char *'>
+	| currentSP frameRcvrOffset oop |
+	currentSP := theSP.
+	frameRcvrOffset := self frameReceiverLocation: theFP.
+	[ theSP <= frameRcvrOffset ] whileTrue: [
+		oop := stackPages unsignedLongAt: theSP.
+		aBlock value: oop.
+		currentSP := currentSP + objectMemory wordSize ]
+]
+
 { #category : 'frame access' }
 StackInterpreter >> frameStackedReceiver: theFP numArgs: numArgs [
 	"Answer the stacked receiver given the frame's argument count.
@@ -6869,6 +6885,28 @@ StackInterpreter >> frameStackedReceiverOffsetNumArgs: numArgs [
 	 itself.  See the diagram in StackInterpreter class>>initializeFrameIndices."
 	<inline: true>
 	^FoxCallerSavedIP + objectMemory wordSize + (numArgs << objectMemory shiftForWord)
+]
+
+{ #category : 'object memory support' }
+StackInterpreter >> framesInPage: thePage do: aBlock [
+
+	| theSP theFP callerFP |
+	theSP := thePage headSP.
+	theFP := thePage headFP.
+
+	"Skip the instruction pointer on top of stack of inactive pages."
+	thePage = stackPage ifFalse: [
+		theSP := theSP + objectMemory wordSize ].
+
+	[
+	aBlock value: theFP value: theSP.
+
+	"While we are not on the base frame"
+	(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
+		theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
+		theFP := callerFP ].
+
+	^ theFP
 ]
 
 { #category : 'object memory support' }
@@ -9277,67 +9315,58 @@ StackInterpreter >> mapStackPages [
 	| numLivePages |
 	numLivePages := 0.
 	self usedStackPagesDo: [ :thePage |
-		| theSP theFP frameRcvrOffset callerFP theIPPtr oop |
+		| baseFrameFP theIPPtr |
 		self assert: (self ifCurrentStackPageHasValidHeadPointers: thePage).
 		numLivePages := numLivePages + 1.
-		theSP := thePage headSP.
-		theFP := thePage headFP.
-		"Skip the instruction pointer on top of stack of inactive pages."
-		thePage = stackPage
-			ifTrue: [ theIPPtr := self savedInstructioPointerLocation: theFP ]
-			ifFalse: [
-				theIPPtr := theSP.
-				theSP := theSP + objectMemory wordSize ].
-		[
-		self assert: (thePage addressIsInPage: theFP).
-		self assert: (thePage addressIsInPage: theSP).
-		self assert:
-			(theIPPtr = 0 or: [ thePage addressIsInPage: theIPPtr ]).
-		frameRcvrOffset := self frameReceiverLocation: theFP.
-		[ theSP <= frameRcvrOffset ] whileTrue: [
-			oop := stackPages unsignedLongAt: theSP.
-			(objectMemory shouldRemapOop: oop) ifTrue: [
-				stackPages unsignedLongAt: theSP put: (objectMemory remapObj: oop) ].
-			theSP := theSP + objectMemory wordSize ].
-		(self frameHasContext: theFP) ifTrue: [
+		theIPPtr := thePage = stackPage
+			            ifTrue: [
+			            self savedInstructioPointerLocation: thePage headFP ]
+			            ifFalse: [ thePage headSP ].
+
+		baseFrameFP := self framesInPage: thePage do: [ :theFP :theSP |
+			self assert: (thePage addressIsInPage: theFP).
+			self assert: (thePage addressIsInPage: theSP).
+			self assert: (theIPPtr = 0 or: [
+                thePage addressIsInPage: theIPPtr ]).
+
+			self
+				frameStackValuesWithFP: theFP
+				withSP: theSP
+				do: [ :oop |
+               (objectMemory shouldRemapOop: oop) ifTrue: [
+	               stackPages
+		               unsignedLongAt: theSP
+		               put: (objectMemory remapObj: oop) ] ].
+
+			(self frameHasContext: theFP) ifTrue: [
 			(objectMemory shouldRemapObj: (self frameContext: theFP)) ifTrue: [
 				stackPages
 					unsignedLongAt: theFP + FoxThisContext
 					put: (objectMemory remapObj: (self frameContext: theFP)) ].
 			"With SpurPlanningCompactor can't assert since object body is yet to move."
-			objectMemory slidingCompactionInProgress not ifTrue: [
+			objectMemory slidingCompactionInProgress ifFalse: [
 				self assert:
-					((self isMarriedOrWidowedContext: (self frameContext: theFP))
-						 and: [
-						 (self frameOfMarriedContext: (self frameContext: theFP))
-						 = theFP ]) ] ].
-		(self isMachineCodeFrame: theFP) ifFalse: [
-			(objectMemory shouldRemapObj: (self iframeMethod: theFP)) ifTrue: [
-				| methodOopBeforeRemapping remappedMethodOop delta |
-				methodOopBeforeRemapping := self iframeMethod: theFP.
-				remappedMethodOop := objectMemory remapObj:
-					                     methodOopBeforeRemapping.
-				delta := methodOopBeforeRemapping - remappedMethodOop.
-				stackPages
-					unsignedLongAt: theFP + FoxMethod
-					put: remappedMethodOop.
-				theIPPtr ~= 0 ifTrue: [
-					self
-						remapInstructionPointerInFrame: theFP
-						inSavedInstructionPointerLocation: theIPPtr
-						byRemapDelta: delta ] ] ].
-		(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
-			theSP := (theIPPtr := theFP + FoxCallerSavedIP)
-			         + objectMemory wordSize.
-			theFP := callerFP ].
+					((self isMarriedOrWidowedContext: (self frameContext: theFP)) and: [
+						 (self frameOfMarriedContext: (self frameContext: theFP)) = theFP ]) ] ].
+			(self isMachineCodeFrame: theFP) ifFalse: [
+				(objectMemory shouldRemapObj: (self iframeMethod: theFP)) ifTrue: [
+					| methodOopBeforeRemapping remappedMethodOop delta |
+					methodOopBeforeRemapping := self iframeMethod: theFP.
+					remappedMethodOop := objectMemory remapObj: methodOopBeforeRemapping.
+					delta := methodOopBeforeRemapping - remappedMethodOop.
+					stackPages unsignedLongAt: theFP + FoxMethod put: remappedMethodOop.
+					theIPPtr ~= 0 ifTrue: [
+						self
+							remapInstructionPointerInFrame: theFP
+							inSavedInstructionPointerLocation: theIPPtr
+							byRemapDelta: delta ] ] ].
+			theIPPtr := theFP + FoxCallerSavedIP].
 
-		"In base frames the caller saved ip field holds the caller context."
-		theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
-		[ theSP <= thePage baseAddress ] whileTrue: [
-			oop := stackPages unsignedLongAt: theSP.
+		self baseFrameArguments: baseFrameFP inPage: thePage do: [ :baseFrameArgumentSP :oop |
 			(objectMemory shouldRemapOop: oop) ifTrue: [
-				stackPages unsignedLongAt: theSP put: (objectMemory remapObj: oop) ].
-			theSP := theSP + objectMemory wordSize ] ].
+				stackPages
+					unsignedLongAt: baseFrameArgumentSP
+					put: (objectMemory remapObj: oop) ] ] ].
 	stackPages recordLivePagesOnMapping: numLivePages
 ]
 
