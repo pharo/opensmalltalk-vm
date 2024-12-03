@@ -76,6 +76,18 @@ SLDeadCodeEliminationTestClass >> methodWithBlockValueAssignmentIntoSameVariable
 	       arg ] value: var
 ]
 
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithBlockValueValueAssignmentIntoSameVariableInArguments [
+	"produce a self assignation at translation time"
+
+	<returnTypeC: #void>
+	| var var2 |
+	var := [ :arg :arg2 |
+	       self method: arg.
+	       self method: arg2.
+	       arg2 ] value: var value: var2
+]
+
 { #category : 'method-in-c-coerce' }
 SLDeadCodeEliminationTestClass >> methodWithCallInCoerce [
 
