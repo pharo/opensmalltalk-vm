@@ -3697,6 +3697,7 @@ SpurMemoryManager >> classFormatFromInstFormat: instFormat [
 
 { #category : 'header format' }
 SpurMemoryManager >> classIndexFieldWidth [
+	<api>
 	"22-bit class mask => ~ 4M classes"
 	^22
 ]
@@ -8166,6 +8167,7 @@ SpurMemoryManager >> isValidClassIndex: classIndex [
 SpurMemoryManager >> isValidClassTag: classIndex [
 	<api>
 	| classOrNil |
+
 	self assert: (classIndex between: 0 and: 1 << self classIndexFieldWidth - 1).
 	classOrNil := self classOrNilAtIndex: classIndex.
 	^classOrNil ~= nilObj

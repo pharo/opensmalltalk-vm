@@ -3646,7 +3646,11 @@ CogIA32Compiler >> hasThreeAddressArithmetic [
 { #category : 'inline cacheing' }
 CogIA32Compiler >> inlineCacheTagAt: callSiteReturnAddress [
 	"Answer the inline cache tag for the return address of a send."
-	^self literalBeforeFollowingAddress: callSiteReturnAddress - 5
+
+	<returnTypeC: #usqInt>
+
+	^ (self literalBeforeFollowingAddress: callSiteReturnAddress - 5)
+		  bitAnd: 1 << objectMemory classIndexFieldWidth - 1
 ]
 
 { #category : 'disassembly' }
