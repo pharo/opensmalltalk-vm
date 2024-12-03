@@ -6849,7 +6849,7 @@ StackInterpreter >> frameStackValuesWithFP: theFP withSP: theSP do: aBlock [
 	| currentSP frameRcvrOffset oop |
 	currentSP := theSP.
 	frameRcvrOffset := self frameReceiverLocation: theFP.
-	[ theSP <= frameRcvrOffset ] whileTrue: [
+	[ currentSP <= frameRcvrOffset ] whileTrue: [
 		oop := stackPages unsignedLongAt: currentSP.
 		aBlock value: oop.
 		currentSP := currentSP + objectMemory wordSize ]
