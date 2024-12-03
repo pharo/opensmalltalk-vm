@@ -48,6 +48,27 @@ SLDeadCodeEliminationVisitor >> visit: aNode [
 
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
+	"var := var"
+
+	| var expr |
+	var := anAssignmentNode variable.
+	expr := anAssignmentNode expression.
+	(anAssignmentNode variable isSameAs: expr) ifTrue: [
+		self removeUnusedNodesInBranch: anAssignmentNode ].
+
+	"a node like var := [ :arg | self method:arg. arg ] value: var -> [ :arg | self method:arg ] value: var,
+					 var := [ :arg :arg2 | self method:arg. self method:arg2. arg2 ] value: var2 value: var -> [ :arg :arg2 | self method:arg. self method:arg2 ] value: var2 value: var"
+	(expr isSend and: [ expr isValueExpansion ]) ifTrue: [ "check if var is in the arguments of the value: selector and its place in it"
+		expr arguments doWithIndex: [ :arg :index |
+			(arg isSameAs: var) ifTrue: [
+				| lastStmt |
+				"expr receiver is the block"
+				lastStmt := expr receiver lastNonCommentStatement.
+				"check if lastStmt is the arguments which has the value of var"
+				(lastStmt isVariable and: [
+					 lastStmt name = (expr receiver arguments at: index) ]) ifTrue: [
+					self removeUnusedNodesInBranch: lastStmt.
+					anAssignmentNode parent replaceChild: anAssignmentNode with: expr ] ] ] ]
 ]
 
 { #category : 'visiting' }
@@ -101,6 +122,5 @@ SLDeadCodeEliminationVisitor >> visitSwitchStatementNode: aSwitchStatementNode [
 
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitVariableNode: aVariableNode [
-
 	self removeUnusedNodesInBranch: aVariableNode
 ]

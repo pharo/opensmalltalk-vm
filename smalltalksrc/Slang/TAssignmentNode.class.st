@@ -126,7 +126,8 @@ TAssignmentNode >> asCASTValueExpansionIn: aCodeGen [
 	
 	Emit directly the block without the last statement, as the assignment has no impact in the translation.
 	"
-	lastStmt = variable ifTrue: [ ^ expression asCASTIn: aCodeGen ].
+	(variable isSameAs: lastStmt) ifTrue: [
+		^ expression asCASTIn: aCodeGen ].
 	copy := stmtList copy.
 	copy statements
 		at: (stmtList statements indexOf: lastStmt)
@@ -291,6 +292,16 @@ TAssignmentNode >> printOn: aStream level: level [
 TAssignmentNode >> removeAssertions [
 
 	expression removeAssertions
+]
+
+{ #category : 'dead-code-elimination' }
+TAssignmentNode >> removeUnusedNodesInBranch: aNode [
+	"only happens when the expression is a value selector with a block receiver that became empty,
+	the assignement is now empty we remove it from the receiver"
+	self assert: expression isValueExpansion.
+	self assert: expression receiver isEmptyStmtListNode. 
+	self parent removeUnusedNodesInBranch: self.
+	
 ]
 
 { #category : 'transformations' }

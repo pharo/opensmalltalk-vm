@@ -581,7 +581,7 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 			self transformReceiverAfterEmptyArguments.
 			self parent removeUnusedNodesInBranch: self ]
 		ifFalse: [
-			(self selector beginsWith: #cCoerce)
+			((self selector beginsWith: #cCoerce) or: [self isValueExpansion ])
 				ifTrue: [ self parent removeUnusedNodesInBranch: self ]
 				ifFalse: [ self reduceConditionalSend: branchIndex ] ]
 ]

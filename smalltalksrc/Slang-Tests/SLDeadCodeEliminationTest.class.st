@@ -139,6 +139,41 @@ methodWithAddInCoerce(SLDeadCodeEliminationTestClass * self_in_methodWithAddInCo
 }'
 ]
 
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithBlockValueAssignmentIntoSameVariableInArguments [
+	
+	"arg is still in the code, the problem comes from removeUnusedTempsAndNilIfRequiredIn:"
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithBlockValueAssignmentIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+'/*	produce a self assignation at translation time */
+/* SLDeadCodeEliminationTestClass>>#methodWithBlockValueAssignmentIntoSameVariableInArguments */
+static void
+methodWithBlockValueAssignmentIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithBlockValueAssignmentIntoSameVariableInArguments)
+{
+	sqInt arg;
+	sqInt var;
+
+	var = 0;
+	{
+		method(self_in_methodWithBlockValueAssignmentIntoSameVariableInArguments, var);
+	}
+	{
+		return;
+	}
+}'
+]
+
 { #category : 'method-in-c-coerce' }
 SLDeadCodeEliminationTest >> testMethodWithCallInCoerce [
 
@@ -1113,6 +1148,33 @@ methodWithInstanceVariableInReturn(SLDeadCodeEliminationTestClass * self_in_meth
 }'
 ]
 
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyBlockValueAssignmentIntoSameVariableInArguments [
+	"all of the body is dead code"
+
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals: '/*	produce a self assignation at translation time */
+/* SLDeadCodeEliminationTestClass>>#methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments */
+static void
+methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments)
+{
+	{
+		return;
+	}
+}'
+]
+
 { #category : 'only-comment' }
 SLDeadCodeEliminationTest >> testMethodWithOnlyComment [
 	"currently the only way to get comments in a methods is through inlining, having only comments is equivalent to being empty so it shouldn't change the behavior of the dead code elimination process"
@@ -1135,6 +1197,32 @@ methodWithOnlyComment(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyCom
 {
 	/* begin method */
 	/* end method */
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithSelfAssign [
+	"happens because of polymorphisme or inlining"
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithSelfAssign.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithSelfAssign */
+static void
+methodWithSelfAssign(SLDeadCodeEliminationTestClass * self_in_methodWithSelfAssign)
+{
 	{
 		return;
 	}

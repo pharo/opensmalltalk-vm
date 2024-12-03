@@ -65,6 +65,17 @@ SLDeadCodeEliminationTestClass >> methodWithAddInCoerce [
 	self cCoerce: 4 + 8 to: #type
 ]
 
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithBlockValueAssignmentIntoSameVariableInArguments [
+	"produce a self assignation at translation time"
+
+	<returnTypeC: #void>
+	| var |
+	var := [ :arg |
+	       self method: arg.
+	       arg ] value: var
+]
+
 { #category : 'method-in-c-coerce' }
 SLDeadCodeEliminationTestClass >> methodWithCallInCoerce [
 
@@ -353,11 +364,28 @@ SLDeadCodeEliminationTestClass >> methodWithInstanceVariableInReturn [
 	^ instancesVariable
 ]
 
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments [
+	"produce a self assignation at translation time"
+
+	<returnTypeC: #void>
+	| var |
+	var := [ :arg | arg ] value: var
+]
+
 { #category : 'only-comment' }
 SLDeadCodeEliminationTestClass >> methodWithOnlyComment [
 
 	<returnTypeC: #void>
 	self method
+]
+
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithSelfAssign [
+
+	<returnTypeC: #void>
+	| var |
+	var := var
 ]
 
 { #category : 'unused-leaf' }
