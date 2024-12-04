@@ -2908,10 +2908,18 @@ TMethod >> statementsListsForInliningIn: aCodeGen [
 		unless: [ :node | 
 			node isSend and: [ 
 				node selector == #cCode:inSmalltalk: or: [ 
-					aCodeGen isAssertSelector: node selector ] ] ].
+					node selector == #cCall: or: [ 
+						node selector == #cCall:withArguments: or: [ 
+							aCodeGen isAssertSelector: node selector ] ] ] ] ].
 	parseTree nodesDo: [ :node | 
 		node isSend ifTrue: [ 
 			node selector = #cCode:inSmalltalk: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall:withArguments: ifTrue: [ 
 				node nodesDo: [ :ccisNode | 
 					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
 			(node selector = #cppIf:ifTrue:ifFalse: or: [ 
@@ -3212,8 +3220,6 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 	 Answer if something was inlined."
 
 	| didSomething statementLists |
-	"complete ifTrue:
-		[^false]."
 	self definedAsMacro ifTrue: [
 		complete ifTrue: [ ^ false ].
 		^ complete := true ].
@@ -3227,9 +3233,11 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 		                didSomething ].
 
 	didSomething ifTrue: [ writtenToGlobalVarsCache := nil ].
+	
+	"marking a method complete is progress"
 	complete ifFalse: [
 		self checkForCompletenessIn: aCodeGen.
-		complete ifTrue: [ didSomething := true ] ]. "marking a method complete is progress"
+		complete ifTrue: [ didSomething := true ] ]. 
 	^ didSomething
 ]
 
