@@ -4921,6 +4921,13 @@ StackInterpreter >> currentBytecode [
 	^ currentBytecode
 ]
 
+{ #category : 'indexing primitive support' }
+StackInterpreter >> currentBytecode: anInteger [
+
+	<doNotGenerate>
+	currentBytecode := anInteger
+]
+
 { #category : 'initialization' }
 StackInterpreter >> defaultNumStackPages [
 	"Return the default number of stack pages allocate at startup.
@@ -14734,48 +14741,46 @@ StackInterpreter >> specialSelectorNumArgs: index [
 
 { #category : 'indexing primitive support' }
 StackInterpreter >> stObject: array at: index [
-	"Return what ST would return for <obj> at: index."
+  "Return what ST would return for <obj> at: index."
 
-	| hdr fmt totalLength fixedFields stSize |
-	<inline: true>
-	hdr := objectMemory baseHeader: array.
-	fmt := objectMemory formatOfHeader: hdr.
-	totalLength := objectMemory lengthOf: array format: fmt.
-	fixedFields := objectMemory fixedFieldsOf: array format: fmt length: totalLength.
-	(fmt = objectMemory indexablePointersFormat
-	 and: [objectMemory isContextHeader: hdr])
-		ifTrue:
-			[stSize := self stackPointerForMaybeMarriedContext: array.
-			((self oop: index isGreaterThanOrEqualTo: 1)
-			 and: [(self oop: index isLessThanOrEqualTo: stSize)
-			 and: [self isStillMarriedContext: array]]) ifTrue:
-				[^self noInlineTemporary: index - 1 in: (self frameOfMarriedContext: array)]]
-		ifFalse: [stSize := totalLength - fixedFields].
-	((self oop: index isGreaterThanOrEqualTo: (objectMemory firstValidIndexOfIndexableObject: array withFormat: fmt))
-	 and: [self oop: index isLessThanOrEqualTo: stSize]) ifTrue:
-		[^self subscript: array with: (index + fixedFields) format: fmt].
-	self primitiveFailFor: (fmt <= 1 ifTrue: [PrimErrBadReceiver] ifFalse: [PrimErrBadIndex]).
-	^0
+  | fmt totalLength fixedFields stSize |
+  <inline: true>
+  fmt := objectMemory formatOf: array.
+  totalLength := objectMemory lengthOf: array format: fmt.
+  fixedFields := objectMemory fixedFieldsOf: array format: fmt length: totalLength.
+  (fmt = objectMemory indexablePointersFormat
+   and: [objectMemory isContextObject: array])
+    ifTrue:
+      [stSize := self stackPointerForMaybeMarriedContext: array.
+      ((self oop: index isGreaterThanOrEqualTo: 1)
+       and: [(self oop: index isLessThanOrEqualTo: stSize)
+       and: [self isStillMarriedContext: array]]) ifTrue:
+        [^self noInlineTemporary: index - 1 in: (self frameOfMarriedContext: array)]]
+    ifFalse: [stSize := totalLength - fixedFields].
+  ((self oop: index isGreaterThanOrEqualTo: (objectMemory firstValidIndexOfIndexableObject: array withFormat: fmt))
+   and: [self oop: index isLessThanOrEqualTo: stSize]) ifTrue:
+    [^self subscript: array with: (index + fixedFields) format: fmt].
+  self primitiveFailFor: (fmt <= 1 ifTrue: [PrimErrBadReceiver] ifFalse: [PrimErrBadIndex]).
+  ^0
 ]
 
 { #category : 'indexing primitive support' }
 StackInterpreter >> stObject: array at: index put: value [
-	"Do what ST would return for <obj> at: index put: value."
-	| hdr fmt totalLength fixedFields stSize |
-	<inline: true>
-	hdr := objectMemory baseHeader: array.
-	(objectMemory isContextHeader: hdr) ifTrue:[
-		"we have another primitive (contextAt:Put: for contexts"
-		^self primitiveFailFor: PrimErrBadReceiver].
-	fmt := objectMemory formatOfHeader: hdr.
-	totalLength := objectMemory lengthOf: array format: fmt.
-	fixedFields := objectMemory fixedFieldsOf: array format: fmt length: totalLength.
-	stSize := totalLength - fixedFields.
-	((self oop: index isGreaterThanOrEqualTo: (objectMemory firstValidIndexOfIndexableObject: array withFormat: fmt))
-	 and: [self oop: index isLessThanOrEqualTo: stSize])
-		ifTrue: [self subscript: array with: (index + fixedFields) storing: value format: fmt]
-		ifFalse: [self primitiveFailFor: (fmt <= 1 ifTrue: [PrimErrBadReceiver] ifFalse: [PrimErrBadIndex])].
-	^value
+  "Do what ST would return for <obj> at: index put: value."
+  | fmt totalLength fixedFields stSize |
+  <inline: true>
+  (objectMemory isContextObject: array) ifTrue:[
+    "we have another primitive (contextAt:Put: for contexts"
+    ^self primitiveFailFor: PrimErrBadReceiver].
+  fmt := objectMemory formatOf: array.
+  totalLength := objectMemory lengthOf: array format: fmt.
+  fixedFields := objectMemory fixedFieldsOf: array format: fmt length: totalLength.
+  stSize := totalLength - fixedFields.
+  ((self oop: index isGreaterThanOrEqualTo: (objectMemory firstValidIndexOfIndexableObject: array withFormat: fmt))
+   and: [self oop: index isLessThanOrEqualTo: stSize])
+    ifTrue: [self subscript: array with: (index + fixedFields) storing: value format: fmt]
+    ifFalse: [self primitiveFailFor: (fmt <= 1 ifTrue: [PrimErrBadReceiver] ifFalse: [PrimErrBadIndex])].
+  ^value
 ]
 
 { #category : 'indexing primitive support' }
@@ -14805,7 +14810,7 @@ StackInterpreter >> stackFloatValue: offset [
 StackInterpreter >> stackIntegerValue: offset [
 	"In the StackInterpreter stacks grow down."
 	| integerPointer |
-	integerPointer := stackPages unsignedLongAt: stackPointer + (offset*objectMemory wordSize).
+	integerPointer := self stackValue: offset.
 	^self checkedIntegerValueOf: integerPointer
 ]
 
