@@ -1182,6 +1182,28 @@ SlangBasicTranslationTest >> testConstantsStatementsInBlockValueAreIgnored [
 }'
 ]
 
+{ #category : 'tests-inlinemethod' }
+SlangBasicTranslationTest >> testDoNotInlineArgumentsOfCCall [
+	
+	| translation tMethod |
+	tMethod := self getTMethodFrom: #methodCallingCFunction.
+	tMethod recordDeclarationsIn: generator.
+	generator doBasicInlining: true.
+	
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+	
+	self
+		assert: translation
+		equals: '/* SlangBasicTranslationTestClass>>#methodCallingCFunction */
+static sqInt
+methodCallingCFunction(void)
+{
+	cCallwithArguments("function", methodWithInlinePragma());
+	return 0;
+}'
+]
+
 { #category : 'tests-goto' }
 SlangBasicTranslationTest >> testGoto [
 
