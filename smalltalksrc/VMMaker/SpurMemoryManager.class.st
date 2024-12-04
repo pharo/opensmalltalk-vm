@@ -11768,6 +11768,16 @@ SpurMemoryManager >> rtRefCountOf: obj put: refCount [
 ]
 
 { #category : 'debug support' }
+SpurMemoryManager >> runLeakCheckerFor: gcModes [
+
+	<inline: false>
+	^ self
+		  inLineRunLeakCheckerFor: gcModes
+		  excludeUnmarkedObjs: false
+		  classIndicesShouldBeValid: true
+]
+
+{ #category : 'debug support' }
 SpurMemoryManager >> runLeakCheckerFor: gcModes excludeUnmarkedObjs: excludeUnmarkedObjs classIndicesShouldBeValid: classIndicesShouldBeValid [
 	<inline: false>
 	self inLineRunLeakCheckerFor: gcModes
