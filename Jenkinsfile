@@ -84,14 +84,14 @@ def buildGTKBundle(){
 				archiveArtifacts artifacts: "${gtkBundleName}"
 				
 				if(!isPullRequest() && isMainBranch()){
-					sshagent (credentials: ['b5248b59-a193-4457-8459-e28e9eb29ed7']) {
+					sshagent (credentials: ['files-pharo-org-inria']) {
 						sh "scp -o StrictHostKeyChecking=no \
 						${gtkBundleName} \
-						pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur64-headless/win/${gtkBundleName}"
+						pharo-ci@files.pharo.org:vm/pharo-spur64-headless/win/${gtkBundleName}"
 
 						sh "scp -o StrictHostKeyChecking=no \
 						${gtkBundleName} \
-						pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur64-headless/win/latest${mainBranchVersion()}-win64-GTK.zip"
+						pharo-ci@files.pharo.org:vm/pharo-spur64-headless/win/latest${mainBranchVersion()}-win64-GTK.zip"
 					}
 				}
 			}
@@ -111,7 +111,6 @@ def runBuild(platformName, configuration, headless = true, someAdditionalParamet
 	def additionalParameters = someAdditionalParameters
 	
 	additionalParameters += headless ? "" : " -DALWAYS_INTERACTIVE=1 "
-	additionalParameters += isRelease() ? " -DBUILD_IS_RELEASE=ON " : " -DBUILD_IS_RELEASE=OFF "
 
 	if(configuration == 'StackVM'){
 		additionalParameters += " -DFEATURE_MESSAGE_COUNT=TRUE "
@@ -303,41 +302,41 @@ def upload(platform, configuration, archiveName, isStableRelease = false) {
 	def expandedCSourceTarName = sh(returnStdout: true, script: "ls build/build/packages/PharoVM-*-${archiveName}-c-src.tar.gz").trim()
 	def expandedHeadersFileName = sh(returnStdout: true, script: "ls build/build/packages/PharoVM-*-${archiveName}-include.zip").trim()
 
-	sshagent (credentials: ['b5248b59-a193-4457-8459-e28e9eb29ed7']) {
+	sshagent (credentials: ['files-pharo-org-inria']) {
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/latest${mainBranchVersion()}.zip"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/latest${mainBranchVersion()}.zip"
 
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedHeadersFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/include"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/include"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedHeadersFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/include/latest${mainBranchVersion()}.zip"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/include/latest${mainBranchVersion()}.zip"
 
 		// Upload Souces ZIP 
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedCSourceFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/source"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/source"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedCSourceFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/source/latest${mainBranchVersion()}.zip"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/source/latest${mainBranchVersion()}.zip"
 
 		// Upload Sources TAR.GZ
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedCSourceTarName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/source"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/source"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedCSourceTarName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/source/latest${mainBranchVersion()}.tar.gz"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/source/latest${mainBranchVersion()}.tar.gz"
 		
 		if(isStableRelease){
 			sh "scp -o StrictHostKeyChecking=no \
 			${expandedBinaryFileName} \
-			pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/stable${mainBranchVersion()}.zip"
+			pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/stable${mainBranchVersion()}.zip"
 		}
 	}
 }
@@ -351,18 +350,18 @@ def uploadStockReplacement(platform, configuration, archiveName, isStableRelease
 	def wordSize = is32Bits(platform) ? "32" : "64"
 	def expandedBinaryFileName = sh(returnStdout: true, script: "ls build-stockReplacement/build/packages/PharoVM-*-${archiveName}-bin.zip").trim()
 
-	sshagent (credentials: ['b5248b59-a193-4457-8459-e28e9eb29ed7']) {
+	sshagent (credentials: ['files-pharo-org-inria']) {
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}/${platform}"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}/${platform}"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}/${platform}/latestReplacement${mainBranchVersion()}.zip"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}/${platform}/latestReplacement${mainBranchVersion()}.zip"
 
 		if(isStableRelease){
 			sh "scp -o StrictHostKeyChecking=no \
 			${expandedBinaryFileName} \
-			pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}/${platform}/stable${mainBranchVersion()}.zip"
+			pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}/${platform}/stable${mainBranchVersion()}.zip"
 		}
 	}
 }
@@ -382,18 +381,18 @@ def uploadStackVM(platform, configuration, archiveName, isStableRelease = false)
 	
 	sh(script: "cp ${oldName} ${expandedBinaryFileName}")
 	
-	sshagent (credentials: ['b5248b59-a193-4457-8459-e28e9eb29ed7']) {
+	sshagent (credentials: ['files-pharo-org-inria']) {
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}"
 		sh "scp -o StrictHostKeyChecking=no \
 		${expandedBinaryFileName} \
-		pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/latestStackVM${mainBranchVersion()}.zip"
+		pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/latestStackVM${mainBranchVersion()}.zip"
 
 		if(isStableRelease){
 			sh "scp -o StrictHostKeyChecking=no \
 			${expandedBinaryFileName} \
-			pharoorgde@ssh.cluster023.hosting.ovh.net:/home/pharoorgde/files/vm/pharo-spur${wordSize}-headless/${platform}/stableStackVM${mainBranchVersion()}.zip"
+			pharo-ci@files.pharo.org:vm/pharo-spur${wordSize}-headless/${platform}/stableStackVM${mainBranchVersion()}.zip"
 		}
 	}
 }

@@ -77,6 +77,7 @@ static VMErrorCode processEdenSizeOption(const char *argument, VMParameters * pa
 static VMErrorCode processWorkerOption(const char *argument, VMParameters * params);
 static VMErrorCode processMinPermSpaceSizeOption(const char *argument, VMParameters * params);
 static VMErrorCode processStackPageSizeOption(const char *argument, VMParameters * params);
+static VMErrorCode processWorkingDirectory(const char *argument, VMParameters * params);
 static VMErrorCode processAvoidSearchingSegmentsWithPinnedObjects(const char *argument, VMParameters * params);
 
 static const VMParameterSpec vm_parameters_spec[] =
@@ -97,6 +98,8 @@ static const VMParameterSpec vm_parameters_spec[] =
   {.name = "codeSize", .hasArgument = true, .function = processMaxCodeSpaceSizeOption},
   {.name = "edenSize", .hasArgument = true, .function = processEdenSizeOption},
   {.name = "minPermSpaceSize", .hasArgument = true, .function = processMinPermSpaceSizeOption},
+
+  {.name = "workingDirectory", .hasArgument = true, .function = processWorkingDirectory},
 
   {.name = "avoidSearchingSegmentsWithPinnedObjects", .hasArgument = false, .function = processAvoidSearchingSegmentsWithPinnedObjects},
 #ifdef __APPLE__
@@ -435,19 +438,19 @@ vm_printUsageTo(FILE *out)
 "                                       spaces are fixed (or calculated from this) with\n"
 "                                       this parameter is possible to set the total size.\n"
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
-"  --codeSize=<size>[mk]                Sets the max size of code zone.\n"
+"  --codeSize=<size>[mk]                Sets the max size of code zone (default: 1M)\n"
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
-"  --edenSize=<size>[mk]                Sets the size of eden\n"
+"  --edenSize=<size>[mk]                Sets the size of eden (default: 15M)\n"
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
-"  --minPermSpaceSize=<size>[mk]        Sets the size of eden\n"
+"  --minPermSpaceSize=<size>[mk]        Sets the min size of the permanent space (default: 0k)\n"
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
-"  --stackPageSize=<size>[mk]           Sets the size of each stack page\n"
+"  --stackPageSize=<size>[mk]           Sets the size of each stack page (default: 8k)\n"
 "                                       It is possible to use k(kB), M(MB) and G(GB).\n"
-"\n"
+"  --workingDirectory=<dir>		It sets the working directory for the running image.\n"
 "  --avoidSearchingSegmentsWithPinnedObjects\n"
-"                                       When pinning young objects, the objects are clonned into the old space.\n"
+"                                       When pinning young objects, the objects are cloned into the old space. (default: false)\n"
 "                                       It tries to allocate the object in a segment with already pinned objects.\n"
-"	                                    Avoid the clonning process avoid this search and allocate the clonned object anywhere?\n"
+"	                                  Avoid the clonning process avoid this search and allocate the clonned object anywhere?\n"
 "\n"
 "\n"
 "Notes:\n"
@@ -560,6 +563,18 @@ processMinPermSpaceSizeOption(const char* originalArgument, VMParameters * param
 	}
 
 	params->minPermSpaceSize = intValue;
+
+	return VM_SUCCESS;
+}
+
+static VMErrorCode
+processWorkingDirectory(const char* originalArgument, VMParameters * params)
+{
+
+	logDebug("Changing working directory to: %s", originalArgument);
+	if(chdir(originalArgument)== -1){
+		logErrorFromErrno("Error changing directory");
+	}
 
 	return VM_SUCCESS;
 }
