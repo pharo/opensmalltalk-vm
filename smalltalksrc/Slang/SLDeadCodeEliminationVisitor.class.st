@@ -108,6 +108,9 @@ SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 	aSendNode isUnaryIterativeSend ifTrue: [
 		self visit: aSendNode receiver.
 		^ self ].
+	aSendNode isUnaryIterativeSendWithImportantLastStatement ifTrue: [
+		self visitStatementListNodeExceptLast: aSendNode receiver.
+		^ self ].
 	(aSendNode selector beginsWith: #cCoerce) ifTrue: [
 		self visit: aSendNode arguments first.
 		^ self ].
@@ -119,6 +122,19 @@ SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 SLDeadCodeEliminationVisitor >> visitStatementListNode: aStatementListNode [
 
 	aStatementListNode children do: [ :subNode | self visit: subNode ]
+]
+
+{ #category : 'visiting' }
+SLDeadCodeEliminationVisitor >> visitStatementListNodeExceptLast: aStatementListNode [
+	"useful for whileTrue as the last statements is actually not dead code"
+
+	| statements |
+	statements := aStatementListNode children.
+
+	statements size = 1 ifTrue: [
+		self removeUnusedNodesInBranch: aStatementListNode ].
+
+	1 to: statements size - 1 do: [ :i | self visit: (statements at: i) ]
 ]
 
 { #category : 'visiting' }

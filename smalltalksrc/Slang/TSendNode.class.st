@@ -457,7 +457,13 @@ TSendNode >> isStructReference: varNode in: aCodeGen [
 { #category : 'dead-code-elimination' }
 TSendNode >> isUnaryIterativeSend [
 
-	^ #( #whileTrue #whileFalse #repeat ) includes: selector
+	^ #( #repeat ) includes: selector
+]
+
+{ #category : 'dead-code-elimination' }
+TSendNode >> isUnaryIterativeSendWithImportantLastStatement [
+
+	^ #( #whileTrue #whileFalse ) includes: selector
 ]
 
 { #category : 'testing' }
@@ -603,7 +609,14 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 					self parent removeUnusedNodesInBranch: self.
 					^ self ].
 			self isConditionalSend ifTrue: [
-				self reduceConditionalSend: branchIndex ] ]
+				self reduceConditionalSend: branchIndex.
+				^ self ].
+			"a case like it remains only [false] whileTrue, we don't have enough arguments anymore"
+			(self isUnaryIterativeSendWithImportantLastStatement and: [
+				 arguments size = 1 and: [ arguments first children size = 1 ] ])
+				ifTrue: [
+					self transformReceiverAfterEmptyArguments.
+					self parent removeUnusedNodesInBranch: self ] ]
 ]
 
 { #category : 'transformations' }

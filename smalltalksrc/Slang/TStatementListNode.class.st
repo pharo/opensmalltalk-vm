@@ -607,7 +607,11 @@ TStatementListNode >> removeUnusedNodesInBranch: aChild [
 
 	statements := statements select: [ :stmt | stmt ~~ aChild ].
 	(statements isEmpty or: [ self hasNothingButComments ]) ifTrue: [
-		self parent removeUnusedNodesInBranch: self ]
+		self parent removeUnusedNodesInBranch: self ].
+	(statements size = 1 and: [self parent isTMethod not and: [
+		 self parent isSend and: [
+			 self parent isUnaryIterativeSendWithImportantLastStatement ] ]])
+		ifTrue: [ self parent removeUnusedNodesInBranch: self ]
 ]
 
 { #category : 'inlining support' }

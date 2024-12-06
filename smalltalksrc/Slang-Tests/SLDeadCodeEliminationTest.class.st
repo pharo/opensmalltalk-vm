@@ -389,7 +389,7 @@ methodWithDeadCodeInRepeat(SLDeadCodeEliminationTestClass * self_in_methodWithDe
 SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalse [
 
 	| translation tMethod |
-	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileFalse.
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileFalseLastExpressionIsLeaf.
 	ccg currentMethod: tMethod.
 	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
 	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
@@ -400,16 +400,13 @@ SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalse [
 	self
 		assert: translation
 		equals:
-			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileFalse */
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileFalseLastExpressionIsLeaf */
 static void
-methodWithDeadCodeInWhileFalse(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileFalse)
+methodWithDeadCodeInWhileFalseLastExpressionIsLeaf(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileFalseLastExpressionIsLeaf)
 {
-	sqInt expr;
-
-	expr = 0;
 	do{
-		method(self_in_methodWithDeadCodeInWhileFalse);
-	}while(!(expr == 1));
+		method(self_in_methodWithDeadCodeInWhileFalseLastExpressionIsLeaf);
+	}while(!1);
 	{
 		return;
 	}
@@ -481,7 +478,7 @@ methodWithDeadCodeInWhileFalseBinarySendInReceiver(SLDeadCodeEliminationTestClas
 SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileTrue [
 
 	| translation tMethod |
-	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileTrue.
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileTrueLastExpressionIsLeaf.
 	ccg currentMethod: tMethod.
 	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
 	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
@@ -492,16 +489,13 @@ SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileTrue [
 	self
 		assert: translation
 		equals:
-			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileTrue */
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileTrueLastExpressionIsLeaf */
 static void
-methodWithDeadCodeInWhileTrue(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileTrue)
+methodWithDeadCodeInWhileTrueLastExpressionIsLeaf(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileTrueLastExpressionIsLeaf)
 {
-	sqInt expr;
-
-	expr = 0;
 	do{
-		method(self_in_methodWithDeadCodeInWhileTrue);
-	}while(expr == 1);
+		method(self_in_methodWithDeadCodeInWhileTrueLastExpressionIsLeaf);
+	}while(1);
 	{
 		return;
 	}

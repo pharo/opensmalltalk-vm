@@ -298,10 +298,10 @@ TAssignmentNode >> removeAssertions [
 TAssignmentNode >> removeUnusedNodesInBranch: aNode [
 	"only happens when the expression is a value selector with a block receiver that became empty,
 	the assignement is now empty we remove it from the receiver"
+
 	self assert: expression isValueExpansion.
-	self assert: expression receiver isEmptyStmtListNode. 
-	self parent removeUnusedNodesInBranch: self.
-	
+	self assert: expression receiver isEmptyStmtListNode.
+	self parent removeUnusedNodesInBranch: self
 ]
 
 { #category : 'transformations' }

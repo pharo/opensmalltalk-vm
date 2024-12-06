@@ -139,20 +139,7 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInRepeat [
 	| var |
 	[
 	var := var.
-	self method.
-	true ] repeat
-]
-
-{ #category : 'dead-code-in-unary-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalse [
-
-	<returnTypeC: #void>
-	| expr var |
-	[
-	var := var.
-	self method.
-	true.
-	expr = true ] whileFalse
+	self method ] repeat
 ]
 
 { #category : 'dead-code-in-binary-iterative' }
@@ -178,15 +165,14 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinarySendInRece
 ]
 
 { #category : 'dead-code-in-unary-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrue [
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseLastExpressionIsLeaf [
 
 	<returnTypeC: #void>
 	| expr var |
 	[
 	var := var.
 	self method.
-	true.
-	expr = true ] whileTrue
+	true ] whileFalse
 ]
 
 { #category : 'dead-code-in-binary-iterative' }
@@ -209,6 +195,17 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueBinarySendInRecei
 		var := var.
 		self method.
 		true ]
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueLastExpressionIsLeaf [
+
+	<returnTypeC: #void>
+	| expr var |
+	[
+	var := var.
+	self method.
+	true ] whileTrue
 ]
 
 { #category : 'empty-switch-no-send-in-expression' }
