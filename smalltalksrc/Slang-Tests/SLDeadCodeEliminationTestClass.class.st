@@ -132,7 +132,18 @@ SLDeadCodeEliminationTestClass >> methodWithConstantInReturn [
 	^ 5 
 ]
 
-{ #category : 'dead-code-in-iterative' }
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInRepeat [
+
+	<returnTypeC: #void>
+	| var |
+	[
+	var := var.
+	self method.
+	true ] repeat
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalse [
 
 	<returnTypeC: #void>
@@ -144,8 +155,8 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalse [
 	expr = true ] whileFalse
 ]
 
-{ #category : 'dead-code-in-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinary [
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinaryNoSendInReceiver [
 
 	<returnTypeC: #void>
 	| var |
@@ -155,7 +166,18 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinary [
 		false ]
 ]
 
-{ #category : 'dead-code-in-iterative' }
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinarySendInReceiver [
+
+	<returnTypeC: #void>
+	| var |
+	[ self method ] whileFalse: [
+		var := var.
+		self method.
+		false ]
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrue [
 
 	<returnTypeC: #void>
@@ -167,12 +189,23 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrue [
 	expr = true ] whileTrue
 ]
 
-{ #category : 'dead-code-in-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueBinary [
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueBinaryNoSendInReceiver [
 
 	<returnTypeC: #void>
 	| var |
 	[var = false ] whileTrue: [
+		var := var.
+		self method.
+		true ]
+]
+
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueBinarySendInReceiver [
+
+	<returnTypeC: #void>
+	| var |
+	[self method ] whileTrue: [
 		var := var.
 		self method.
 		true ]
@@ -468,7 +501,7 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyComment [
 	self method
 ]
 
-{ #category : 'dead-code-in-iterative' }
+{ #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalse [
 
 	<returnTypeC: #void>
@@ -478,8 +511,8 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalse [
 	true ] whileFalse
 ]
 
-{ #category : 'dead-code-in-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalseBinary [
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalseBinaryNoSendInReceiver [
 
 	<returnTypeC: #void>
 	| var |
@@ -488,7 +521,17 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalseBinary [
 		false ]
 ]
 
-{ #category : 'dead-code-in-iterative' }
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalseBinarySendInReceiver [
+
+	<returnTypeC: #void>
+	| var |
+	[ self method ] whileFalse: [
+		var := var.
+		false ]
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrue [
 
 	<returnTypeC: #void>
@@ -498,12 +541,22 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrue [
 	true ] whileTrue
 ]
 
-{ #category : 'dead-code-in-iterative' }
-SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrueBinary [
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrueBinaryNoSendInReceiver [
 
 	<returnTypeC: #void>
 	| var |
 	[ var = true ] whileTrue: [
+		var := var.
+		3 ]
+]
+
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrueBinarySendInReceiver [
+
+	<returnTypeC: #void>
+	| var |
+	[ self method ] whileTrue: [
 		var := var.
 		3 ]
 ]

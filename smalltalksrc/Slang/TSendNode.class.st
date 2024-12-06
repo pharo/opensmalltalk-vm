@@ -282,8 +282,7 @@ TSendNode >> children [
 { #category : 'dead-code-elimination' }
 TSendNode >> collectSendInArguments: sendToCollect [
 
-	arguments do: [ :child |
-		child isSend ifTrue: [ child collectSendInSelf: sendToCollect ] ]
+	arguments do: [ :arg | arg collectSendInSelf: sendToCollect ]
 ]
 
 { #category : 'dead-code-elimination' }
@@ -293,8 +292,7 @@ TSendNode >> collectSendInSelf: sendToCollect [
 	self isSelectorWithNoSideEffect
 		ifFalse: [ sendToCollect add: self ]
 		ifTrue: [
-			receiver isSend ifTrue: [
-				receiver collectSendInSelf: sendToCollect ].
+			receiver collectSendInSelf: sendToCollect.
 			self collectSendInArguments: sendToCollect ]
 ]
 
@@ -735,7 +733,6 @@ TSendNode >> transformReceiverAfterEmptyArguments [
 	"keep any send that isn't a comparaison in the receiver to the parent of self. Since this method is called in a dead code cleaning processus the parent should only be a statement list or another conditional send"
 
 	| sendToCollect |
-	receiver isSend ifFalse: [ ^ self ].
 	sendToCollect := OrderedCollection new.
 	receiver collectSendInSelf: sendToCollect.
 	sendToCollect isNotEmpty ifTrue: [

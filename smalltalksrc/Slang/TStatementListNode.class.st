@@ -351,6 +351,12 @@ TStatementListNode >> children [
 	^ statements
 ]
 
+{ #category : 'dead-code-elimination' }
+TStatementListNode >> collectSendInSelf: sendToCollect [
+
+	statements do: [ :stmt | stmt collectSendInSelf: sendToCollect ]
+]
+
 { #category : 'transformations' }
 TStatementListNode >> copyWithoutReturn [
 

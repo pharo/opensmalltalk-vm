@@ -145,6 +145,13 @@ TParseNode >> collect: aBlock [
 	^nodes
 ]
 
+{ #category : 'dead-code-elimination' }
+TParseNode >> collectSendInSelf: sendToCollect [
+	"used to rearrange sends in a sendNode (with no side effects) receiver after the arguments have been found empty"
+
+	^ self
+]
+
 { #category : 'accessing' }
 TParseNode >> comment [
 	^comment
