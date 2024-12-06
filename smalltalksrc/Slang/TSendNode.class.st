@@ -382,6 +382,13 @@ TSendNode >> isConditionalSend [
 		ifNil:ifNotNil: ifNotNil:ifNil: ifNil: ifNotNil:) includes: selector
 ]
 
+{ #category : 'dead-code-elimination' }
+TSendNode >> isIterativeSend [
+
+	^ #( #whileTrue: #whileFalse: #whileTrue #whileFalse #do:
+	     #repeat #timesRepeat: ) includes: selector
+]
+
 { #category : 'testing' }
 TSendNode >> isLiteralArrayDeclaration [
 	^selector == #cCoerce:to:
@@ -581,9 +588,12 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 			self transformReceiverAfterEmptyArguments.
 			self parent removeUnusedNodesInBranch: self ]
 		ifFalse: [
-			((self selector beginsWith: #cCoerce) or: [self isValueExpansion ])
-				ifTrue: [ self parent removeUnusedNodesInBranch: self ]
-				ifFalse: [ self reduceConditionalSend: branchIndex ] ]
+			((self selector beginsWith: #cCoerce) or: [ self isValueExpansion ])
+				ifTrue: [
+					self parent removeUnusedNodesInBranch: self.
+					^ self ].
+			self isConditionalSend ifTrue: [
+				self reduceConditionalSend: branchIndex ] ]
 ]
 
 { #category : 'transformations' }

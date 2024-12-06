@@ -72,6 +72,11 @@ SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
 ]
 
 { #category : 'visiting' }
+SLDeadCodeEliminationVisitor >> visitCaseStatementNode: aCaseStatementNode [
+	"nothing for now"
+]
+
+{ #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitConstantNode: aConstantNode [
 
 	self removeUnusedNodesInBranch: aConstantNode
@@ -96,9 +101,10 @@ SLDeadCodeEliminationVisitor >> visitReturnNode: aReturnNode [
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 
-	aSendNode isConditionalSend ifTrue: [
-		aSendNode arguments do: [ :subNode | self visit: subNode ].
-		^ self ].
+	(aSendNode isConditionalSend or: [ aSendNode isIterativeSend ])
+		ifTrue: [
+			aSendNode arguments do: [ :subNode | self visit: subNode ].
+			^ self ].
 	(aSendNode selector beginsWith: #cCoerce) ifTrue: [
 		self visit: aSendNode arguments first.
 		^ self ].
