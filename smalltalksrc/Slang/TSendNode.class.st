@@ -363,6 +363,12 @@ TSendNode >> isAssertion [
 	^(selector beginsWith: 'assert') or: [selector beginsWith: 'verify']
 ]
 
+{ #category : 'dead-code-elimination' }
+TSendNode >> isBinaryIterativeSend [
+
+	^ #( #whileTrue: #whileFalse: #do: #timesRepeat: ) includes: selector
+]
+
 { #category : 'testing' }
 TSendNode >> isBuiltinOperator [
 
@@ -448,6 +454,12 @@ TSendNode >> isSend [
 { #category : 'C code generation' }
 TSendNode >> isStructReference: varNode in: aCodeGen [
 	^(varNode structTargetKindIn: aCodeGen) notNil
+]
+
+{ #category : 'dead-code-elimination' }
+TSendNode >> isUnaryIterativeSend [
+
+	^ #( #whileTrue #whileFalse #repeat ) includes: selector
 ]
 
 { #category : 'testing' }

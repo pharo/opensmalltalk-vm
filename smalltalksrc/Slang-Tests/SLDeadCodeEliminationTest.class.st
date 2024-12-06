@@ -357,6 +357,130 @@ methodWithConstantInReturn(SLDeadCodeEliminationTestClass * self_in_methodWithCo
 }'
 ]
 
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalse [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileFalse.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileFalse */
+static void
+methodWithDeadCodeInWhileFalse(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileFalse)
+{
+	sqInt expr;
+
+	expr = 0;
+	do{
+		method(self_in_methodWithDeadCodeInWhileFalse);
+	}while(!(expr == 1));
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalseBinary [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileFalseBinary.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileFalseBinary */
+static void
+methodWithDeadCodeInWhileFalseBinary(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileFalseBinary)
+{
+	sqInt var;
+
+	var = 0;
+	while (!(var == 1)) {
+		method(self_in_methodWithDeadCodeInWhileFalseBinary);
+	};
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileTrue [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileTrue.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileTrue */
+static void
+methodWithDeadCodeInWhileTrue(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileTrue)
+{
+	sqInt expr;
+
+	expr = 0;
+	do{
+		method(self_in_methodWithDeadCodeInWhileTrue);
+	}while(expr == 1);
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileTrueBinary [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInWhileTrueBinary.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInWhileTrueBinary */
+static void
+methodWithDeadCodeInWhileTrueBinary(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInWhileTrueBinary)
+{
+	sqInt var;
+
+	var = 0;
+	while (var == 0) {
+		method(self_in_methodWithDeadCodeInWhileTrueBinary);
+	};
+	{
+		return;
+	}
+}'
+]
+
 { #category : 'empty-switch-no-send-in-expression' }
 SLDeadCodeEliminationTest >> testMethodWithEmptyCaseOfNoSendInReceiver [
 	"we need to use prepareMethodIn to build switch node, the cases are empty only the default remains "
@@ -1338,6 +1462,106 @@ methodWithOnlyComment(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyCom
 {
 	/* begin method */
 	/* end method */
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyDeadCodeInWhileFalse [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithOnlyDeadCodeInWhileFalse.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithOnlyDeadCodeInWhileFalse */
+static void
+methodWithOnlyDeadCodeInWhileFalse(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyDeadCodeInWhileFalse)
+{
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyDeadCodeInWhileFalseBinary [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithOnlyDeadCodeInWhileFalseBinary.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithOnlyDeadCodeInWhileFalseBinary */
+static void
+methodWithOnlyDeadCodeInWhileFalseBinary(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyDeadCodeInWhileFalseBinary)
+{
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyDeadCodeInWhileTrue [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithOnlyDeadCodeInWhileTrue.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithOnlyDeadCodeInWhileTrue */
+static void
+methodWithOnlyDeadCodeInWhileTrue(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyDeadCodeInWhileTrue)
+{
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyDeadCodeInWhileTrueBinary [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithOnlyDeadCodeInWhileTrueBinary.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithOnlyDeadCodeInWhileTrueBinary */
+static void
+methodWithOnlyDeadCodeInWhileTrueBinary(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyDeadCodeInWhileTrueBinary)
+{
 	{
 		return;
 	}

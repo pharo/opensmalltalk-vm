@@ -101,10 +101,13 @@ SLDeadCodeEliminationVisitor >> visitReturnNode: aReturnNode [
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 
-	(aSendNode isConditionalSend or: [ aSendNode isIterativeSend ])
+	(aSendNode isConditionalSend or: [ aSendNode isBinaryIterativeSend ])
 		ifTrue: [
 			aSendNode arguments do: [ :subNode | self visit: subNode ].
 			^ self ].
+	aSendNode isUnaryIterativeSend ifTrue: [
+		self visit: aSendNode receiver.
+		^ self ].
 	(aSendNode selector beginsWith: #cCoerce) ifTrue: [
 		self visit: aSendNode arguments first.
 		^ self ].

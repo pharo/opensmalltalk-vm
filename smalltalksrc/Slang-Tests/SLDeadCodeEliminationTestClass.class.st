@@ -132,6 +132,52 @@ SLDeadCodeEliminationTestClass >> methodWithConstantInReturn [
 	^ 5 
 ]
 
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalse [
+
+	<returnTypeC: #void>
+	| expr var |
+	[
+	var := var.
+	self method.
+	true.
+	expr = true ] whileFalse
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinary [
+
+	<returnTypeC: #void>
+	| var |
+	[ var = true ] whileFalse: [
+		var := var.
+		self method.
+		false ]
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrue [
+
+	<returnTypeC: #void>
+	| expr var |
+	[
+	var := var.
+	self method.
+	true.
+	expr = true ] whileTrue
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileTrueBinary [
+
+	<returnTypeC: #void>
+	| var |
+	[var = false ] whileTrue: [
+		var := var.
+		self method.
+		true ]
+]
+
 { #category : 'empty-switch-no-send-in-expression' }
 SLDeadCodeEliminationTestClass >> methodWithEmptyCaseOfNoSendInReceiver: anInt [
 
@@ -420,6 +466,46 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyComment [
 
 	<returnTypeC: #void>
 	self method
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalse [
+
+	<returnTypeC: #void>
+	| var |
+	[
+	var := var.
+	true ] whileFalse
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileFalseBinary [
+
+	<returnTypeC: #void>
+	| var |
+	[ var = false ] whileFalse: [
+		var := var.
+		false ]
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrue [
+
+	<returnTypeC: #void>
+	| var |
+	[
+	var := var.
+	true ] whileTrue
+]
+
+{ #category : 'dead-code-in-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInWhileTrueBinary [
+
+	<returnTypeC: #void>
+	| var |
+	[ var = true ] whileTrue: [
+		var := var.
+		3 ]
 ]
 
 { #category : 'variable-assign-to-itself' }
