@@ -76,9 +76,31 @@ SLDeadCodeEliminationTestClass >> methodWithBlockValueAssignmentIntoSameVariable
 	       arg ] value: var
 ]
 
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithBlockValueAssignmentNotIntoSameVariableInArguments [
+
+	<returnTypeC: #void>
+	| var var2 |
+	var := [ :arg |
+	       self method: arg.
+	       arg ] value: var2
+]
+
 { #category : 'variable-assign-to-itself' }
 SLDeadCodeEliminationTestClass >> methodWithBlockValueValueAssignmentIntoSameVariableInArguments [
 	"produce a self assignation at translation time"
+
+	<returnTypeC: #void>
+	| var var2 |
+	var := [ :arg :arg2 |
+	       self method: arg.
+	       self method: arg2.
+	       arg.
+	       arg2 ] value: var2 value: var
+]
+
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments [
 
 	<returnTypeC: #void>
 	| var var2 |
@@ -383,6 +405,14 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyBlockValueAssignmentIntoSameVari
 	<returnTypeC: #void>
 	| var |
 	var := [ :arg | arg ] value: var
+]
+
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments [
+
+	<returnTypeC: #void>
+	| var var2 |
+	var := [ :arg | arg ] value: var2
 ]
 
 { #category : 'only-comment' }

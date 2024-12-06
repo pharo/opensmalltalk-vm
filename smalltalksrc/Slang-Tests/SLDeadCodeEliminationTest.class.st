@@ -174,6 +174,114 @@ methodWithBlockValueAssignmentIntoSameVariableInArguments(SLDeadCodeEliminationT
 }'
 ]
 
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithBlockValueAssignmentNotIntoSameVariableInArguments [
+	
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithBlockValueAssignmentNotIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals: '/* SLDeadCodeEliminationTestClass>>#methodWithBlockValueAssignmentNotIntoSameVariableInArguments */
+static void
+methodWithBlockValueAssignmentNotIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithBlockValueAssignmentNotIntoSameVariableInArguments)
+{
+	sqInt arg;
+	sqInt var;
+	sqInt var2;
+
+	var2 = 0;
+	{
+		method(self_in_methodWithBlockValueAssignmentNotIntoSameVariableInArguments, var2);
+		var = var2;
+	}
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'variable-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithBlockValueValueAssignmentIntoSameVariableInArguments [
+	"remove var = var"
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithBlockValueValueAssignmentIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals: '/*	produce a self assignation at translation time */
+/* SLDeadCodeEliminationTestClass>>#methodWithBlockValueValueAssignmentIntoSameVariableInArguments */
+static void
+methodWithBlockValueValueAssignmentIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithBlockValueValueAssignmentIntoSameVariableInArguments)
+{
+	sqInt arg;
+	sqInt arg2;
+	sqInt var;
+	sqInt var2;
+
+	var = 0;
+	var2 = 0;
+	{
+		method(self_in_methodWithBlockValueValueAssignmentIntoSameVariableInArguments, var2);
+		method(self_in_methodWithBlockValueValueAssignmentIntoSameVariableInArguments, var);
+	}
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithBlockValueValueAssignmentNotIntoSameVariableInArguments [
+	
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals: '/* SLDeadCodeEliminationTestClass>>#methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments */
+static void
+methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments)
+{
+	sqInt arg;
+	sqInt arg2;
+	sqInt var;
+	sqInt var2;
+
+	var = 0;
+	var2 = 0;
+	{
+		method(self_in_methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments, var);
+		method(self_in_methodWithBlockValueValueAssignmentNotIntoSameVariableInArguments, var2);
+		var = var2;
+	}
+	{
+		return;
+	}
+}'
+]
+
 { #category : 'method-in-c-coerce' }
 SLDeadCodeEliminationTest >> testMethodWithCallInCoerce [
 
@@ -1169,6 +1277,39 @@ SLDeadCodeEliminationTest >> testMethodWithOnlyBlockValueAssignmentIntoSameVaria
 static void
 methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyBlockValueAssignmentIntoSameVariableInArguments)
 {
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'variable-not-assign-to-itself' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments [
+	
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals: '/* SLDeadCodeEliminationTestClass>>#methodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments */
+static void
+methodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyBlockValueAssignmentNotIntoSameVariableInArguments)
+{
+	sqInt arg;
+	sqInt var;
+	sqInt var2;
+
+	var2 = 0;
+	{
+		var = var2;
+	}
 	{
 		return;
 	}
