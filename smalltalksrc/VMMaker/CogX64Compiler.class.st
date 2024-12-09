@@ -4823,7 +4823,8 @@ CogX64Compiler >> unalignedLong32At: byteAddress [
 
 { #category : 'memory access' }
 CogX64Compiler >> unalignedLong32At: byteAddress put: aWord [
-	<cmacro: '(inst,byteAddress,aWord) long32Atput(byteAddress,aWord)'>
+	<cmacro: '(inst,byteAddress,aWord) memcpy((void*)byteAddress, &aWord, sizeof(int32_t))'>
+
 	objectMemory
 		byteAt: byteAddress + 0 put:  (aWord bitAnd: 16rFF);
 		byteAt: byteAddress + 1 put: ((aWord >> 8) bitAnd: 16rFF);
