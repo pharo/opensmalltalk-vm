@@ -4840,8 +4840,16 @@ CogX64Compiler >> unalignedLongAt: byteAddress [
 
 { #category : 'memory access' }
 CogX64Compiler >> unalignedLongAt: byteAddress put: aWord [
-	<cmacro: '(byteAddress,aWord) longAtput(byteAddress,aWord)'>
-	^objectMemory unalignedLongAt: byteAddress put: aWord
+
+	self
+		cCode: [
+			self
+				memcpy: byteAddress
+				_: (self addressOf: aWord)
+				_: (self sizeof: #sqInt) ]
+		inSmalltalk: [ objectMemory unalignedLongAt: byteAddress put: aWord ].
+		
+	^ aWord
 ]
 
 { #category : 'testing' }
