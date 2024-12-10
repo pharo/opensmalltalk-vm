@@ -4814,11 +4814,21 @@ CogX64Compiler >> twoByteInstructionSizeAt: pc [
 
 { #category : 'memory access' }
 CogX64Compiler >> unalignedLong32At: byteAddress [
-	<cmacro: '(inst,byteAddress) long32At(byteAddress)'>
-	^ ((objectMemory byteAt: byteAddress + 3) << 24)
-	+ ((objectMemory byteAt: byteAddress + 2) << 16)
-	+ ((objectMemory byteAt: byteAddress + 1) << 8)
-	+  (objectMemory byteAt: byteAddress)
+
+	<var: 'readValue' type: 'int'>
+	self
+		cCode: [
+			| readValue |
+			self
+				memcpy: (self addressOf: readValue)
+				_: byteAddress
+				_: (self sizeof: readValue).
+			^ readValue ]
+		inSmalltalk: [
+			^ (objectMemory byteAt: byteAddress + 3) << 24
+			  + ((objectMemory byteAt: byteAddress + 2) << 16)
+			  + ((objectMemory byteAt: byteAddress + 1) << 8)
+			  + (objectMemory byteAt: byteAddress) ]
 ]
 
 { #category : 'memory access' }
@@ -4831,20 +4841,6 @@ CogX64Compiler >> unalignedLong32At: byteAddress put: aWord [
 		byteAt: byteAddress + 2 put: ((aWord >> 16) bitAnd: 16rFF);
 		byteAt: byteAddress + 3 put: ((aWord >> 24) bitAnd: 16rFF).
 	^aWord
-]
-
-{ #category : 'memory access' }
-CogX64Compiler >> unalignedLongAt: byteAddress [
-	<cmacro: '(byteAddress) longAt(byteAddress)'>
-	^objectMemory unalignedLongAt: byteAddress
-]
-
-{ #category : 'memory access' }
-CogX64Compiler >> unalignedLongAt: byteAddress put: aWord [
-
-	<cmacro: '(byteAddress,aWord) memcpy((void*)byteAddress, &aWord, sizeof(sqInt))'>
-
-	^ objectMemory unalignedLongAt: byteAddress put: aWord
 ]
 
 { #category : 'testing' }
