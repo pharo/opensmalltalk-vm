@@ -4726,7 +4726,7 @@ CogX64Compiler >> shiftSetsConditionCodesFor: aConditionalJumpOpcode [
 { #category : 'inline cacheing' }
 CogX64Compiler >> sixtyFourBitLiteralBefore: followingAddress [
 	<inline: true>
-	^objectMemory unalignedLongAt: followingAddress - 8
+	^self unalignedLongAt: followingAddress - 8
 ]
 
 { #category : 'disassembly' }
