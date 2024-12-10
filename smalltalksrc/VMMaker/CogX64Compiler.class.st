@@ -4816,6 +4816,7 @@ CogX64Compiler >> twoByteInstructionSizeAt: pc [
 CogX64Compiler >> unalignedLong32At: byteAddress [
 
 	<var: 'readValue' type: 'int'>
+	<returnTypeC: 'int'>
 	self
 		cCode: [
 			| readValue |
