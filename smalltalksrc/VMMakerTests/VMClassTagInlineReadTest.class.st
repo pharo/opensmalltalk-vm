@@ -21,7 +21,7 @@ VMClassTagInlineReadTest >> testLinkingWithEntryOffset [
 		                jitMethod: (self findMethod: #yourself)
 		                selector: memory trueObject.
 
-	callSiteReturn := sendingMethod address + 16r98.
+	cogit sendSitesIn: sendingMethod do: [ :annotation :pc | callSiteReturn := pc ].
 
 	cogit
 		linkSendAt: callSiteReturn
@@ -41,11 +41,12 @@ VMClassTagInlineReadTest >> testLinkingWithEntryOffsetLargeClassIndex [
 		                 jitMethod: (self findMethod: #methodWithSend)
 		                 selector: memory nilObject.
 
+	cogit sendSitesIn: sendingMethod do: [ :annotation :pc | callSiteReturn := pc ].
+
 	targetMethod := self
 		                jitMethod: (self findMethod: #yourself)
 		                selector: memory trueObject.
 
-	callSiteReturn := sendingMethod address + 16r98.
 
 	obj := self newZeroSizedObject.
 	memory setClassIndexOf: obj to: (1 << memory classIndexFieldWidth - 5).
