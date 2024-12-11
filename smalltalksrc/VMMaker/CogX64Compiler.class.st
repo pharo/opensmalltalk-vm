@@ -1807,6 +1807,18 @@ CogX64Compiler >> concretizeMoveAwR [
 			at: 2 put: 0.
 		^machineCodeSize].
 	reg := operands at: 1.
+
+	"Avoid the long load sequence when loading into SP.
+	The following code will generate a sequence like:
+	
+	xchg   rsp,rax
+	movabs rax, ADDRESS
+	xchg   rsp,rax
+	
+	This makes rsp potentially (and temporarily) point to an object, breaking the invariant that SP must point to stack space.
+	If an interrupt/signal happens before SP is restored, then the interrupt may corrupt the heap."
+	reg = SPReg ifTrue: [ self error: 'Cannot compile store into SP from far address' ].
+
 	reg = RAX
 		ifTrue: [offset := 0]
 		ifFalse:
