@@ -1780,15 +1780,24 @@ CogAbstractInstruction >> symbolicOn: aStream [
 
 { #category : 'memory access' }
 CogAbstractInstruction >> unalignedLongAt: byteAddress [
-	"Some processors need this, but word-oriented RISCs don't. Hence doNotGenerate."
-	<doNotGenerate>
-	^self subclassResponsibility
+
+	self
+		cCode: [
+			| readValue |
+			self
+				memcpy: (self addressOf: readValue)
+				_: byteAddress
+				_: (self sizeof: readValue).
+			^ readValue ]
+		inSmalltalk: [ ^ objectMemory unalignedLongAt: byteAddress ]
 ]
 
 { #category : 'memory access' }
 CogAbstractInstruction >> unalignedLongAt: byteAddress put: aWord [
-	"Some processors need this, but word-oriented RISCs don't. Hence doNotGenerate."
-	^self subclassResponsibility
+
+	<cmacro: '(byteAddress,aWord) memcpy((void*)byteAddress, &aWord, sizeof(sqInt))'>
+
+	^ objectMemory unalignedLongAt: byteAddress put: aWord
 ]
 
 { #category : 'generate machine code' }
