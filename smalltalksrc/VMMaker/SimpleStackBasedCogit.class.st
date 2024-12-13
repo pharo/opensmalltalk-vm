@@ -2336,6 +2336,9 @@ SimpleStackBasedCogit >> genSend: selectorIndex numArgs: numArgs [
 SimpleStackBasedCogit >> genSend: selectorIndex numArgs: numArgs sendTable: sendTable [
 	<inline: false>
 	<var: #sendTable type: #'sqInt *'>
+	
+	<story: #pic>
+	
 	| annotation |
 	self assert: needsFrame.
 	annotation := self annotationForSendTable: sendTable.

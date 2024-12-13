@@ -8885,15 +8885,6 @@ StackInterpreter >> longUnconditionalJump [
 	self fetchNextBytecode
 ]
 
-{ #category : 'debug support' }
-StackInterpreter >> lookupBreakFor: lookupClass [
-	<inline: true>
-	(objectMemory shouldBreakForLookupIn: lookupClass given: breakLookupClassTag) ifTrue:
-		[self
-			cCode: [self warning: 'lookup class send break (heartbeat suppressed)']
-			inSmalltalk: [self halt: 'Lookup in class ', lookupClass hex]]
-]
-
 { #category : 'method lookup cache' }
 StackInterpreter >> lookupInMethodCacheSel: selector classTag: classTag [
 	"This method implements a simple method lookup cache.  If an entry for the given
@@ -8909,7 +8900,6 @@ StackInterpreter >> lookupMNUInClass: class [
 	 for the error selector to use on failure rather than performing MNU processing etc."
 	| currentClass dictionary found |
 	<inline: false>
-	self lookupBreakFor: class.
 	currentClass := class.
 	[currentClass ~= objectMemory nilObject] whileTrue:
 		[dictionary := objectMemory followObjField: MethodDictionaryIndex ofObject: currentClass.
@@ -8964,7 +8954,6 @@ StackInterpreter >> lookupMethodInClass: class [
 	| currentClass superClass dictionary found |
 	<inline: false>
 	self assert: (self addressCouldBeClassObj: class).
-	self lookupBreakFor: class.
 	currentClass := class.
 	[currentClass ~= objectMemory nilObject] whileTrue:
 		[dictionary := objectMemory followObjField: MethodDictionaryIndex ofObject: currentClass.
@@ -9042,22 +9031,28 @@ StackInterpreter >> lookupMethodInDictionary: dictionary [
 
 { #category : 'message sending' }
 StackInterpreter >> lookupOrdinaryNoMNUEtcInClass: class [
-	"Lookup messageSelector in class.  Answer 0 on success. Answer the splObj: index
-	 for the error selector to use on failure rather than performing MNU processing etc."
-	| currentClass dictionary found |
+	"Lookup messageSelector in class. 
+		Answer 0 on success.
+		Answer the splObj: index for the error selector to use on failure
+			(MNU, CannotInterpret)"
+
 	<inline: false>
-	self lookupBreakFor: class.
+	| currentClass dictionary found |
 	currentClass := class.
-	[currentClass ~= objectMemory nilObject] whileTrue:
-		[dictionary := objectMemory followObjField: MethodDictionaryIndex ofObject: currentClass.
-		 dictionary = objectMemory nilObject ifTrue:
-			[lkupClass := self superclassOf: currentClass.
-			 ^SelectorCannotInterpret].
+	[ currentClass ~= objectMemory nilObject ] whileTrue: [
+		dictionary := objectMemory
+			              followObjField: MethodDictionaryIndex
+			              ofObject: currentClass.
+		dictionary = objectMemory nilObject ifTrue: [
+			lkupClass := self superclassOf: currentClass.
+			^ SelectorCannotInterpret ].
 		found := self lookupMethodInDictionary: dictionary.
-		found ifTrue: [self addNewMethodToCache: class. ^0].
-		currentClass := self superclassOf: currentClass].
+		found ifTrue: [
+			self addNewMethodToCache: class.
+			^ 0 ].
+		currentClass := self superclassOf: currentClass ].
 	lkupClass := class.
-	^SelectorDoesNotUnderstand
+	^ SelectorDoesNotUnderstand
 ]
 
 { #category : 'debug support' }

@@ -265,11 +265,6 @@ CurrentImageCoInterpreterFacade >> compactClassFieldWidth [
 	^objectMemory compactClassFieldWidth
 ]
 
-{ #category : 'debug support' }
-CurrentImageCoInterpreterFacade >> compilationBreak: aString point: length isMNUCase: isMNUCase [
-	^self
-]
-
 { #category : 'printing' }
 CurrentImageCoInterpreterFacade >> cr [
 	coInterpreter transcript cr; flush

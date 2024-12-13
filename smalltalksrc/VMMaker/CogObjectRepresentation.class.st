@@ -1733,11 +1733,6 @@ CogObjectRepresentation >> inlineCacheTagForInstance: oop [
 ]
 
 { #category : 'in-line cacheing' }
-CogObjectRepresentation >> inlineCacheTagIsYoung: cacheTag [
-	^self subclassResponsibility
-]
-
-{ #category : 'in-line cacheing' }
 CogObjectRepresentation >> inlineCacheTagsMayBeObjects [
 	<inline: true>
 	^self subclassResponsibility
