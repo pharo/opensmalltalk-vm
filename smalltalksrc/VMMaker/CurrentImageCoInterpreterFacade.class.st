@@ -647,7 +647,7 @@ CurrentImageCoInterpreterFacade >> lookupAddress: address [
 ]
 
 { #category : 'cog jit support' }
-CurrentImageCoInterpreterFacade >> lookupOrdinary: selectorOop receiver: receiverOop [
+CurrentImageCoInterpreterFacade >> lookupMethodWithoutMNUProcessingForSelector: selectorOop receiver: receiverOop [
 	| rcvr selector |
 	rcvr := self objectForOop: receiverOop.
 	selector := self objectForOop: selectorOop.

@@ -3802,7 +3802,7 @@ Cogit >> ceCPICMiss: cPIC receiver: receiver [
 	<api>
 	<story: #pic>
 	<var: #cPIC type: #'CogMethod *'>
-	| callerReturnAddress newTargetMethodOrNil errorSelectorOrNil cacheTag |
+	| callerReturnAddress newTargetMethodOrNil errorSelectorOrNil |
 	self simulationOnly: [
 		cPIC isInteger ifTrue: [
 			^ self
@@ -3816,34 +3816,48 @@ Cogit >> ceCPICMiss: cPIC receiver: receiver [
 	self deny: (backEnd inlineCacheTagAt: callerReturnAddress)
 		= self isMNUPicAbortDiscriminatorValue.
 
-	cPIC cPICNumCases < MaxCPICCases
-		ifTrue: [
-			self
-				lookup: cPIC selector
-				for: receiver
-				methodAndErrorSelectorInto: [ :method :errsel |
-					newTargetMethodOrNil := method.
-					errorSelectorOrNil := errsel ] ]
-		ifFalse: [ newTargetMethodOrNil := errorSelectorOrNil := nil ].
-
-	cacheTag := objectRepresentation inlineCacheTagForInstance: receiver.
-	(cPIC cPICNumCases >= MaxCPICCases or: [
-		 (errorSelectorOrNil notNil and: [
-			  errorSelectorOrNil ~= SelectorDoesNotUnderstand ]) or: [
-			 newTargetMethodOrNil isNil or: [
-				 objectMemory isYoung: newTargetMethodOrNil ] ] ]) ifTrue: [
+	"Transition to megamorphic if the PIC is full"
+	MaxCPICCases <= cPIC cPICNumCases ifTrue: [
 		self
 			patchToMegamorphicICFor: cPIC selector
 			numArgs: cPIC cmNumArgs
 			receiver: receiver.
 		^ coInterpreter ceSendFromInLineCacheMiss: cPIC ].
 
-	"Now extend the PIC with the new case."
+	self
+		lookup: cPIC selector
+		for: receiver
+		methodAndErrorSelectorInto: [ :method :errsel |
+			newTargetMethodOrNil := method.
+			errorSelectorOrNil := errsel ].
+
+	"      method | errorSelector             | situation
+	 -------------+---------------------------+-------------------------------------------------------------
+	          nil | SelectorCannotInterpret   | There was an error during the lookup (ill-formed class)
+	          nil | SelectorDoesNotUnderstand | Didn't find the method nor the DNU implementation
+	  foundMethod | SelectorCannotInterpret   | Found something that isn't a CompiledMethod (#run:with:in:)
+	  foundMethod | *                         | foundMethod is young (may not be a CompiledMethod!)"
+	(errorSelectorOrNil = SelectorCannotInterpret or: [
+		 newTargetMethodOrNil isNil or: [
+			 objectMemory isYoung: newTargetMethodOrNil ] ]) ifTrue: [
+		self
+			patchToMegamorphicICFor: cPIC selector
+			numArgs: cPIC cmNumArgs
+			receiver: receiver.
+		^ coInterpreter ceSendFromInLineCacheMiss: cPIC ].
+
+	"      method | errorSelector             | situation
+	 -------------+---------------------------+-------------------------------------------------------------
+	  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
+	  foundMethod | nil                       | Found the method
+
+	Now extend the PIC with the new case."
 	self
 		cogExtendPIC: cPIC
 		CaseNMethod: newTargetMethodOrNil
-		tag: cacheTag
+		tag: (objectRepresentation inlineCacheTagForInstance: receiver)
 		isMNUCase: errorSelectorOrNil = SelectorDoesNotUnderstand.
+
 	"Jump back into the pic at its entry in case this is an MNU."
 	coInterpreter
 		executeCogPIC: cPIC
@@ -4034,7 +4048,6 @@ Cogit >> ceSICMiss: receiver [
 	<api>
 	<story: #pic>
 	<var: #inlineCache type: #'CogMethod *'>
-	<var: #targetMethod type: #'CogMethod *'>
 	| inlineCache missedTargetReturnAddress callerReturnAddress missedTargetCogMethod newTargetMethodOrNil errorSelectorOrNil cacheTag extent |
 	missedTargetReturnAddress := coInterpreter popStack asUnsignedInteger.
 	"Whether we can relink to a PIC or not we need to pop off the inner return and identify the target method."
@@ -4055,6 +4068,15 @@ Cogit >> ceSICMiss: receiver [
 	self assert: missedTargetCogMethod asInteger + cmEntryOffset
 		= (backEnd callTargetFromReturnAddress: callerReturnAddress).
 
+	"FIXME: What does this check mean?"
+	(backEnd inlineCacheTagAt: callerReturnAddress)
+	= self isMNUPicAbortDiscriminatorValue ifTrue: [
+		self
+			patchToMegamorphicICFor: missedTargetCogMethod selector
+			numArgs: missedTargetCogMethod cmNumArgs
+			receiver: receiver.
+		^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ].
+
 	self
 		lookup: missedTargetCogMethod selector
 		for: receiver
@@ -4062,52 +4084,33 @@ Cogit >> ceSICMiss: receiver [
 			newTargetMethodOrNil := method.
 			errorSelectorOrNil := errsel ].
 
+	"      method | errorSelector             | situation
+	 -------------+---------------------------+-------------------------------------------------------------
+	          nil | SelectorCannotInterpret   | There was an error during the lookup (ill-formed class)
+	          nil | SelectorDoesNotUnderstand | Didn't find the method nor the DNU implementation
+	  foundMethod | SelectorCannotInterpret   | Found something that isn't a CompiledMethod (#run:with:in:)
+	  foundMethod | *                         | foundMethod is young (may not be a CompiledMethod!)"
 	cacheTag := objectRepresentation inlineCacheTagForInstance: receiver.
-	((errorSelectorOrNil notNil and: [
-		  errorSelectorOrNil ~= SelectorDoesNotUnderstand ]) or: [
-		 (backEnd inlineCacheTagAt: callerReturnAddress)
-		 = self isMNUPicAbortDiscriminatorValue or: [
-			 newTargetMethodOrNil isNil or: [
-				 objectMemory isYoung: newTargetMethodOrNil ] ] ]) ifTrue: [
+	(errorSelectorOrNil = SelectorCannotInterpret or: [
+		 newTargetMethodOrNil isNil or: [
+			 objectMemory isYoung: newTargetMethodOrNil ] ]) ifTrue: [
 		self
-			          patchToMegamorphicICFor: missedTargetCogMethod selector
-			          numArgs: missedTargetCogMethod cmNumArgs
-			          receiver: receiver.
+			patchToMegamorphicICFor: missedTargetCogMethod selector
+			numArgs: missedTargetCogMethod cmNumArgs
+			receiver: receiver.
 		^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ].
 
-	"See if an Megamorphic PIC is already available."
-	inlineCache := methodZone openPICWithSelector: missedTargetCogMethod selector.
-	(inlineCache isNil or: [ self allowEarlyPromotionToMegamorphicIC not ]) ifTrue: [
-		"If none is available go for creating a PIC with the new case"
-		self
-			enableCodeZoneWriteDuring: [
-				inlineCache := self
-					       cogPICSelector: missedTargetCogMethod selector
-					       numArgs: missedTargetCogMethod cmNumArgs
-					       Case0Method: missedTargetCogMethod
-					       Case1Method: newTargetMethodOrNil
-					       tag: cacheTag
-					       isMNUCase: errorSelectorOrNil = SelectorDoesNotUnderstand ]
-			flushingCacheWith: [
-				(inlineCache asInteger between: MaxNegativeErrorCode and: -1) ifFalse: [
-					self
-						flushICacheFrom: inlineCache asUnsignedInteger
-						to: inlineCache asUnsignedInteger + closedPICSize ] ] ].
-
-	(inlineCache asInteger between: MaxNegativeErrorCode and: -1) ifTrue: [
-		"For some reason the PIC couldn't be generated, most likely a lack of code memory.
-			  Continue as if this is an unlinked send."
-		inlineCache asInteger = InsufficientCodeSpace ifTrue: [
-			coInterpreter callForCogCompiledCodeCompaction ].
-		^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ].
-
-	"Relink the send site to the pic.  If to an open PIC then reset the cache tag to the selector,
-	 for the benefit of the cacheTag assert check in checkIfValidOopRef:pc:cogMethod: et al."
-	self
-		enableCodeZoneWriteDuring: [
-			extent := inlineCache cmType = CMMegamorphicIC
-				          ifTrue: [
-					          backEnd
+	"If early promotion is allowed check if anyone else saw this selector turn megamorphic"
+	self allowEarlyPromotionToMegamorphicIC
+		ifTrue: [
+			inlineCache := methodZone openPICWithSelector:
+				               missedTargetCogMethod selector.
+			self
+				enableCodeZoneWriteDuring: [ "Link the sendsite.
+					Because we are on a megamorphic sendsite put the selector as tag for the
+					benefit of the cacheTag assert check in checkIfValidOopRef:pc:cogMethod:
+					et al."
+					extent := backEnd
 						          rewriteInlineCacheAt: callerReturnAddress
 						          tag: (self
 								           inlineCacheValueForSelector:
@@ -4115,14 +4118,47 @@ Cogit >> ceSICMiss: receiver [
 								           in: coInterpreter mframeHomeMethodExport
 								           at: callerReturnAddress)
 						          target: inlineCache asInteger + cmEntryOffset ]
-				          ifFalse: [
-					          backEnd
-						          rewriteCallAt: callerReturnAddress
-						          target: inlineCache asInteger + cmEntryOffset ] ]
-		flushingCacheWith: [
+				flushingCacheWith: [
+					self
+						flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
+						to: callerReturnAddress asUnsignedInteger ] ]
+		ifFalse: [
+			| picCreationFailed |
+			"      method | errorSelector             | situation
+			 -------------+---------------------------+-------------------------------------------------------------
+			  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
+			  foundMethod | nil                       | Found the method"
 			self
-				flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
-				to: callerReturnAddress asUnsignedInteger ].
+				enableCodeZoneWriteDuring: [
+					inlineCache := self
+						               cogPICSelector: missedTargetCogMethod selector
+						               numArgs: missedTargetCogMethod cmNumArgs
+						               Case0Method: missedTargetCogMethod
+						               Case1Method: newTargetMethodOrNil
+						               tag: cacheTag
+						               isMNUCase:
+						               errorSelectorOrNil = SelectorDoesNotUnderstand.
+					picCreationFailed := inlineCache asInteger
+						                     between: MaxNegativeErrorCode
+						                     and: -1.
+					picCreationFailed ifFalse: [ "Link the send site to the pic."
+						extent := backEnd
+							          rewriteCallAt: callerReturnAddress
+							          target: inlineCache asInteger + cmEntryOffset ] ]
+				flushingCacheWith: [
+					picCreationFailed ifFalse: [
+						self
+							flushICacheFrom: inlineCache asUnsignedInteger
+							to: inlineCache asUnsignedInteger + closedPICSize.
+						self
+							flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
+							to: callerReturnAddress asUnsignedInteger ] ].
+
+			picCreationFailed ifTrue: [ "For some reason the PIC couldn't be generated, most likely a lack of code memory.
+			  Continue as if this is an unlinked send."
+				inlineCache asInteger = InsufficientCodeSpace ifTrue: [
+					coInterpreter callForCogCompiledCodeCompaction ].
+				^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ] ].
 
 	"Jump back into the pic at its entry in case this is an MNU (newTargetMethodOrNil is nil)"
 	coInterpreter
@@ -4899,6 +4935,15 @@ Cogit >> cogMethodDoesntLookKosher: cogMethod [
 		 ^0].
 
 	^9
+]
+
+{ #category : 'in-line cacheing' }
+Cogit >> cogMethodIfPossible: methodOrSelectorIndex selector: selector [
+
+	((coInterpreter methodHasCogMethod: methodOrSelectorIndex) not and: [
+		 coInterpreter methodShouldBeCogged: methodOrSelectorIndex ])
+		ifTrue: [ "We assume cog:selector: will *not* reclaim the method zone"
+			self cog: methodOrSelectorIndex selector: selector ]
 ]
 
 { #category : 'simulation only' }
@@ -8890,50 +8935,59 @@ Cogit >> loadSubsequentBytesForDescriptor: descriptor at: pc [
 
 { #category : 'in-line cacheing' }
 Cogit >> lookup: selector for: receiver methodAndErrorSelectorInto: binaryBlock [
-	"Lookup selector in the class of receiver.  If found, evaluate binaryBlock with the
-	 method, cogged if appropriate..  If not found, due to MNU, lookup the DNU selector
-	 and evaluate binaryBlock with the MNU method, cogged if appropriate..  If not found
-	 due to cannot interpret, evaluate binaryBlock with a nil method and the error selector."
+	"Lookup selector in the class of receiver:
+	   - Found: Evaluate binaryBlock with the method, cogged if appropriate
+	   - Not found (MNU): Lookup the DNU selector. Evaluate binaryBlock with the MNU method, cogged if appropriate
+	   - Not found (cannot interpret): evaluate binaryBlock with a nil method and the error selector
+
+	       method | errorSelector             | situation
+	 -------------+---------------------------+-------------------------------------------------------------
+	          nil | SelectorCannotInterpret   | There was an error during the lookup (ill-formed class)
+	          nil | SelectorDoesNotUnderstand | Didn't find the method nor the DNU implementation
+	  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
+	  foundMethod | SelectorCannotInterpret   | Found something that isn't a CompiledMethod (#run:with:in:)
+	  foundMethod | nil                       | Found the method"
 
 	| methodOrSelectorIndex |
 	methodOrSelectorIndex := coInterpreter
-		                         lookupOrdinary: selector
+		                         lookupMethodWithoutMNUProcessingForSelector: selector
 		                         receiver: receiver.
-	methodOrSelectorIndex asUnsignedInteger > coInterpreter maxLookupNoMNUErrorCode ifTrue: [
-		(objectMemory isOopCompiledMethod: methodOrSelectorIndex) ifFalse: [
-			^ binaryBlock
-				  value: methodOrSelectorIndex
-				  value: SelectorCannotInterpret ].
-		((coInterpreter methodHasCogMethod: methodOrSelectorIndex) not
-			and: [ coInterpreter methodShouldBeCogged: methodOrSelectorIndex ])
-				ifTrue: [
-					self cog: methodOrSelectorIndex selector: selector ].
-		
-		^ binaryBlock value: methodOrSelectorIndex value: nil ].
 
+	methodOrSelectorIndex = SelectorCannotInterpret ifTrue: [
+		^ binaryBlock value: nil value: SelectorCannotInterpret ].
 
 	methodOrSelectorIndex = SelectorDoesNotUnderstand ifTrue: [
 		methodOrSelectorIndex := coInterpreter
-			                         lookupMNU:
+			                         lookupMethodWithoutMNUProcessingForSelector:
 			                         (objectMemory splObj:
 				                          SelectorDoesNotUnderstand)
 			                         receiver: receiver.
+
 		methodOrSelectorIndex asUnsignedInteger
-		> coInterpreter maxLookupNoMNUErrorCode ifTrue: [
-			self assert:
-				(objectMemory isOopCompiledMethod: methodOrSelectorIndex).
-			((coInterpreter methodHasCogMethod: methodOrSelectorIndex) not
-				 and: [ coInterpreter methodShouldBeCogged: methodOrSelectorIndex ])
-				ifTrue: [ "We assume cog:selector: will *not* reclaim the method zone"
-					self
-						cog: methodOrSelectorIndex
-						selector: (objectMemory splObj: SelectorDoesNotUnderstand) ].
-			^ binaryBlock
-				  value: methodOrSelectorIndex
-				  value: SelectorDoesNotUnderstand ].
-		^ binaryBlock value: nil value: SelectorDoesNotUnderstand ].
-	
-	^ binaryBlock value: nil value: methodOrSelectorIndex
+		<= coInterpreter maxLookupNoMNUErrorCode ifTrue: [
+			^ binaryBlock value: nil value: SelectorDoesNotUnderstand ].
+
+		"NOTE: This assertion is wrong (we should probably allow #run:with:in for #doesNotUnderstand)"
+		self assert:
+			(objectMemory isOopCompiledMethod: methodOrSelectorIndex).
+		self
+			cogMethodIfPossible: methodOrSelectorIndex
+			selector: (objectMemory splObj: SelectorDoesNotUnderstand).
+		^ binaryBlock
+			  value: methodOrSelectorIndex
+			  value: SelectorDoesNotUnderstand ].
+
+	"NOTE: Should we support having #run:with:in: implementations on literal values?"
+	self assert: (objectRepresentation couldBeObject:
+			 methodOrSelectorIndex asUnsignedInteger).
+
+	(objectMemory isOopCompiledMethod: methodOrSelectorIndex) ifFalse: [
+		^ binaryBlock
+			  value: methodOrSelectorIndex
+			  value: SelectorCannotInterpret ].
+
+	self cogMethodIfPossible: methodOrSelectorIndex selector: selector.
+	^ binaryBlock value: methodOrSelectorIndex value: nil
 ]
 
 { #category : 'disassembly' }

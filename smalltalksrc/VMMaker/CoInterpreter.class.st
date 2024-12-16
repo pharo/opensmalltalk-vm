@@ -1150,7 +1150,7 @@ CoInterpreter >> ceCounterTripped: condition [
 	(self lookupInMethodCacheSel: counterTrippedSelector classTag: classTag) ifFalse:
 	 	[messageSelector := counterTrippedSelector.
 		 classObj := objectMemory classForClassTag: classTag.
-		 (self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
+		 (self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0 ifTrue:
 			[cogit resetCountersIn: (self mframeHomeMethod: framePointer).
 			 ^condition]].
 
@@ -1187,8 +1187,7 @@ CoInterpreter >> ceInterpretMethodFromPIC: aMethodObj receiver: rcvr [
 	 cogged, jump to machine code, otherwise interpret."
 	pic cmType = CMMegamorphicIC ifTrue:
 		[self assert: (self methodHasCogMethod: aMethodObj) not.
-		 (self methodShouldBeCogged: aMethodObj) ifTrue:
-			[cogit cog: aMethodObj selector: pic selector]].
+		 cogit cogMethodIfPossible: aMethodObj selector: pic selector].
 	(self methodHasCogMethod: aMethodObj) ifTrue:
 		[self executeCogMethod: (self cogMethodOf: aMethodObj)
 			fromUnlinkedSendWithReceiver: rcvr.
@@ -1442,7 +1441,7 @@ CoInterpreter >> ceSend: selector above: methodClass to: rcvr numArgs: numArgs [
 					numArgs: numArgs].
 			 messageSelector := selector.
 			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
+			 (errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0 ifTrue:
 				[(errSelIdx = SelectorDoesNotUnderstand
 				  and: [(cogMethod := cogit cogMNUPICSelector: messageSelector
 											receiver: rcvr
@@ -1557,7 +1556,7 @@ CoInterpreter >> ceSend: maybeForwardedSelector super: isSuperSend to: maybeForw
 	found ifFalse: [
 		messageSelector := selector.
 		classObj := objectMemory classForClassTag: classTag.
-		(errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0
+		(errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0
 			ifTrue: [
 				errSelIdx = SelectorDoesNotUnderstand ifTrue: [
 					| mnuPIC |
@@ -1643,7 +1642,7 @@ CoInterpreter >> ceSendAbort: selector to: rcvr numArgs: numArgs [
 		ifFalse:
 			[messageSelector := selector.
 			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
+			 (errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0 ifTrue:
 				[self handleMNU: errSelIdx InMachineCodeTo: rcvr classForMessage: classObj.
 				self unreachable]].
 	instructionPointer := self popStack.
@@ -1689,7 +1688,7 @@ CoInterpreter >> ceSendFromInLineCacheMiss: cogMethodOrPIC [
 		ifFalse: [
 			messageSelector := cogMethodOrPIC selector.
 			classObj := objectMemory classForClassTag: classTag.
-			(errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0
+			(errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0
 				ifTrue: [
 					self
 						handleMNU: errSelIdx
@@ -2959,7 +2958,7 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 				ifAppropriateCompileToNativeCode: newMethod
 				selector: messageSelector]
 		ifFalse:
-			[errSelIdx := self lookupMNUInClass: (classForThisMessage := lkupClass).
+			[errSelIdx := self lookupMethodWithoutMNUProcessingInClass: (classForThisMessage := lkupClass).
 			 errSelIdx ~= 0 ifTrue:
 				[selectorIndex = SelectorDoesNotUnderstand ifTrue:
 					[self error: 'Recursive not understood error encountered'].
@@ -3302,38 +3301,21 @@ CoInterpreter >> lookupAddress: address [
 ]
 
 { #category : 'cog jit support' }
-CoInterpreter >> lookupMNU: selector receiver: rcvr [
-	<api>
+CoInterpreter >> lookupMethodWithoutMNUProcessingForSelector: selector receiver: rcvr [
 	"Lookup selector in rcvr, without doing MNU processing, and answer either a
 	 method or an error code if the message was not understood.  Used to populate closed PICs."
-	| classTag inCache erridx |
-	"self printFrame: stackPage headFP WithSP: stackPage headSP"
-	"self printStringOf: selector"
-	classTag := objectMemory fetchClassTagOf: rcvr.
-	inCache := self lookupInMethodCacheSel: selector classTag: classTag.
-	inCache ifFalse:
-		[messageSelector := selector.
-		 erridx := self lookupMNUInClass: (objectMemory classForClassTag: classTag).
-		 erridx ~= 0 ifTrue:
-			[self assert: erridx <= self maxLookupNoMNUErrorCode.
-			 ^erridx]].
-	^newMethod
-]
 
-{ #category : 'cog jit support' }
-CoInterpreter >> lookupOrdinary: selector receiver: rcvr [
 	<api>
-	"Lookup selector in rcvr, without doing MNU processing, and answer either a
-	 method or an error code if the message was not understood.  Used to populate closed PICs."
 	| classTag erridx |
-
 	classTag := objectMemory fetchClassTagOf: rcvr.
-	(self lookupInMethodCacheSel: selector classTag: classTag) ifFalse:
-		[messageSelector := selector.
-		 (erridx := self lookupOrdinaryNoMNUEtcInClass: (objectMemory classForClassTag: classTag)) ~= 0 ifTrue:
-			[self assert: erridx <= self maxLookupNoMNUErrorCode.
-			 ^erridx]].
-	^newMethod
+	(self lookupInMethodCacheSel: selector classTag: classTag) ifFalse: [
+		messageSelector := selector.
+		erridx := self lookupMethodWithoutMNUProcessingInClass:
+			          (objectMemory classForClassTag: classTag).
+		erridx ~= 0 ifTrue: [
+			self assert: erridx <= self maxLookupNoMNUErrorCode.
+			^ erridx ] ].
+	^ newMethod
 ]
 
 { #category : 'cog jit support' }
