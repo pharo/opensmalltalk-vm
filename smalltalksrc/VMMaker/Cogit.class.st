@@ -3798,40 +3798,49 @@ Cogit >> ceCPICMiss: cPIC receiver: receiver [
 			receiver
 			args
 	  sp=>	sender return address"
-	<var: #cPIC type: #'CogMethod *'>
+
 	<api>
-	| outerReturn newTargetMethodOrNil errorSelectorOrNil cacheTag result |
-	self cCode: ''
-		inSmalltalk:
-			[cPIC isInteger ifTrue:
-				[^self ceCPICMiss: (self cogMethodSurrogateAt: cPIC) receiver: receiver]].
-	(objectMemory isOopForwarded: receiver) ifTrue:
-		[^coInterpreter ceSendFromInLineCacheMiss: cPIC].
-	outerReturn := coInterpreter stackTop.
-	self deny: (backEnd inlineCacheTagAt: outerReturn) = self isMNUPicAbortDiscriminatorValue. 
+	<story: #pic>
+	<var: #cPIC type: #'CogMethod *'>
+	| callerReturnAddress newTargetMethodOrNil errorSelectorOrNil cacheTag |
+	self simulationOnly: [
+		cPIC isInteger ifTrue: [
+			^ self
+				  ceCPICMiss: (self cogMethodSurrogateAt: cPIC)
+				  receiver: receiver ] ].
+
+	(objectMemory isOopForwarded: receiver) ifTrue: [
+		^ coInterpreter ceSendFromInLineCacheMiss: cPIC ].
+
+	callerReturnAddress := coInterpreter stackTop.
+	self deny: (backEnd inlineCacheTagAt: callerReturnAddress)
+		= self isMNUPicAbortDiscriminatorValue.
+
 	cPIC cPICNumCases < MaxCPICCases
-		ifTrue:
-			[self lookup: cPIC selector
+		ifTrue: [
+			self
+				lookup: cPIC selector
 				for: receiver
-				methodAndErrorSelectorInto:
-					[:method :errsel|
+				methodAndErrorSelectorInto: [ :method :errsel |
 					newTargetMethodOrNil := method.
-					errorSelectorOrNil := errsel]]
-		ifFalse: [newTargetMethodOrNil := errorSelectorOrNil := nil].
-	"We assume lookupAndCog:for: will *not* reclaim the method zone"
-	self assert: outerReturn = coInterpreter stackTop.
+					errorSelectorOrNil := errsel ] ]
+		ifFalse: [ newTargetMethodOrNil := errorSelectorOrNil := nil ].
+
 	cacheTag := objectRepresentation inlineCacheTagForInstance: receiver.
-	(cPIC cPICNumCases >= MaxCPICCases
-	 or: [(errorSelectorOrNil notNil and: [errorSelectorOrNil ~= SelectorDoesNotUnderstand])
-	 or: [newTargetMethodOrNil isNil
-	 or: [objectMemory isYoung: newTargetMethodOrNil]]]) ifTrue:
-		[result := self patchToMegamorphicICFor: cPIC selector
-					numArgs: cPIC cmNumArgs
-					receiver: receiver.
-		 self assert: result not. "If patchToOpenPICFor:.. returns we're out of code memory"
-		 ^coInterpreter ceSendFromInLineCacheMiss: cPIC].
+	(cPIC cPICNumCases >= MaxCPICCases or: [
+		 (errorSelectorOrNil notNil and: [
+			  errorSelectorOrNil ~= SelectorDoesNotUnderstand ]) or: [
+			 newTargetMethodOrNil isNil or: [
+				 objectMemory isYoung: newTargetMethodOrNil ] ] ]) ifTrue: [
+		self
+			patchToMegamorphicICFor: cPIC selector
+			numArgs: cPIC cmNumArgs
+			receiver: receiver.
+		^ coInterpreter ceSendFromInLineCacheMiss: cPIC ].
+
 	"Now extend the PIC with the new case."
-	self cogExtendPIC: cPIC
+	self
+		cogExtendPIC: cPIC
 		CaseNMethod: newTargetMethodOrNil
 		tag: cacheTag
 		isMNUCase: errorSelectorOrNil = SelectorDoesNotUnderstand.
@@ -3839,7 +3848,7 @@ Cogit >> ceCPICMiss: cPIC receiver: receiver [
 	coInterpreter
 		executeCogPIC: cPIC
 		fromLinkedSendWithReceiver: receiver
-		andCacheTag: (backEnd inlineCacheTagAt: outerReturn).
+		andCacheTag: (backEnd inlineCacheTagAt: callerReturnAddress).
 	self unreachable
 ]
 
@@ -4026,7 +4035,7 @@ Cogit >> ceSICMiss: receiver [
 	<story: #pic>
 	<var: #inlineCache type: #'CogMethod *'>
 	<var: #targetMethod type: #'CogMethod *'>
-	| inlineCache missedTargetReturnAddress callerReturnAddress missedTargetCogMethod newTargetMethodOrNil errorSelectorOrNil cacheTag extent result |
+	| inlineCache missedTargetReturnAddress callerReturnAddress missedTargetCogMethod newTargetMethodOrNil errorSelectorOrNil cacheTag extent |
 	missedTargetReturnAddress := coInterpreter popStack asUnsignedInteger.
 	"Whether we can relink to a PIC or not we need to pop off the inner return and identify the target method."
 	missedTargetCogMethod := self
@@ -4060,11 +4069,10 @@ Cogit >> ceSICMiss: receiver [
 		 = self isMNUPicAbortDiscriminatorValue or: [
 			 newTargetMethodOrNil isNil or: [
 				 objectMemory isYoung: newTargetMethodOrNil ] ] ]) ifTrue: [
-		result := self
+		self
 			          patchToMegamorphicICFor: missedTargetCogMethod selector
 			          numArgs: missedTargetCogMethod cmNumArgs
 			          receiver: receiver.
-		self assert: result not. "If patchToOpenPICFor:.. returns we're out of code memory"
 		^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ].
 
 	"See if an Megamorphic PIC is already available."
@@ -4720,8 +4728,8 @@ Cogit >> cogExtendPIC: cPIC CaseNMethod: caseNMethod tag: caseNTag isMNUCase: is
 					 isMNUCase
 						ifTrue: "this is an MNU so tag the CPIC header and setup a jump to the MNUAbort"
 							[cPIC cpicHasMNUCase: true.
-							 target := cPIC asInteger + (self sizeof: CogMethod)]
-						ifFalse: "setup a jump to the interpretAborth so we can cog the target method"
+							 target := self picAbortAddress: cPIC]
+						ifFalse: "setup a jump to the interpretAbort so we can cog the target method"
 							[target := cPIC asInteger + self picInterpretAbortOffset]].
 
 			"find the end address of the new case"
@@ -8924,6 +8932,7 @@ Cogit >> lookup: selector for: receiver methodAndErrorSelectorInto: binaryBlock 
 				  value: methodOrSelectorIndex
 				  value: SelectorDoesNotUnderstand ].
 		^ binaryBlock value: nil value: SelectorDoesNotUnderstand ].
+	
 	^ binaryBlock value: nil value: methodOrSelectorIndex
 ]
 
