@@ -3847,7 +3847,7 @@ Cogit >> ceCPICMiss: cPIC receiver: receiver [
 		^ coInterpreter ceSendFromInLineCacheMiss: cPIC ].
 
 	"      method | errorSelector             | situation
-	 -------------+---------------------------+-------------------------------------------------------------
+	 -------------+---------------------------+---------------------------------------------------------
 	  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
 	  foundMethod | nil                       | Found the method
 
@@ -4125,7 +4125,7 @@ Cogit >> ceSICMiss: receiver [
 		ifFalse: [
 			| picCreationFailed |
 			"      method | errorSelector             | situation
-			 -------------+---------------------------+-------------------------------------------------------------
+			 -------------+---------------------------+---------------------------------------------------------
 			  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
 			  foundMethod | nil                       | Found the method"
 			self
