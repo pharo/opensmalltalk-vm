@@ -11100,48 +11100,72 @@ Cogit >> relocateCallsInClosedPIC: cPIC [
 
 { #category : 'compaction' }
 Cogit >> relocateIfCallOrMethodReference: annotation mcpc: mcpc delta: refDelta [
+
 	<var: #mcpc type: #'char *'>
 	<var: #targetMethod type: #'CogMethod *'>
-	
 	| callDelta entryPoint targetMethod unlinkedRoutine |
+	callDelta := backEnd zoneCallsAreRelative
+		             ifTrue: [ refDelta ]
+		             ifFalse: [ 0 ].
 
-	callDelta := backEnd zoneCallsAreRelative ifTrue: [refDelta] ifFalse: [0].
+	(self isPureSendAnnotation: annotation) ifTrue: [
+		entryPoint := backEnd callTargetFromReturnAddress: mcpc asInteger.
+		entryPoint <= methodZoneBase ifTrue: [ "
+			send is not linked; just relocate"
+			backEnd
+				relocateCallBeforeReturnPC: mcpc asInteger
+				by: callDelta negated.
+			^ 0 ].
 
-	(self isPureSendAnnotation: annotation) ifTrue:
-		[entryPoint := backEnd callTargetFromReturnAddress: mcpc asInteger.
-		entryPoint <= methodZoneBase ifTrue: "send is not linked; just relocate"
-			[backEnd relocateCallBeforeReturnPC: mcpc asInteger by: callDelta negated.
-			 ^0].
 		"It's a linked send; find which kind."
 		self
 			offsetAndSendTableFor: entryPoint
 			annotation: annotation
-			into: [:offset :sendTable|
-				 targetMethod := self cCoerceSimple: entryPoint - offset to: #'CogMethod *'.
-				 targetMethod cmType ~= CMFree ifTrue: "send target not freed; just relocate."
-					[backEnd
+			into: [ :offset :sendTable |
+				targetMethod := self
+					                cCoerceSimple: entryPoint - offset
+					                to: #'CogMethod *'.
+
+				"Target not freed; just relocate."
+				targetMethod cmType ~= CMFree ifTrue: [
+					backEnd
 						relocateCallBeforeReturnPC: mcpc asInteger
 						by: (callDelta - targetMethod objectHeader) negated.
-					 SistaVM ifTrue: "See comment in planCompaction"
-						[methodZone restorePICUsageCount: targetMethod].
-					 ^0].
-				 "Target was freed; map back to an unlinked send; but include this method's reocation"
-				 unlinkedRoutine := sendTable at: (targetMethod cmNumArgs min: NumSendTrampolines - 1).
-				 unlinkedRoutine := unlinkedRoutine - callDelta.
-				 backEnd
+					SistaVM ifTrue: [ "
+						See comment in planCompaction"
+						methodZone restorePICUsageCount: targetMethod ].
+					^ 0 ].
+
+				"Target was freed; map back to an unlinked send."
+				unlinkedRoutine := sendTable at:
+					                   (targetMethod cmNumArgs min:
+						                    NumSendTrampolines - 1).
+
+				"NOTE: This assumes that underlying instruction to be patched uses relative addressing.
+				 Otherwise we should pass both the target and the pointer that's used as a reference
+				 when doing PC-relative jumps"
+				backEnd
 					rewriteInlineCacheAt: mcpc asInteger
-					tag: (self inlineCacheValueForSelector: targetMethod selector in: enumeratingCogMethod at: mcpc)
-					target: unlinkedRoutine.
-				 ^0]].
+					tag: (self
+							 inlineCacheValueForSelector: targetMethod selector
+							 in: enumeratingCogMethod
+							 at: mcpc)
+					target: unlinkedRoutine - callDelta.
+				^ 0 ] ].
 
-	annotation = IsRelativeCall ifTrue:
-		[backEnd relocateCallBeforeReturnPC: mcpc asInteger by: callDelta negated.
-		 ^0].
+	annotation = IsRelativeCall ifTrue: [
+		backEnd
+			relocateCallBeforeReturnPC: mcpc asInteger
+			by: callDelta negated.
+		^ 0 ].
 
-	annotation = IsAbsPCReference ifTrue:
-		[backEnd relocateMethodReferenceBeforeAddress: mcpc asInteger by: refDelta].
+	annotation = IsAbsPCReference ifTrue: [
+		backEnd
+			relocateMethodReferenceBeforeAddress: mcpc asInteger
+			by: refDelta.
+		^ 0 ].
 
-	^0 "keep scanning"
+	^ 0 "keep scanning"
 ]
 
 { #category : 'garbage collection' }
