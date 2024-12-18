@@ -3203,7 +3203,7 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 	<inline: true>
 	<var: #cogMethod type: #'CogMethod *'>
 	<var: #mnuPIC type: #'CogMethod *'>
-	| selector found cogMethod |
+	| selector found cogMethod mnuPIC |
 	cogit assertCStackWellAligned.
 	self deny: (objectMemory isForwardedClassTag: classTag).
 	self assert: (objectMemory isNotForwarded: receiver).
@@ -3227,7 +3227,6 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 		errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj.
 		errSelIdx ~= 0 ifTrue: [
 			errSelIdx = SelectorDoesNotUnderstand ifTrue: [
-				| mnuPIC |
 				mnuPIC := (cogit
 					           cogMNUPICSelector: messageSelector
 					           receiver: receiver
