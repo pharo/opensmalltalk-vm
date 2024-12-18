@@ -4939,6 +4939,7 @@ Cogit >> cogMethodDoesntLookKosher: cogMethod [
 
 { #category : 'in-line cacheing' }
 Cogit >> cogMethodIfPossible: methodOrSelectorIndex selector: selector [
+	<api>
 
 	((coInterpreter methodHasCogMethod: methodOrSelectorIndex) not and: [
 		 coInterpreter methodShouldBeCogged: methodOrSelectorIndex ])

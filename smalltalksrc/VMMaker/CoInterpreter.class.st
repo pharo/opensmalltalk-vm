@@ -3174,30 +3174,35 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 	"Entry-point unlinked sends in a CogMethod. Inlined into every related
 	 trampoline (regular sends, super sends, directed super sends).
 
-	We have a `classObjGetter` as parameter (as oposed to just the object)
-	because it is not needed on our fastpath and it may not be cheap to obtain
-	(`classForClassTag:` causes a class table traversal).
+	 We have a `classObjGetter` as parameter (as oposed to just the object)
+	 because it is not needed on our fastpath and it may not be cheap to obtain
+	 (`classForClassTag:` causes a class table traversal).
 
-	We will handle a forwarded selector but not a forwarded receiver (this is
-	explicited on our parameter names).
+	 We will handle a forwarded selector but not a forwarded receiver (this is
+	 explicited on our parameter names).
 
-	As a result of invoking this method the following inline-cache state
-	transitions may ocurr:
-	- Method not found, `doesNotUnderstand:` implementation found: Transition to
-	  a polymorphic IC with an MNU case.
-	- Neither method nor `doesNotUnderstand:` found: proceed with the execution,
-	  leave inline cache unlinked. This covers rDNU and `cannotInterpret:`
-	  faults.
-	- Found an uncogged method: Proceed on the interpreter, leave the inline
-	  cache unlinked.
-	- Found a method whose selector is not the exoected one: Transition to a
-	  megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
-	- Found a cogged method: Transition to a monomorphic IC.
+	 As a result of invoking this method the following inline-cache state
+	 transitions may ocurr:
+	 - Method not found, `doesNotUnderstand:` implementation found: Transition to
+	   a polymorphic IC with an MNU case.
+	 - Neither method nor `doesNotUnderstand:` found: proceed with the execution,
+	   leave inline cache unlinked. This covers rDNU and `cannotInterpret:`
+	   faults.
+	 - Found an uncogged method: Proceed on the interpreter, leave the inline
+	   cache unlinked.
+	 - Found a method whose selector is not the exoected one: Transition to a
+	   megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
+	 - Found a cogged method: Transition to a monomorphic IC.
 
-	Link attempts may fail; e.g. because we're out of code memory."
+	 When this method is invoked the smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc
 
+	 Link attempts may fail; e.g. because we're out of code memory."
+
+	<api>
 	<story: #pic>
-	<inline: true>
 	<var: #cogMethod type: #'CogMethod *'>
 	<var: #mnuPIC type: #'CogMethod *'>
 	| selector found cogMethod |
