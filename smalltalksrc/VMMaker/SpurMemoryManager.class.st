@@ -7909,6 +7909,15 @@ SpurMemoryManager >> isNormalObject: objOop [
 ]
 
 { #category : 'object testing' }
+SpurMemoryManager >> isNotForwarded: oop [
+	"Note that (sadly) this is not the negation of `isForwarded`.
+	 `isForwarded` performs an unconditional memory access that can cause a crash
+	 (or an erroneous result) when applied on literals."
+	<api>
+	^ (self isImmediate: oop) or: [ (self isForwarded: oop) not ]
+]
+
+{ #category : 'object testing' }
 SpurMemoryManager >> isObjEphemeron: objOop [
 	^self isEphemeronFormat: (self formatOf: objOop)
 ]
