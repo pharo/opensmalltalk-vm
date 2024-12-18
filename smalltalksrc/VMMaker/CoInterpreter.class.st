@@ -3202,7 +3202,7 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 	 Link attempts may fail; e.g. because we're out of code memory."
 
 	<story: #pic>
-	<inline: true>
+	<inline: #always>
 	<var: #cogMethod type: #'CogMethod *'>
 	<var: #mnuPIC type: #'CogMethod *'>
 	| selector found cogMethod |
