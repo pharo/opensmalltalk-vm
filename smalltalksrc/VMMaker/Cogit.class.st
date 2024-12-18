@@ -5797,7 +5797,7 @@ Cogit >> configureCPIC: aPIC Case0: case0CogMethod Case1Method: case1Method tag:
 
 	"self disassembleFrom: cPIC asInteger + (self sizeof: CogMethod) to: cPIC asInteger + closedPICSize"
 
-	<var: #cPIC type: #'CogMethod *'>
+	<var: #aPIC type: #'CogMethod *'>
 	<var: #case0CogMethod type: #'CogMethod *'>
 	| operand targetEntry caseEndAddress |
 	self assert: case1Method notNil.
@@ -5841,7 +5841,7 @@ Cogit >> configureMNUCPIC: aPIC methodOperand: methodOop [
 	 addDelta is the address change from the prototype to the new CPIC location, needed
 	 because the loading of the CPIC label at the end may be a literal instead of a pc-relative load."
 
-	<var: #cPIC type: #'CogMethod *'>
+	<var: #aPIC type: #'CogMethod *'>
 	| operand |	
 	"We do not scavenge PICs, hence we cannot cache the MNU method if it is in new space."
 	operand := (methodOop isNil or: [
