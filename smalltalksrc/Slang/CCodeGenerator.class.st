@@ -3222,6 +3222,7 @@ CCodeGenerator >> initializeCASTTranslationDictionary [
 	#==			#generateCASTEqual:
 	#~~			#generateCASTNotEqual:
 	#isNil			#generateCASTIsNil:
+	#isNotNil			#generateCASTNotNil:
 	#notNil			#generateCASTNotNil:
 
 	#whileTrue: 	#generateCASTWhileTrue:
