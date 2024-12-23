@@ -4048,7 +4048,7 @@ Cogit >> ceSICMiss: receiver [
 	<api>
 	<story: #pic>
 	<var: #inlineCache type: #'CogMethod *'>
-	| inlineCache missedTargetReturnAddress callerReturnAddress missedTargetCogMethod newTargetMethodOrNil errorSelectorOrNil cacheTag extent |
+	| inlineCache missedTargetReturnAddress callerReturnAddress missedTargetCogMethod newTargetMethodOrNil errorSelectorOrNil cacheTag linkingSucceeded |
 	missedTargetReturnAddress := coInterpreter popStack asUnsignedInteger.
 	"Whether we can relink to a PIC or not we need to pop off the inner return and identify the target method."
 	missedTargetCogMethod := self
@@ -4103,27 +4103,30 @@ Cogit >> ceSICMiss: receiver [
 	"If early promotion is allowed check if anyone else saw this selector turn megamorphic"
 	self allowEarlyPromotionToMegamorphicIC
 		ifTrue: [
+			| extent |
 			inlineCache := methodZone openPICWithSelector:
 				               missedTargetCogMethod selector.
-			self
-				enableCodeZoneWriteDuring: [ "Link the sendsite.
+			linkingSucceeded := inlineCache isNil.
+			inlineCache ifNotNil: [
+				self
+					enableCodeZoneWriteDuring: [ "Link the sendsite.
 					Because we are on a megamorphic sendsite put the selector as tag for the
 					benefit of the cacheTag assert check in checkIfValidOopRef:pc:cogMethod:
 					et al."
-					extent := backEnd
-						          rewriteInlineCacheAt: callerReturnAddress
-						          tag: (self
-								           inlineCacheValueForSelector:
-								           missedTargetCogMethod selector
-								           in: coInterpreter mframeHomeMethodExport
-								           at: callerReturnAddress)
-						          target: inlineCache asInteger + cmEntryOffset ]
-				flushingCacheWith: [
-					self
-						flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
-						to: callerReturnAddress asUnsignedInteger ] ]
+						extent := backEnd
+							          rewriteInlineCacheAt: callerReturnAddress
+							          tag: (self
+									           inlineCacheValueForSelector:
+									           missedTargetCogMethod selector
+									           in: coInterpreter mframeHomeMethodExport
+									           at: callerReturnAddress)
+							          target: inlineCache asInteger + cmEntryOffset ]
+					flushingCacheWith: [
+						self
+							flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
+							to: callerReturnAddress asUnsignedInteger ] ] ]
 		ifFalse: [
-			| picCreationFailed |
+			| extent |
 			"      method | errorSelector             | situation
 			 -------------+---------------------------+---------------------------------------------------------
 			  foundMethod | SelectorDoesNotUnderstand | Didn't find the method but found the DNU implementation
@@ -4138,34 +4141,34 @@ Cogit >> ceSICMiss: receiver [
 						               tag: cacheTag
 						               isMNUCase:
 						               errorSelectorOrNil = SelectorDoesNotUnderstand.
-					picCreationFailed := inlineCache asInteger
+					linkingSucceeded := (inlineCache asInteger
 						                     between: MaxNegativeErrorCode
-						                     and: -1.
-					picCreationFailed ifFalse: [ "Link the send site to the pic."
+						                     and: -1) not.
+					linkingSucceeded ifTrue: [ "Link the send site to the pic."
 						extent := backEnd
 							          rewriteCallAt: callerReturnAddress
 							          target: inlineCache asInteger + cmEntryOffset ] ]
 				flushingCacheWith: [
-					picCreationFailed ifFalse: [
+					linkingSucceeded ifTrue: [
 						self
 							flushICacheFrom: inlineCache asUnsignedInteger
 							to: inlineCache asUnsignedInteger + closedPICSize.
 						self
 							flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
-							to: callerReturnAddress asUnsignedInteger ] ].
+							to: callerReturnAddress asUnsignedInteger ] ] ].
 
-			picCreationFailed ifTrue: [ "For some reason the PIC couldn't be generated, most likely a lack of code memory.
-			  Continue as if this is an unlinked send."
-				inlineCache asInteger = InsufficientCodeSpace ifTrue: [
-					coInterpreter callForCogCompiledCodeCompaction ].
-				^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod ] ].
 
-	"Jump back into the pic at its entry in case this is an MNU (newTargetMethodOrNil is nil)"
-	coInterpreter
-		executeCogPIC: inlineCache
-		fromLinkedSendWithReceiver: receiver
-		andCacheTag: (backEnd inlineCacheTagAt: callerReturnAddress).
-	^ self unreachable
+	linkingSucceeded ifTrue: [ "Jump back into the pic at its entry in case this is an MNU (newTargetMethodOrNil is nil)"
+		coInterpreter
+			executeCogPIC: inlineCache
+			fromLinkedSendWithReceiver: receiver
+			andCacheTag: (backEnd inlineCacheTagAt: callerReturnAddress) ].
+
+	"For some reason the PIC couldn't be generated, most likely lack of code memory or a promotion to megamorphic.
+	 Continue as if this is an unlinked send."
+	inlineCache asInteger = InsufficientCodeSpace ifTrue: [
+		coInterpreter callForCogCompiledCodeCompaction ].
+	^ coInterpreter ceSendFromInLineCacheMiss: missedTargetCogMethod
 ]
 
 { #category : 'accessing' }
