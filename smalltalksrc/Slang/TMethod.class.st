@@ -1755,13 +1755,13 @@ TMethod >> inlineableSend: aNode in: aCodeGen [
 
 	| m |
 	aCodeGen maybeBreakForTestToInline: aNode in: self.
-	aNode isSend ifFalse: [^false].
-	m := aCodeGen methodNamed: aNode selector.  "nil if builtin or external function"
-	^m ~= nil
-	 and: [m ~~ self
-	 and: [m mayBeInlined
-	 and: [(m isComplete and: [aCodeGen mayInline: m selector])
-		or: [m checkForRequiredInlinability]]]]
+	aNode isSend ifFalse: [ ^ false ].
+	m := aCodeGen methodNamed: aNode selector. "nil if builtin or external function"
+	^ m isNotNil and: [
+		  m ~~ self and: [
+			  m mayBeInlined and: [
+				  (m isComplete and: [ aCodeGen mayInline: m selector ]) or: [
+					  m checkForRequiredInlinability ] ] ] ]
 ]
 
 { #category : 'accessing' }
