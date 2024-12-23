@@ -1282,6 +1282,12 @@ TMethod >> hasProperties [
 	^properties notNil and: [properties notEmpty]
 ]
 
+{ #category : 'transformations' }
+TMethod >> hasProperty: aName [
+
+	^ self hasProperties and: [ properties includesKey: aName ]
+]
+
 { #category : 'testing' }
 TMethod >> hasReturn [
 	"Answer true if this method contains a return statement."
