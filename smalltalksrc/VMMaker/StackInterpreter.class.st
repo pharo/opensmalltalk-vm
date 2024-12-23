@@ -6890,6 +6890,7 @@ StackInterpreter >> frameStackedReceiverOffsetNumArgs: numArgs [
 { #category : 'object memory support' }
 StackInterpreter >> framesInPage: thePage do: aBlock [
 
+	<var: #theFP type: #'char *'>
 	| theSP theFP callerFP |
 	theSP := thePage headSP.
 	theFP := thePage headFP.
