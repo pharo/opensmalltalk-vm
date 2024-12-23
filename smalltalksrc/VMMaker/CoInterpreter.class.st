@@ -700,20 +700,21 @@ CoInterpreter >> assertValidStackedInstructionPointers: ln [
 	"Check that the stacked instruction pointers in all pages are correct.
 	 Checks the interpreter sender/machine code callee contract.
 	 Written so it will be optimized away if not in an assert VM."
-	| thePage |
+
 	<inline: false>
-	<var: #thePage type: #'StackPage *'>
-	0 to: numStackPages - 1 do:
-		[:i|
-		thePage := stackPages stackPageAt: i.
-		(stackPages isFree: thePage) ifFalse:
-			[self assert: (self assertValidStackedInstructionPointersIn: thePage line: ln) l: ln]]
+	self usedStackPagesDo: [ :thePage |
+		[
+		self
+			assert:
+			(self assertValidStackedInstructionPointersIn: thePage line: ln)
+			l: ln ] ]
 ]
 
 { #category : 'debug support' }
 CoInterpreter >> assertValidStackedInstructionPointersIn: aStackPage line: ln [
 	"Check that the stacked instruction pointers in the given page are correct.
 	 Checks the interpreter sender/machine code callee contract."
+
 	<var: #aStackPage type: #'StackPage *'>
 	<var: #theFP type: #'char *'>
 	<var: #callerFP type: #'char *'>
@@ -721,44 +722,52 @@ CoInterpreter >> assertValidStackedInstructionPointersIn: aStackPage line: ln [
 	<var: #theMethod type: #'CogMethod *'>
 	<inline: false>
 	| prevFrameWasCogged theFP callerFP theMethod theIP methodObj |
-	(self asserta: (stackPages isFree: aStackPage) not l: ln) ifFalse:
-		[^false].
+	(self asserta: aStackPage isFree not l: ln) ifFalse: [ ^ false ].
 	prevFrameWasCogged := false.
 	"The top of stack of an inactive page is always the instructionPointer.
 	 The top of stack of the active page may be the instructionPointer if it has been pushed,
 	 which is indicated by a 0 instructionPointer."
-	(stackPage = aStackPage and: [instructionPointer ~= 0])
-		ifTrue:
-			[theIP := instructionPointer.
-			theFP := framePointer]
-		ifFalse:
-			[theIP := (stackPages unsignedLongAt: aStackPage headSP) asUnsignedInteger.
-			 theFP := aStackPage headFP.
-			 stackPage = aStackPage ifTrue:
-				[self assert: framePointer = theFP l: ln]].
-	[(self isMachineCodeFrame: theFP)
-		ifTrue:
-			[theMethod := self mframeHomeMethod: theFP.
-			 self assert: (theIP = cogit ceCannotResumePC
-						  or: [theIP >= theMethod asUnsignedInteger
-							   and: [theIP < (theMethod asUnsignedInteger + theMethod blockSize)]])
-					l: ln.
-			prevFrameWasCogged := true]
-		ifFalse: "assert-check the interpreter frame."
-			[methodObj := self iframeMethod: theFP.
-			 prevFrameWasCogged ifTrue:
-				[self assert: theIP = cogit ceReturnToInterpreterPC l: ln].
-			 theIP = cogit ceReturnToInterpreterPC ifTrue:
-				[theIP := self iframeSavedIP: theFP].
-			 self assert: (theIP >= (methodObj + (objectMemory lastPointerOf: methodObj))
-						  and: [theIP <= (methodObj + (objectMemory numBytesOfBytes: methodObj) + objectMemory baseHeaderSize - 1)])
+	(stackPage = aStackPage and: [ instructionPointer ~= 0 ])
+		ifTrue: [
+			theIP := instructionPointer.
+			theFP := framePointer ]
+		ifFalse: [
+			theIP := (stackPages unsignedLongAt: aStackPage headSP)
+				         asUnsignedInteger.
+			theFP := aStackPage headFP.
+			stackPage = aStackPage ifTrue: [
+				self assert: framePointer = theFP l: ln ] ].
+	[
+	(self isMachineCodeFrame: theFP)
+		ifTrue: [
+			theMethod := self mframeHomeMethod: theFP.
+			self
+				assert: (theIP = cogit ceCannotResumePC or: [
+						 theIP >= theMethod asUnsignedInteger and: [
+							 theIP < (theMethod asUnsignedInteger + theMethod blockSize) ] ])
 				l: ln.
-			 prevFrameWasCogged := false].
-	 theIP := (stackPages unsignedLongAt: theFP + FoxCallerSavedIP) asUnsignedInteger.
-	 (callerFP := self frameCallerFP: theFP) ~= 0] whileTrue:
-		[theFP := callerFP].
+			prevFrameWasCogged := true ]
+		ifFalse: [ "assert-check the interpreter frame."
+			methodObj := self iframeMethod: theFP.
+			prevFrameWasCogged ifTrue: [
+				self assert: theIP = cogit ceReturnToInterpreterPC l: ln ].
+			theIP = cogit ceReturnToInterpreterPC ifTrue: [
+				theIP := self iframeSavedIP: theFP ].
+			self
+				assert:
+					(theIP >= (methodObj + (objectMemory lastPointerOf: methodObj))
+						 and: [
+							 theIP
+							 <= (methodObj + (objectMemory numBytesOfBytes: methodObj)
+								  + objectMemory baseHeaderSize - 1) ])
+				l: ln.
+			prevFrameWasCogged := false ].
+	theIP := (stackPages unsignedLongAt: theFP + FoxCallerSavedIP)
+		         asUnsignedInteger.
+	(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
+		theFP := callerFP ].
 	self assert: theIP = cogit ceBaseFrameReturnPC l: ln.
-	^true
+	^ true
 ]
 
 { #category : 'jump bytecodes' }
@@ -2216,19 +2225,15 @@ CoInterpreter >> divorceMachineCodeFramesWithMethod: methodObj [
 CoInterpreter >> divorceSomeMachineCodeFramesWithMethod: cogMethod [
 	"Divorce at most one frame (since the divorce may cause the containing
 	 page to be split) and answer whether a frame was divorced."
+
 	<var: #cogMethod type: #'CogMethod *'>
 	| divorcedSome |
-	<var: #aPage type: #'StackPage *'>
 	divorcedSome := false.
-	0 to: numStackPages - 1 do:
-		[:i| | aPage |
-		aPage := stackPages stackPageAt: i.
-		(stackPages isFree: aPage) ifFalse:
-			["this to avoid assert in externalDivorceFrame:andContext:"
-			 stackPages markStackPageMostRecentlyUsed: stackPage.
-			 (self divorceAMachineCodeFrameWithCogMethod: cogMethod in: aPage) ifTrue:
-				[divorcedSome := true]]].
-	^divorcedSome
+	self usedStackPagesDo: [ :aPage | "this to avoid assert in externalDivorceFrame:andContext:"
+		stackPages markStackPageMostRecentlyUsed: stackPage.
+		(self divorceAMachineCodeFrameWithCogMethod: cogMethod in: aPage)
+			ifTrue: [ divorcedSome := true ] ].
+	^ divorcedSome
 ]
 
 { #category : 'send bytecodes' }
@@ -3423,14 +3428,10 @@ CoInterpreter >> mapVMRegisters [
 
 { #category : 'cog jit support' }
 CoInterpreter >> markActiveMethodsAndReferents [
+
 	<api>
-	| thePage |
-	<var: #thePage type: #'StackPage *'>
-	0 to: numStackPages - 1 do:
-		[:i|
-		thePage := stackPages stackPageAt: i.
-		(stackPages isFree: thePage) ifFalse:
-			[self markCogMethodsAndReferentsOnPage: thePage]]
+	self usedStackPagesDo: [ :thePage |
+		self markCogMethodsAndReferentsOnPage: thePage ]
 ]
 
 { #category : 'gc -- mark and sweep' }
@@ -3504,19 +3505,21 @@ CoInterpreter >> markAndTraceTraceLog [
 
 { #category : 'frame access' }
 CoInterpreter >> markCogMethodsAndReferentsOnPage: thePage [
+
 	<var: #thePage type: #'StackPage *'>
-	| theFP callerFP |
 	<var: #theFP type: #'char *'>
 	<var: #callerFP type: #'char *'>
 	<inline: false>
-	self assert: (stackPages isFree: thePage) not.
+	| theFP callerFP |
+	self assert: thePage isFree not.
 	self assert: (self ifCurrentStackPageHasValidHeadPointers: thePage).
 	theFP := thePage headFP.
 	"Skip the instruction pointer on top of stack of inactive pages."
-	[(self isMachineCodeFrame: theFP) ifTrue:
-		[cogit markMethodAndReferents: (self mframeCogMethod: theFP)].
-	(callerFP := self frameCallerFP: theFP) ~= 0] whileTrue:
-		[theFP := callerFP]
+	[
+	(self isMachineCodeFrame: theFP) ifTrue: [
+		cogit markMethodAndReferents: (self mframeCogMethod: theFP) ].
+	(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
+		theFP := callerFP ]
 ]
 
 { #category : 'frame access' }
@@ -3737,21 +3740,22 @@ CoInterpreter >> minimumUnusedHeadroom [
 	"Traverse all stack pages looking for non-zero bytes in the headroom part of each page.
 	 Answer the minimum size of unused headroom (zero bytes) in the pages.  This is for
 	 checking that there is enough headroom allocated in stack pages."
-	| minUnused page |
+
 	<var: #page type: #'StackPage *'>
 	<var: #p type: #'char *'>
-	minUnused := (stackPages stackPageAt: 0) baseAddress - (stackPages stackPageAt: 0) lastAddress.
-	0 to: numStackPages - 1 do:
-		[:i| | p unused |
-		page := stackPages stackPageAt: i.
+	| minUnused |
+	minUnused := (stackPages stackPageAt: 0) baseAddress
+	             - (stackPages stackPageAt: 0) lastAddress.
+	self allStackPagesDo: [ :page |
+		| p unused |
 		p := page lastAddress.
-		[p := p + objectMemory wordSize.
-		(self longAtPointer: p) = 0
-		 and: [p <= page baseAddress]] whileTrue.
+		[
+		p := p + objectMemory wordSize.
+		(self longAtPointer: p) = 0 and: [ p <= page baseAddress ] ]
+			whileTrue.
 		unused := p - objectMemory wordSize - page lastAddress.
-		unused < minUnused ifTrue:
-			[minUnused := unused]].
-	^minUnused
+		unused < minUnused ifTrue: [ minUnused := unused ] ].
+	^ minUnused
 ]
 
 { #category : 'debug support' }
@@ -5017,36 +5021,38 @@ CoInterpreter >> unknownShortOrCodeSizeInKs [
 
 { #category : 'code compaction' }
 CoInterpreter >> updateStackZoneReferencesToCompiledCodePreCompaction [
+
 	<api>
-	<var: #thePage type: #'StackPage *'>
 	<var: #theFP type: #'char *'>
 	<var: #callerFP type: #'char *'>
 	<var: #theIPPtr type: #'char *'>
 	<var: #theIP type: #usqInt>
 	<var: #theMethod type: #'CogMethod *'>
-	0 to: numStackPages - 1 do:
-		[:i| | thePage theFP callerFP theIPPtr theIP theMethodField theFlags theMethod |
-		thePage := stackPages stackPageAt: i.
-		(stackPages isFree: thePage) ifFalse:
-			[theIPPtr := thePage headSP.
-			 theFP := thePage  headFP.
-			 [(self isMachineCodeFrame: theFP) ifTrue:
-				[theMethodField := self frameMethodField: theFP.
-				 theFlags := theMethodField bitAnd: MFMethodFlagsMask.
-				 theMethod := self cCoerceSimple: theMethodField - theFlags to: #'CogMethod *'.
-				 theIP := (stackPages unsignedLongAt: theIPPtr) asUnsignedInteger.
-				 (theIP ~= cogit ceCannotResumePC
-				  and: [(theIP >= theMethod asUnsignedInteger
-							   and: [theIP < (theMethod asUnsignedInteger + theMethod blockSize)])]) ifTrue:
-					[stackPages
+	self usedStackPagesDo: [ :thePage |
+		| theFP callerFP theIPPtr theIP theMethodField theFlags theMethod |
+		theIPPtr := thePage headSP.
+		theFP := thePage headFP.
+		[
+		(self isMachineCodeFrame: theFP) ifTrue: [
+			theMethodField := self frameMethodField: theFP.
+			theFlags := theMethodField bitAnd: MFMethodFlagsMask.
+			theMethod := self
+				             cCoerceSimple: theMethodField - theFlags
+				             to: #'CogMethod *'.
+			theIP := (stackPages unsignedLongAt: theIPPtr) asUnsignedInteger.
+			(theIP ~= cogit ceCannotResumePC and: [
+				 theIP >= theMethod asUnsignedInteger and: [
+					 theIP < (theMethod asUnsignedInteger + theMethod blockSize) ] ])
+				ifTrue: [
+					stackPages
 						unsignedLongAt: theIPPtr
-						put: theIP + theMethod objectHeader].
-				 stackPages
-					unsignedLongAt: theFP + FoxMethod
-					put: theMethodField + theMethod objectHeader].
-			 (callerFP := self frameCallerFP: theFP) ~= 0] whileTrue:
-				[theIPPtr := theFP + FoxCallerSavedIP.
-				 theFP := callerFP]]]
+						put: theIP + theMethod objectHeader ].
+			stackPages
+				unsignedLongAt: theFP + FoxMethod
+				put: theMethodField + theMethod objectHeader ].
+		(callerFP := self frameCallerFP: theFP) ~= 0 ] whileTrue: [
+			theIPPtr := theFP + FoxCallerSavedIP.
+			theFP := callerFP ] ]
 ]
 
 { #category : 'debug support' }
