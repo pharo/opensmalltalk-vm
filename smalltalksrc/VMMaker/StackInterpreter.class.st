@@ -4226,14 +4226,14 @@ StackInterpreter >> checkStackIntegrity [
 			               self
 				               frameStackValuesWithFP: theFP
 				               withSP: theSP
-				               do: [ :theOop |
+				               do: [ :theOopSP :theOop |
 					               ((objectMemory isNonImmediate: theOop) and: [
 						                (objectMemory heapMapAtWord:
 							                 (self pointerForOop: theOop)) = 0 ]) ifTrue: [
 						               self
 							               printFrameThing: 'object leak in frame temp'
 							               andFrame: theFP
-							               at: theSP.
+							               at: theOopSP.
 						               ok := false ] ].
 			               (self frameHasContext: theFP) ifTrue: [
 				               oop := self frameContext: theFP.
@@ -6851,7 +6851,7 @@ StackInterpreter >> frameStackValuesWithFP: theFP withSP: theSP do: aBlock [
 	frameRcvrOffset := self frameReceiverLocation: theFP.
 	[ currentSP <= frameRcvrOffset ] whileTrue: [
 		oop := stackPages unsignedLongAt: currentSP.
-		aBlock value: oop.
+		aBlock value: currentSP value: oop.
 		currentSP := currentSP + objectMemory wordSize ]
 ]
 
@@ -9327,10 +9327,10 @@ StackInterpreter >> mapStackPages [
 			self
 				frameStackValuesWithFP: theFP
 				withSP: theSP
-				do: [ :oop |
+				do: [ :theOopSP :oop |
                (objectMemory shouldRemapOop: oop) ifTrue: [
 	               stackPages
-		               unsignedLongAt: theSP
+		               unsignedLongAt: theOopSP
 		               put: (objectMemory remapObj: oop) ] ].
 
 			(self frameHasContext: theFP) ifTrue: [
