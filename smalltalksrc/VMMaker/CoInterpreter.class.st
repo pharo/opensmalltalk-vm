@@ -3190,7 +3190,7 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 	   faults.
 	 - Found an uncogged method: Proceed on the interpreter, leave the inline
 	   cache unlinked.
-	 - Found a method whose selector is not the exoected one: Transition to a
+	 - Found a method whose selector is not the expected one: Transition to a
 	   megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
 	 - Found a cogged method: Transition to a monomorphic IC.
 
@@ -3278,6 +3278,7 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 		ifFalse: [
 			isSuperSend = 0 ifTrue: [ "
 				Megamorphic PICs perform normal sends. Can't patch if this is a super send."
+				self unreachable.
 				cogit
 					patchToMegamorphicICFor: selector
 					numArgs: numArgs
