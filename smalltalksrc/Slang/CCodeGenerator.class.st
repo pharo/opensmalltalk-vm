@@ -3275,6 +3275,8 @@ CCodeGenerator >> initializeCASTTranslationDictionary [
 	#isIntegerObject: 			#generateCASTIsIntegerObject:
 	#cCode:					#generateCASTInlineCCode:
 	#cCode:inSmalltalk:			#generateCASTInlineCCode:
+	#cCall:                  #generateCASTCCallAsArgument:
+	#cCall:withArguments:    #generateCASTCCallAsArgument:
 	#cppIf:ifTrue:ifFalse:		#generateCASTInlineCppIfElse:
 	#cppIf:ifTrue:				#generateCASTInlineCppIfElse:
 	#cCoerce:to:				#generateCASTCCoercion:
@@ -3352,8 +3354,6 @@ CCodeGenerator >> initializeCASTTranslationDictionary [
 	#ifNil:ifNotNil:			#generateCASTIfNilIfNotNilAsArgument:
 	#cCode:				#generateCASTInlineCCodeAsArgument:
 	#cCode:inSmalltalk:		#generateCASTInlineCCodeAsArgument:
-	#cCall:                  #generateCASTCCallAsArgument:
-	#cCall:withArguments:    #generateCASTCCallAsArgument:
 	#cppIf:ifTrue:ifFalse:	#generateCASTInlineCppIfElseAsArgument:
 	#cppIf:ifTrue:			#generateCASTInlineCppIfElseAsArgument:
 				
