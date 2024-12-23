@@ -1466,7 +1466,8 @@ CoInterpreter >> ceSend: maybeForwardedSelector super: isSuperSend to: maybeForw
 				receiver := self
 					            handleForwardedSendFaultForReceiver:
 					            maybeForwardedReceiver
-					            stackDelta: 1 ].
+					            rcvrStackOffsetFromTop: numArgs + 1.
+				classTag := objectMemory fetchClassTagOf: receiver ].
 
 			self
 				linkSendFor: maybeForwardedSelector
@@ -1555,7 +1556,9 @@ CoInterpreter >> ceSendFromInLineCacheMiss: cogMethodOrPIC [
 			to: (self handleForwardedSelectorFaultFor: cogMethodOrPIC selector).
 		^ self ceSendFromInLineCacheMiss: cogMethodOrPIC ].
 	(objectMemory isForwardedClassTag: classTag) ifTrue: [
-		self handleForwardedSendFaultForReceiver: rcvr stackDelta: 1. "skip return pc"
+		self
+			handleForwardedSendFaultForReceiver: rcvr
+			rcvrStackOffsetFromTop: numArgs + 1. "skip return pc"
 		^ self ceSendFromInLineCacheMiss: cogMethodOrPIC ].
 
 	(self
@@ -1568,13 +1571,13 @@ CoInterpreter >> ceSendFromInLineCacheMiss: cogMethodOrPIC [
 		ifFalse: [
 			messageSelector := cogMethodOrPIC selector.
 			classObj := objectMemory classForClassTag: classTag.
-			(errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0
-				ifTrue: [
-					self
-						handleMNU: errSelIdx
-						InMachineCodeTo: rcvr
-						classForMessage: classObj.
-					self unreachable ] ].
+			(errSelIdx := self lookupMethodWithoutMNUProcessingInClass:
+				              classObj) ~= 0 ifTrue: [
+				self
+					handleMNU: errSelIdx
+					InMachineCodeTo: rcvr
+					classForMessage: classObj.
+				self unreachable ] ].
 
 	instructionPointer := self popStack.
 	(self maybeMethodHasCogMethod: newMethod) ifTrue: [
@@ -2800,26 +2803,29 @@ CoInterpreter >> getMethodCompilationMSecs [
 ]
 
 { #category : 'message sending' }
-CoInterpreter >> handleForwardedSendFaultForReceiver: forwardedReceiver stackDelta: stackDelta [
+CoInterpreter >> handleForwardedSendFaultForReceiver: forwardedReceiver rcvrStackOffsetFromTop: rcvrStackIndex [
 	"Handle a send fault that may be due to a send to a forwarded object.
 	 Unforward the receiver on the stack and answer it."
+
 	<option: #SpurObjectMemory>
-	| rcvrStackIndex rcvr |
 	<inline: false>
-	"should *not* be a super send, so the receiver should be forwarded."
+	| rcvr |
 	self assert: (objectMemory isOopForwarded: forwardedReceiver).
-	rcvrStackIndex := argumentCount + stackDelta.
+	"should *not* be a super send, so the receiver should be forwarded."
 	self assert: (self stackValue: rcvrStackIndex) = forwardedReceiver.
 	rcvr := objectMemory followForwarded: forwardedReceiver.
 	self stackValue: rcvrStackIndex put: rcvr.
-	self followForwardedFrameContents: framePointer
-		stackPointer: stackPointer + (rcvrStackIndex + 1 * objectMemory wordSize). "don't repeat effort"
-	(objectMemory isPointers: (self frameReceiver: framePointer)) ifTrue:
-		[objectMemory
-			followForwardedObjectFields: (self frameReceiver: framePointer)
-			toDepth: 0].
+	self
+		followForwardedFrameContents: framePointer
+		stackPointer:
+		stackPointer + (rcvrStackIndex + 1 * objectMemory wordSize). "don't repeat effort"
+	(objectMemory isPointers: (self frameReceiver: framePointer))
+		ifTrue: [
+			objectMemory
+				followForwardedObjectFields: (self frameReceiver: framePointer)
+				toDepth: 0 ].
 	self followForwardedFieldsInCurrentMethod.
-	^rcvr
+	^ rcvr
 ]
 
 { #category : 'message sending' }
@@ -3172,7 +3178,7 @@ CoInterpreter >> isMachineCodeIP: anInstrPointer [
 
 { #category : 'trampolines' }
 CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: receiver classTag: classTag numArgs: numArgs classObjGetter: classObjGetter [
-	"Entry-point unlinked sends in a CogMethod. Inlined into every related
+	"Entry-point for unlinked sends in a CogMethod. Inlined into every related
 	 trampoline (regular sends, super sends, directed super sends).
 
 	 We have a `classObjGetter` as parameter (as oposed to just the object)
@@ -3244,12 +3250,12 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 						offset: (isSuperSend = 0
 								 ifTrue: [ cogit entryOffset ]
 								 ifFalse: [ cogit noCheckEntryOffset ])
-						receiver: receiver ].
+						receiver: receiver ] ].
 				self
 					handleMNU: errSelIdx
 					InMachineCodeTo: receiver
 					classForMessage: classObj.
-				self unreachable ] ] ].
+				self unreachable ] ].
 
 	"Method has been found, either in the cache or in by doing a lookup.
 	It's not a MNU, it has been handled before."
@@ -3279,7 +3285,6 @@ CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: rece
 		ifFalse: [
 			isSuperSend = 0 ifTrue: [ "
 				Megamorphic PICs perform normal sends. Can't patch if this is a super send."
-				self unreachable.
 				cogit
 					patchToMegamorphicICFor: selector
 					numArgs: numArgs
