@@ -5197,7 +5197,7 @@ VMPrimitiveTest >> testPrimitiveVMParameterReturnsArrayOfOops [
 	"Check this is an array that has 85 OOP entries"
 	self assert: (memory isArray: interpreter stackTop).
 	slots := memory numSlotsOf: interpreter stackTop.
-	self assert: slots equals: 85.
+	self assert: slots equals: 87.
 	
 	0 to: slots - 1 do: [ :i |
 		memory okayOop: (memory fetchPointer: i ofObject: interpreter stackTop) ]

@@ -12567,15 +12567,18 @@ SpurMemoryManager >> storePointer: fieldIndex ofObject: objOop withValue: valueP
 	<api>
 	self assert: (self isForwarded: objOop) not.
 
+	self
+		unsignedLongAt: objOop + self baseHeaderSize + (fieldIndex << self shiftForWord)
+		put: valuePointer.
+
 	(self isOld: objOop) ifTrue: [ "most stores into young objects"
 		(self isYoung: valuePointer) ifTrue: [ 
 			self possibleOldObjectStoreInto: objOop ] ].
 
-	self possiblePermObjectStoreInto: objOop value: valuePointer.
+	self druidIgnore: [ "Ignore permi for now..."
+		self possiblePermObjectStoreInto: objOop value: valuePointer].
 
-	^self
-		unsignedLongAt: objOop + self baseHeaderSize + (fieldIndex << self shiftForWord)
-		put: valuePointer
+	
 ]
 
 { #category : #'object access' }
