@@ -2200,11 +2200,16 @@ StackInterpreter >> assertValidStackLimits: ln [
 
 { #category : 'object memory support' }
 StackInterpreter >> baseFrameArguments: baseFrameFP inPage: thePage do: aBlock [
-	"In base frames the caller saved ip field holds the caller context."
+	"Iterate the arguments of the base frame of a given page."
 
 	| baseFrameArgumentSP |
+	"Skip the caller saved IP slot containing the caller context"
 	baseFrameArgumentSP := baseFrameFP + FoxCallerSavedIP
 	                       + objectMemory wordSize.
+	
+	"Iterate each of the arguments of this base frame.
+	Arguments were copied above the base frame to ensure
+	the base frame access them normally"
 	[ baseFrameArgumentSP <= thePage baseAddress ] whileTrue: [
 		| oop |
 		oop := stackPages unsignedLongAt: baseFrameArgumentSP.
