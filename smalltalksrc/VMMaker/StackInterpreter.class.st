@@ -4188,14 +4188,15 @@ StackInterpreter >> checkOkayStackPage: thePage [
 { #category : 'debug support' }
 StackInterpreter >> checkOkayStackZone: writeBack [
 	"Check that all objects in the stack zone are okay"
-
+	| ok |
+	<var: #thePage type: #'StackPage *'>
 	<inline: false>
 	writeBack ifTrue: [ self writeBackHeadFramePointers ].
-
+	
+	ok := true.
 	self usedStackPagesDo: [ :thePage |
-		(self checkOkayStackPage: thePage) ifFalse: [ ^ false ] ].
-
-	^ true
+		ok := ok and: [ (self checkOkayStackPage: thePage) ] ].
+	^ ok
 ]
 
 { #category : 'process primitive support' }
