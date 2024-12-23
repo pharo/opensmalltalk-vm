@@ -3776,6 +3776,38 @@ StackInterpreter >> checkForAndFollowForwardedPrimitiveState [
 	^ self checkForAndFollowForwardedPrimitiveState: primIndex
 ]
 
+{ #category : 'primitive support' }
+StackInterpreter >> checkForAndFollowForwardedPrimitiveState: primitiveIndex [
+	"If the primitive is one of the meta primitives PrimNumberDoPrimitive or
+	 PrimNumberDoExternalCall, then metaAccessorDepth will have been set
+	 to nil at the start of the primitive, and to the accessor depth of the called
+	 primitive (or external call) immediately before dispatch.  Hence if primIndex
+	 is that of a meta primiitve then if metaAccessorDepth is -2, the accessor
+	 depth is that of the meta primitive, and if > -2, then metaAccessorDepth is
+	 the accessor depth of the primitive (or external call).  SImilarly, if the
+	 primitive is primitiveExternalCall then the accessor depth is that of
+	 primitiveExternalCall until primitiveFunctionPointer is assigned, at which
+	 point the accessor depth is taken from the slot in newMethod's first literal."
+
+	| accessorDepth |
+	accessorDepth := ((self isMetaPrimitiveIndex: primitiveIndex) and: [
+		                  metaAccessorDepth > -2 ])
+		                 ifTrue: [ metaAccessorDepth ]
+		                 ifFalse: [
+			                 (primitiveIndex = PrimNumberExternalCall and: [
+				                  primitiveFunctionPointer
+				                  ~~ #primitiveExternalCall ])
+				                 ifTrue: [
+				                 self
+					                 primitiveAccessorDepthForExternalPrimitiveMethod:
+					                 newMethod ]
+				                 ifFalse: [
+				                 primitiveAccessorDepthTable at: primitiveIndex ] ].
+	self assert:
+		(self saneFunctionPointerForFailureOfPrimIndex: primitiveIndex).
+	^ self followForwardedForAccessorDepth: accessorDepth
+]
+
 { #category : 'process primitive support' }
 StackInterpreter >> checkForEventsMayContextSwitch: mayContextSwitch [
 	"Check for possible interrupts and handle one if necessary.
