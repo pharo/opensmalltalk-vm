@@ -211,7 +211,8 @@ CogOutOfLineLiteralsARMCompiler >> rewriteInlineCacheAt: callSiteReturnAddress t
 	objectMemory
 		unsignedLongAt: (self instructionAddressBefore: callSiteReturnAddress ) put: call;
 		unsignedLongAt: (self pcRelativeAddressAt: callSiteReturnAddress - 8) put: cacheTag.
-	self assert: (self inlineCacheTagAt: callSiteReturnAddress) = cacheTag.
+	self assert: (self inlineCacheTagAt: callSiteReturnAddress) = (cacheTag signedIntFromLong bitAnd:
+		  1 << objectMemory classIndexFieldWidth - 1).
 	"self cCode: ''
 		inSmalltalk: [cogit disassembleFrom: callSiteReturnAddress - 8 to: (self pcRelativeAddressAt: callSiteReturnAddress - 8)]."
 	^4
