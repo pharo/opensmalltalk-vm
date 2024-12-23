@@ -4102,11 +4102,12 @@ Cogit >> ceSICMiss: receiver [
 
 	"If early promotion is allowed check if anyone else saw this selector turn megamorphic"
 	self allowEarlyPromotionToMegamorphicIC
+		ifFalse: [ inlineCache := nil ]
 		ifTrue: [
 			| extent |
 			inlineCache := methodZone openPICWithSelector:
 				               missedTargetCogMethod selector.
-			linkingSucceeded := inlineCache isNil.
+			linkingSucceeded := inlineCache isNotNil.
 			inlineCache ifNotNil: [
 				self
 					enableCodeZoneWriteDuring: [ "Link the sendsite.
@@ -4124,8 +4125,8 @@ Cogit >> ceSICMiss: receiver [
 					flushingCacheWith: [
 						self
 							flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
-							to: callerReturnAddress asUnsignedInteger ] ] ]
-		ifFalse: [
+							to: callerReturnAddress asUnsignedInteger ] ] ].
+	inlineCache ifNil: [
 			| extent |
 			"      method | errorSelector             | situation
 			 -------------+---------------------------+---------------------------------------------------------
@@ -4156,7 +4157,6 @@ Cogit >> ceSICMiss: receiver [
 						self
 							flushICacheFrom: callerReturnAddress asUnsignedInteger - extent
 							to: callerReturnAddress asUnsignedInteger ] ] ].
-
 
 	linkingSucceeded ifTrue: [ "Jump back into the pic at its entry in case this is an MNU (newTargetMethodOrNil is nil)"
 		coInterpreter
