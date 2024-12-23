@@ -2827,6 +2827,7 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 	"A message send from either an open PIC or an unlinked send has not  been
 	 understood.  Create a message and execute the relevant resulting MNU method.
 	 messageSelector is an implicit argument (yuck)."
+	<inline: false>
 	| errSelIdx classForThisMessage |
 	self assert: (objectMemory addressCouldBeOop: rcvr).
 	instructionPointer := self popStack.
