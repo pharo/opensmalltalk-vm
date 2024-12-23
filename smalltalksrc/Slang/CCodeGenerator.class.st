@@ -564,26 +564,6 @@ CCodeGenerator >> bytesPerWord [
 	^ 8
 ]
 
-{ #category : 'utilities' }
-CCodeGenerator >> cCodeForMethod: selector [
-
-	"Answer a string containing the C code for the given method."
-
-	"Example:
-		((CCodeGenerator new initialize addClass: TestCClass1; prepareMethods)
-			cCodeForMethod: #ifTests)"
-
-	| m s cast |
-	m := self methodNamed: selector.
-	m = nil ifTrue: [ 
-		self error: 'method not found in code base: ' , selector ].
-
-	s := ReadWriteStream on: ''.
-	cast := m asCASTIn: self.
-	cast prettyPrintOn: s.
-	^ s contents
-]
-
 { #category : 'C code generator' }
 CCodeGenerator >> cFunctionNameFor: aSelector [
 	"Create a C function name from the given selector by finding
