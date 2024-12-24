@@ -50,17 +50,6 @@ SlangBasicTranslationTestClass >> initializationOptions [
 	^ nil
 ]
 
-{ #category : 'inline-comment' }
-SlangBasicTranslationTestClass >> methodCallingMethodExpressionList [
-
-	| i |
-	i = [
-	self emptyMethod.
-	self bodyOfMethodWithoutInlinePragma.
-	self methodWithoutInlinePragmaAndEmptyMethodCall.
-	self methodWithInlinePragma ]
-]
-
 { #category : 'inline' }
 SlangBasicTranslationTestClass >> methodCallingInAssignemtMethodWithCCoerceInReturn [
 
@@ -78,6 +67,17 @@ SlangBasicTranslationTestClass >> methodCallingInReturnMethodWithCCoerceInReturn
 SlangBasicTranslationTestClass >> methodCallingInSendMethodWithCCoerceInReturn [
 
 	self method: self methodWithCCoerceInReturn
+]
+
+{ #category : 'inline-comment' }
+SlangBasicTranslationTestClass >> methodCallingMethodExpressionList [
+
+	| i |
+	i = [
+	self emptyMethod.
+	self bodyOfMethodWithoutInlinePragma.
+	self methodWithoutInlinePragmaAndEmptyMethodCall.
+	self methodWithInlinePragma ]
 ]
 
 { #category : 'inline' }
@@ -226,16 +226,16 @@ SlangBasicTranslationTestClass >> methodWithAnOptionPragma [
 ]
 
 { #category : 'inline' }
+SlangBasicTranslationTestClass >> methodWithCCoerceInReturn [
+	^ self cCoerce: self method to: #sqInt 
+]
+
+{ #category : 'inline' }
 SlangBasicTranslationTestClass >> methodWithIfAndShiftRight: var [
 
 	^ (var < 0
 		ifTrue:  [ 0 ]
 		ifFalse: [ var ]) >> (var - 1 * 32)
-]
-
-{ #category : 'inline' }
-SlangBasicTranslationTestClass >> methodWithCCoerceInReturn [
-	^ self cCoerce: self method to: #sqInt 
 ]
 
 { #category : 'inline' }
