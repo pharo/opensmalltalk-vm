@@ -1419,9 +1419,9 @@ CoInterpreter >> ceSend: maybeForwardedSelector above: methodClass to: receiver 
 	classTag := objectMemory classTagForClass: classObj.
 
 	self
-		linkSendFor: maybeForwardedSelector
-		super: true
+		handleUnlinkedSendFor: maybeForwardedSelector
 		to: receiver
+		isSuper: true
 		classTag: classTag
 		numArgs: numArgs
 		classObjGetter: [ classObj ].
@@ -1470,9 +1470,9 @@ CoInterpreter >> ceSend: maybeForwardedSelector super: isSuperSend to: maybeForw
 				classTag := objectMemory fetchClassTagOf: receiver ].
 
 			self
-				linkSendFor: maybeForwardedSelector
-				super: isSuperSend
+				handleUnlinkedSendFor: maybeForwardedSelector
 				to: receiver
+				isSuper: isSuperSend
 				classTag: classTag
 				numArgs: numArgs
 				classObjGetter: [ objectMemory classForClassTag: classTag ] ]
@@ -1487,9 +1487,9 @@ CoInterpreter >> ceSend: maybeForwardedSelector super: isSuperSend to: maybeForw
 			classTag := objectMemory classTagForClass: classObj.
 
 			self
-				linkSendFor: maybeForwardedSelector
-				super: isSuperSend
+				handleUnlinkedSendFor: maybeForwardedSelector
 				to: maybeForwardedReceiver
+				isSuper: isSuperSend
 				classTag: classTag
 				numArgs: numArgs
 				classObjGetter: [ classObj ] ].
@@ -2860,6 +2860,124 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 	^self unreachable
 ]
 
+{ #category : 'trampolines' }
+CoInterpreter >> handleUnlinkedSendFor: maybeForwardedSelector to: receiver isSuper: isSuper classTag: classTag numArgs: numArgs classObjGetter: classObjGetter [
+	"Entry-point for unlinked sends in a CogMethod. Inlined into every related
+	 trampoline (regular sends, super sends, directed super sends).
+
+	 We have a `classObjGetter` as parameter (as oposed to just the object)
+	 because it is not needed on our fastpath and it may not be cheap to obtain
+	 (`classForClassTag:` causes a class table traversal).
+
+	 We will handle a forwarded selector but not a forwarded receiver (this is
+	 explicited on our parameter names).
+
+	 As a result of invoking this method the following inline-cache state
+	 transitions may ocurr:
+	 - Method not found, `doesNotUnderstand:` implementation found: Transition to
+	   a polymorphic IC with an MNU case.
+	 - Neither method nor `doesNotUnderstand:` found: proceed with the execution,
+	   leave inline cache unlinked. This covers rDNU and `cannotInterpret:`
+	   faults.
+	 - Found an uncogged method: Proceed on the interpreter, leave the inline
+	   cache unlinked.
+	 - Found a method whose selector is not the expected one: Transition to a
+	   megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
+	 - Found a cogged method: Transition to a monomorphic IC.
+
+	 When this method is invoked the smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc
+
+	 Link attempts may fail; e.g. because we're out of code memory."
+
+	<story: #pic>
+	<inline: #always>
+	<var: #cogMethod type: #'CogMethod *'>
+	<var: #mnuPIC type: #'CogMethod *'>
+	| selector found cogMethod |
+	cogit assertCStackWellAligned.
+	self deny: (objectMemory isForwardedClassTag: classTag).
+	self assert: (objectMemory isNotForwarded: receiver).
+	argumentCount := numArgs.
+
+	selector := maybeForwardedSelector.
+	(objectMemory isOopForwarded: maybeForwardedSelector) ifTrue: [
+		selector := self handleForwardedSelectorFaultFor:
+			            maybeForwardedSelector ].
+
+	found := self lookupInMethodCacheSel: selector classTag: classTag.
+	found ifTrue: [ "
+		check for coggability because method is in the cache"
+		self ifAppropriateCompileToNativeCode: newMethod selector: selector ].
+
+	found ifFalse: [
+		| classObj errSelIdx |
+		messageSelector := selector.
+		classObj := classObjGetter value.
+		self assert: (objectMemory isNotForwarded: receiver).
+		errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj.
+		errSelIdx ~= 0 ifTrue: [
+			errSelIdx = SelectorDoesNotUnderstand ifTrue: [
+				| mnuPIC |
+				mnuPIC := (cogit
+					           cogMNUPICSelector: messageSelector
+					           receiver: receiver
+					           methodOperand: (self mnuMethodOrNilFor: receiver)
+					           numArgs: argumentCount) asUnsignedInteger.
+				mnuPIC > cogit minCogMethodAddress ifTrue: [
+					cogit
+						linkSendAt: (stackPages longAt: stackPointer)
+						in: (self mframeHomeMethod: framePointer)
+						to: mnuPIC
+							offset: (isSuper = 0
+								 ifTrue: [ cogit entryOffset ]
+								 ifFalse: [ cogit noCheckEntryOffset ])
+						receiver: receiver ] ].
+				self
+					handleMNU: errSelIdx
+					InMachineCodeTo: receiver
+					classForMessage: classObj.
+				self unreachable ] ].
+
+	"Method has been found, either in the cache or in by doing a lookup.
+	It's not a MNU, it has been handled before."
+
+	(self maybeMethodHasCogMethod: newMethod) ifFalse: [ "
+		Method has no cog method, transfer control to the interpreter"
+		instructionPointer := self popStack.
+		self interpretMethodFromMachineCode.
+		self unreachable ].
+
+	"Method has a cog method.  Attempt to link to it.  The receiver's class may be young.
+	If the Cogit can't store young classes in inline caches we can link to an open PIC instead."
+	cogMethod := self cogMethodOf: newMethod.
+	cogMethod selector = objectMemory nilObject ifTrue: [
+		cogit setSelectorOf: cogMethod to: selector ].
+
+	cogMethod selector = selector
+		ifTrue: [
+			cogit
+				linkSendAt: (stackPages longAt: stackPointer)
+				in: (self mframeHomeMethod: framePointer)
+				to: cogMethod
+				offset: (isSuper = 0
+						 ifTrue: [ cogit entryOffset ]
+						 ifFalse: [ cogit noCheckEntryOffset ])
+				receiver: receiver ]
+		ifFalse: [
+			isSuper = 0 ifTrue: [ "
+				Megamorphic PICs perform normal sends. Can't patch if this is a super send."
+				cogit
+					patchToMegamorphicICFor: selector
+					numArgs: numArgs
+					receiver: receiver ] ].
+	instructionPointer := self popStack.
+	self executeNewMethod.
+	self unreachable
+]
+
 { #category : 'message sending' }
 CoInterpreter >> ifAppropriateCompileToNativeCode: aMethodObj selector: selector [
 	| methodHeader cogMethod |
@@ -3174,124 +3292,6 @@ CoInterpreter >> isMachineCodeFrame: theFP [
 { #category : 'debug support' }
 CoInterpreter >> isMachineCodeIP: anInstrPointer [
 	^anInstrPointer asUnsignedInteger < objectMemory getMemoryMap startOfObjectMemory
-]
-
-{ #category : 'trampolines' }
-CoInterpreter >> linkSendFor: maybeForwardedSelector super: isSuperSend to: receiver classTag: classTag numArgs: numArgs classObjGetter: classObjGetter [
-	"Entry-point for unlinked sends in a CogMethod. Inlined into every related
-	 trampoline (regular sends, super sends, directed super sends).
-
-	 We have a `classObjGetter` as parameter (as oposed to just the object)
-	 because it is not needed on our fastpath and it may not be cheap to obtain
-	 (`classForClassTag:` causes a class table traversal).
-
-	 We will handle a forwarded selector but not a forwarded receiver (this is
-	 explicited on our parameter names).
-
-	 As a result of invoking this method the following inline-cache state
-	 transitions may ocurr:
-	 - Method not found, `doesNotUnderstand:` implementation found: Transition to
-	   a polymorphic IC with an MNU case.
-	 - Neither method nor `doesNotUnderstand:` found: proceed with the execution,
-	   leave inline cache unlinked. This covers rDNU and `cannotInterpret:`
-	   faults.
-	 - Found an uncogged method: Proceed on the interpreter, leave the inline
-	   cache unlinked.
-	 - Found a method whose selector is not the expected one: Transition to a
-	   megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
-	 - Found a cogged method: Transition to a monomorphic IC.
-
-	 When this method is invoked the smalltalk stack looks like:
-                   receiver
-	                args
-	     head sp -> sender return pc
-
-	 Link attempts may fail; e.g. because we're out of code memory."
-
-	<story: #pic>
-	<inline: #always>
-	<var: #cogMethod type: #'CogMethod *'>
-	<var: #mnuPIC type: #'CogMethod *'>
-	| selector found cogMethod |
-	cogit assertCStackWellAligned.
-	self deny: (objectMemory isForwardedClassTag: classTag).
-	self assert: (objectMemory isNotForwarded: receiver).
-	argumentCount := numArgs.
-
-	selector := maybeForwardedSelector.
-	(objectMemory isOopForwarded: maybeForwardedSelector) ifTrue: [
-		selector := self handleForwardedSelectorFaultFor:
-			            maybeForwardedSelector ].
-
-	found := self lookupInMethodCacheSel: selector classTag: classTag.
-	found ifTrue: [ "
-		check for coggability because method is in the cache"
-		self ifAppropriateCompileToNativeCode: newMethod selector: selector ].
-
-	found ifFalse: [
-		| classObj errSelIdx |
-		messageSelector := selector.
-		classObj := classObjGetter value.
-		self assert: (objectMemory isNotForwarded: receiver).
-		errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj.
-		errSelIdx ~= 0 ifTrue: [
-			errSelIdx = SelectorDoesNotUnderstand ifTrue: [
-				| mnuPIC |
-				mnuPIC := (cogit
-					           cogMNUPICSelector: messageSelector
-					           receiver: receiver
-					           methodOperand: (self mnuMethodOrNilFor: receiver)
-					           numArgs: argumentCount) asUnsignedInteger.
-				mnuPIC > cogit minCogMethodAddress ifTrue: [
-					cogit
-						linkSendAt: (stackPages longAt: stackPointer)
-						in: (self mframeHomeMethod: framePointer)
-						to: mnuPIC
-						offset: (isSuperSend = 0
-								 ifTrue: [ cogit entryOffset ]
-								 ifFalse: [ cogit noCheckEntryOffset ])
-						receiver: receiver ] ].
-				self
-					handleMNU: errSelIdx
-					InMachineCodeTo: receiver
-					classForMessage: classObj.
-				self unreachable ] ].
-
-	"Method has been found, either in the cache or in by doing a lookup.
-	It's not a MNU, it has been handled before."
-
-	(self maybeMethodHasCogMethod: newMethod) ifFalse: [ "
-		Method has no cog method, transfer control to the interpreter"
-		instructionPointer := self popStack.
-		self interpretMethodFromMachineCode.
-		self unreachable ].
-
-	"Method has a cog method.  Attempt to link to it.  The receiver's class may be young.
-	If the Cogit can't store young classes in inline caches we can link to an open PIC instead."
-	cogMethod := self cogMethodOf: newMethod.
-	cogMethod selector = objectMemory nilObject ifTrue: [
-		cogit setSelectorOf: cogMethod to: selector ].
-
-	cogMethod selector = selector
-		ifTrue: [
-			cogit
-				linkSendAt: (stackPages longAt: stackPointer)
-				in: (self mframeHomeMethod: framePointer)
-				to: cogMethod
-				offset: (isSuperSend = 0
-						 ifTrue: [ cogit entryOffset ]
-						 ifFalse: [ cogit noCheckEntryOffset ])
-				receiver: receiver ]
-		ifFalse: [
-			isSuperSend = 0 ifTrue: [ "
-				Megamorphic PICs perform normal sends. Can't patch if this is a super send."
-				cogit
-					patchToMegamorphicICFor: selector
-					numArgs: numArgs
-					receiver: receiver ] ].
-	instructionPointer := self popStack.
-	self executeNewMethod.
-	self unreachable
 ]
 
 { #category : 'simulation' }
