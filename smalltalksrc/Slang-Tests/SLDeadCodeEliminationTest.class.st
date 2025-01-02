@@ -1164,6 +1164,112 @@ methodWithEmptyIfTrueInIfTrueIfFalseAndSendInReceiver(SLDeadCodeEliminationTestC
 }'
 ]
 
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithEmptyWhileFalseNoSendInCondition [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithEmptyWhileFalseNoSendInCondition.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithEmptyWhileFalseNoSendInCondition */
+static void
+methodWithEmptyWhileFalseNoSendInCondition(SLDeadCodeEliminationTestClass * self_in_methodWithEmptyWhileFalseNoSendInCondition)
+{
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithEmptyWhileFalseSendInCondition [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithEmptyWhileFalseSendInCondition.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithEmptyWhileFalseSendInCondition */
+static void
+methodWithEmptyWhileFalseSendInCondition(SLDeadCodeEliminationTestClass * self_in_methodWithEmptyWhileFalseSendInCondition)
+{
+	{
+		method(self_in_methodWithEmptyWhileFalseSendInCondition);
+	}
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithEmptyWhileTrueNoSendInCondition [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithEmptyWhileTrueNoSendInCondition.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithEmptyWhileTrueNoSendInCondition */
+static void
+methodWithEmptyWhileTrueNoSendInCondition(SLDeadCodeEliminationTestClass * self_in_methodWithEmptyWhileTrueNoSendInCondition)
+{
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithEmptyWhileTrueSendInCondition [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithEmptyWhileTrueSendInCondition.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithEmptyWhileTrueSendInCondition */
+static void
+methodWithEmptyWhileTrueSendInCondition(SLDeadCodeEliminationTestClass * self_in_methodWithEmptyWhileTrueSendInCondition)
+{
+	{
+		method(self_in_methodWithEmptyWhileTrueSendInCondition);
+	}
+	{
+		return;
+	}
+}'
+]
+
 { #category : 'reduce-nil-conditional-no-send-in-receiver' }
 SLDeadCodeEliminationTest >> testMethodWithEmptyifNilInIfNilIfNotNilAndNoSendInReceiver [
 	"reduce the conditional to an ifNotNil"
@@ -1543,6 +1649,31 @@ methodWithOnlyComment(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyCom
 {
 	/* begin method */
 	/* end method */
+	{
+		return;
+	}
+}'
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithOnlyDeadCodeInRepeat [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithOnlyDeadCodeInRepeat.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithOnlyDeadCodeInRepeat */
+static void
+methodWithOnlyDeadCodeInRepeat(SLDeadCodeEliminationTestClass * self_in_methodWithOnlyDeadCodeInRepeat)
+{
 	{
 		return;
 	}

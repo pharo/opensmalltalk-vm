@@ -394,6 +394,34 @@ SLDeadCodeEliminationTestClass >> methodWithEmptyIfTrueInIfTrueIfFalseAndSendInR
 		ifFalse: [ i := 5 ]
 ]
 
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithEmptyWhileFalseNoSendInCondition [
+
+	<returnTypeC: #void>
+	[ true ] whileFalse
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithEmptyWhileFalseSendInCondition [
+
+	<returnTypeC: #void>
+	[ self method ] whileFalse
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithEmptyWhileTrueNoSendInCondition [
+
+	<returnTypeC: #void>
+	[ true ] whileTrue
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithEmptyWhileTrueSendInCondition [
+
+	<returnTypeC: #void>
+	[ self method ] whileTrue
+]
+
 { #category : 'reduce-nil-conditional-no-send-in-receiver' }
 SLDeadCodeEliminationTestClass >> methodWithEmptyifNilInIfNilIfNotNilAndNoSendInReceiver [
 
@@ -496,6 +524,14 @@ SLDeadCodeEliminationTestClass >> methodWithOnlyComment [
 
 	<returnTypeC: #void>
 	self method
+]
+
+{ #category : 'dead-code-in-unary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithOnlyDeadCodeInRepeat [
+
+	<returnTypeC: #void>
+	| var |
+	[ var := var ] repeat
 ]
 
 { #category : 'dead-code-in-unary-iterative' }
