@@ -48,8 +48,9 @@ SLDeadCodeEliminationVisitor >> visit: aNode [
 
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
+	"handle assignement that end up being assignement to itself"
+	
 	"var := var"
-
 	| var expr |
 	var := anAssignmentNode variable.
 	expr := anAssignmentNode expression.
@@ -103,17 +104,25 @@ SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 
 	(aSendNode isConditionalSend or: [ aSendNode isBinaryIterativeSend ])
 		ifTrue: [
+			| receiver |
+			receiver := aSendNode receiver.
+			(receiver isStatementList and: [ receiver statements size > 1 ])
+				ifTrue: [ self visitStatementListNodeExceptLast: receiver ].
 			aSendNode arguments do: [ :subNode | self visit: subNode ].
 			^ self ].
+
 	aSendNode isUnaryIterativeSend ifTrue: [
 		self visit: aSendNode receiver.
 		^ self ].
+
 	aSendNode isUnaryIterativeSendWithImportantLastStatement ifTrue: [
 		self visitStatementListNodeExceptLast: aSendNode receiver.
 		^ self ].
+
 	(aSendNode selector beginsWith: #cCoerce) ifTrue: [
 		self visit: aSendNode arguments first.
 		^ self ].
+
 	(self isStructAccessorWithNoSideEffect: aSendNode) ifTrue: [
 		self removeUnusedNodesInBranch: aSendNode ]
 ]
@@ -126,15 +135,17 @@ SLDeadCodeEliminationVisitor >> visitStatementListNode: aStatementListNode [
 
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitStatementListNodeExceptLast: aStatementListNode [
-	"useful for whileTrue as the last statements is actually not dead code"
+	"useful for whileTrue as the last statements is actually not dead code and for whileTrue: as the receiver might be a statements list"
 
 	| statements |
 	statements := aStatementListNode children.
 
-	statements size = 1 ifTrue: [
+	statements size < 2 ifTrue: [
 		self removeUnusedNodesInBranch: aStatementListNode ].
 
-	1 to: statements size - 1 do: [ :i | self visit: (statements at: i) ]
+	1 to:
+	(statements indexOf: aStatementListNode lastNonCommentStatement) - 1
+	do: [ :i | self visit: (statements at: i) ]
 ]
 
 { #category : 'visiting' }
