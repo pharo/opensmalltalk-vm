@@ -143,6 +143,12 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInRepeat [
 ]
 
 { #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInTimesRepeat [
+	| var |
+	3 timesRepeat: [ :elm | 5. instancesVariable. var. self method: elm ]
+]
+
+{ #category : 'dead-code-in-binary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinaryNoSendInReceiver [
 
 	<returnTypeC: #void>

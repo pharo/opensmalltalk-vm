@@ -77,8 +77,8 @@ TSendNode >> argumentsForInliningCodeGenerator: aCodeGen [
 ]
 
 { #category : 'testing' }
-TSendNode >> argumentsHasNothingButComments [
-	"related to dead code elimination and inlining, see if the cases has nothing but comment meaning they are empty"
+TSendNode >> argumentsIsEmptyOrHasNothingButComments [
+	"related to dead code elimination and inlining, see if the cases has nothing but comment meaning they are empty or dirctly empty"
 
 	^ arguments allSatisfy: [ :arg | arg isComment ]
 ]
@@ -364,7 +364,7 @@ TSendNode >> isAssertion [
 { #category : 'dead-code-elimination' }
 TSendNode >> isBinaryIterativeSend [
 
-	^ #( #whileTrue: #whileFalse: #do: #timesRepeat: ) includes: selector
+	^ #( #whileTrue: #whileFalse: #timesRepeat: ) includes: selector
 ]
 
 { #category : 'testing' }
@@ -384,13 +384,6 @@ TSendNode >> isConditionalSend [
 	"Answer if the receiver is a send of any of the conditionals, ifTrue: ifTrue:ifFalse: et al"
 	^#(	ifTrue:ifFalse: ifFalse:ifTrue: ifTrue: ifFalse:
 		ifNil:ifNotNil: ifNotNil:ifNil: ifNil: ifNotNil:) includes: selector
-]
-
-{ #category : 'dead-code-elimination' }
-TSendNode >> isIterativeSend [
-
-	^ #( #whileTrue: #whileFalse: #whileTrue #whileFalse #do:
-	     #repeat #timesRepeat: ) includes: selector
 ]
 
 { #category : 'testing' }
@@ -599,7 +592,7 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 	| branchIndex |
 	branchIndex := arguments indexOf: aChild.
 	arguments := arguments select: [ :e | e ~= aChild ].
-	(arguments isEmpty or: [ self argumentsHasNothingButComments ])
+	self argumentsIsEmptyOrHasNothingButComments
 		ifTrue: [
 			self transformReceiverAfterEmptyArguments.
 			self parent removeUnusedNodesInBranch: self ]
@@ -609,14 +602,7 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 					self parent removeUnusedNodesInBranch: self.
 					^ self ].
 			self isConditionalSend ifTrue: [
-				self reduceConditionalSend: branchIndex.
-				^ self ].
-			"a case like it remains only [false] whileTrue, we don't have enough arguments anymore"
-			(self isUnaryIterativeSendWithImportantLastStatement and: [
-				 arguments size = 1 and: [ arguments first children size = 1 ] ])
-				ifTrue: [
-					self transformReceiverAfterEmptyArguments.
-					self parent removeUnusedNodesInBranch: self ] ]
+				self reduceConditionalSend: branchIndex ] ]
 ]
 
 { #category : 'transformations' }

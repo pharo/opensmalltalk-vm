@@ -68,6 +68,7 @@ SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
 				"check if lastStmt is the arguments which has the value of var"
 				(lastStmt isVariable and: [
 					 lastStmt name = (expr receiver arguments at: index) ]) ifTrue: [
+					"directly replace the assignement by its expression if it won't produce valid code"
 					self removeUnusedNodesInBranch: lastStmt.
 					anAssignmentNode parent replaceChild: anAssignmentNode with: expr ] ] ] ]
 ]

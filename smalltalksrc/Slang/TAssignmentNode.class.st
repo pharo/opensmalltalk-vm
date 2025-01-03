@@ -299,8 +299,8 @@ TAssignmentNode >> removeUnusedNodesInBranch: aNode [
 	"only happens when the expression is a value selector with a block receiver that became empty,
 	the assignement is now empty we remove it from the receiver"
 
-	self assert: expression isValueExpansion.
-	self assert: expression receiver isEmptyStmtListNode.
+	self assert: (expression isValueExpansion and: [
+			 expression receiver isEmptyStmtListNode ]).
 	self parent removeUnusedNodesInBranch: self
 ]
 

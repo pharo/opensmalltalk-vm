@@ -385,6 +385,42 @@ methodWithDeadCodeInRepeat(SLDeadCodeEliminationTestClass * self_in_methodWithDe
 }'
 ]
 
+{ #category : 'dead-code-in-binary-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInTimesRepeat [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed:
+		           #methodWithDeadCodeInTimesRepeat.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInTimesRepeat */
+static SLDeadCodeEliminationTestClass *
+methodWithDeadCodeInTimesRepeat(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInTimesRepeat)
+{
+	sqInt elm;
+
+	elm = 0;
+	{
+		method(self_in_methodWithDeadCodeInTimesRepeat, elm);
+	}
+	{
+		method(self_in_methodWithDeadCodeInTimesRepeat, elm);
+	}
+	{
+		method(self_in_methodWithDeadCodeInTimesRepeat, elm);
+	}
+	return self_in_methodWithDeadCodeInTimesRepeat;
+}'
+]
+
 { #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalse [
 
