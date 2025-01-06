@@ -18,6 +18,31 @@ SLDeadCodeEliminationVisitor >> codeGenerator: aCodeGen [
 	codeGenerator := aCodeGen
 ]
 
+{ #category : 'helper' }
+SLDeadCodeEliminationVisitor >> handleIterativeAndConditionalSend: aSendNode [
+	"return true if the node has been visited"
+
+	(aSendNode isConditionalSend or: [ aSendNode isBinaryIterativeSend ])
+		ifTrue: [
+			| receiver |
+			receiver := aSendNode receiver.
+			(receiver isStatementList and: [ receiver statements size > 1 ])
+				ifTrue: [ self visitStatementListNodeExceptLast: receiver ].
+			aSendNode arguments do: [ :subNode | self visit: subNode ].
+			^ true ].
+	aSendNode isDoIterativeSend ifTrue: [
+		self visit: (aSendNode arguments at: 3) ].
+	aSendNode isUnaryIterativeSend ifTrue: [
+		self visit: aSendNode receiver.
+		^ true ].
+
+	aSendNode isUnaryIterativeSendWithImportantLastStatement ifTrue: [
+		self visitStatementListNodeExceptLast: aSendNode receiver.
+		^ true ].
+	
+	^ false
+]
+
 { #category : 'testing' }
 SLDeadCodeEliminationVisitor >> isStructAccessorWithNoSideEffect: aSendNode [
 
@@ -49,11 +74,11 @@ SLDeadCodeEliminationVisitor >> visit: aNode [
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
 	"handle assignement that end up being assignement to itself"
-	
-	"var := var"
+
 	| var expr |
 	var := anAssignmentNode variable.
 	expr := anAssignmentNode expression.
+	"var := var"
 	(anAssignmentNode variable isSameAs: expr) ifTrue: [
 		self removeUnusedNodesInBranch: anAssignmentNode ].
 
@@ -67,10 +92,9 @@ SLDeadCodeEliminationVisitor >> visitAssignmentNode: anAssignmentNode [
 				lastStmt := expr receiver lastNonCommentStatement.
 				"check if lastStmt is the arguments which has the value of var"
 				(lastStmt isVariable and: [
-					 lastStmt name = (expr receiver arguments at: index) ]) ifTrue: [
-					"directly replace the assignement by its expression if it won't produce valid code"
-					self removeUnusedNodesInBranch: lastStmt.
-					anAssignmentNode parent replaceChild: anAssignmentNode with: expr ] ] ] ]
+					 lastStmt name = (expr receiver arguments at: index) ]) ifTrue: [ "directly replace the assignement by the block itself and remove the variable at the end of the block"
+					anAssignmentNode parent replaceChild: anAssignmentNode with: expr.
+					self removeUnusedNodesInBranch: lastStmt ] ] ] ]
 ]
 
 { #category : 'visiting' }
@@ -103,22 +127,7 @@ SLDeadCodeEliminationVisitor >> visitReturnNode: aReturnNode [
 { #category : 'visiting' }
 SLDeadCodeEliminationVisitor >> visitSendNode: aSendNode [
 
-	(aSendNode isConditionalSend or: [ aSendNode isBinaryIterativeSend ])
-		ifTrue: [
-			| receiver |
-			receiver := aSendNode receiver.
-			(receiver isStatementList and: [ receiver statements size > 1 ])
-				ifTrue: [ self visitStatementListNodeExceptLast: receiver ].
-			aSendNode arguments do: [ :subNode | self visit: subNode ].
-			^ self ].
-
-	aSendNode isUnaryIterativeSend ifTrue: [
-		self visit: aSendNode receiver.
-		^ self ].
-
-	aSendNode isUnaryIterativeSendWithImportantLastStatement ifTrue: [
-		self visitStatementListNodeExceptLast: aSendNode receiver.
-		^ self ].
+	(self handleIterativeAndConditionalSend: aSendNode) ifTrue: [ ^ self ].
 
 	(aSendNode selector beginsWith: #cCoerce) ifTrue: [
 		self visit: aSendNode arguments first.
@@ -134,7 +143,7 @@ SLDeadCodeEliminationVisitor >> visitStatementListNode: aStatementListNode [
 	aStatementListNode children do: [ :subNode | self visit: subNode ]
 ]
 
-{ #category : 'visiting' }
+{ #category : 'helper' }
 SLDeadCodeEliminationVisitor >> visitStatementListNodeExceptLast: aStatementListNode [
 	"useful for whileTrue as the last statements is actually not dead code and for whileTrue: as the receiver might be a statements list"
 

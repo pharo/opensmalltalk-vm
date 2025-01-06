@@ -386,6 +386,12 @@ TSendNode >> isConditionalSend [
 		ifNil:ifNotNil: ifNotNil:ifNil: ifNil: ifNotNil:) includes: selector
 ]
 
+{ #category : 'dead-code-elimination' }
+TSendNode >> isDoIterativeSend [
+
+	^ #( #to:do: #to:by:do: ) includes: selector
+]
+
 { #category : 'testing' }
 TSendNode >> isLiteralArrayDeclaration [
 	^selector == #cCoerce:to:

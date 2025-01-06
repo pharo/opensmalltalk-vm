@@ -421,6 +421,62 @@ methodWithDeadCodeInTimesRepeat(SLDeadCodeEliminationTestClass * self_in_methodW
 }'
 ]
 
+{ #category : 'dead-code-in-do-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInToByDo [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInToByDo.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInToByDo */
+static SLDeadCodeEliminationTestClass *
+methodWithDeadCodeInToByDo(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInToByDo)
+{
+	sqInt index;
+
+	for (index = 1; index <= 4; index += 2) {
+		method(self_in_methodWithDeadCodeInToByDo, index);
+	};
+	return self_in_methodWithDeadCodeInToByDo;
+}'
+]
+
+{ #category : 'dead-code-in-do-iterative' }
+SLDeadCodeEliminationTest >> testMethodWithDeadCodeInToDo [
+
+	| translation tMethod |
+	tMethod := ccg methodNamed: #methodWithDeadCodeInToDo.
+	ccg currentMethod: tMethod.
+	sLDeadCodeEliminationVisitor visit: tMethod parseTree.
+	tMethod removeUnusedTempsAndNilIfRequiredIn: ccg.
+
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+
+	self
+		assert: translation
+		equals:
+			'/* SLDeadCodeEliminationTestClass>>#methodWithDeadCodeInToDo */
+static SLDeadCodeEliminationTestClass *
+methodWithDeadCodeInToDo(SLDeadCodeEliminationTestClass * self_in_methodWithDeadCodeInToDo)
+{
+	sqInt index;
+
+	for (index = 1; index <= 4; index += 1) {
+		method(self_in_methodWithDeadCodeInToDo, index);
+	};
+	return self_in_methodWithDeadCodeInToDo;
+}'
+]
+
 { #category : 'dead-code-in-unary-iterative' }
 SLDeadCodeEliminationTest >> testMethodWithDeadCodeInWhileFalse [
 

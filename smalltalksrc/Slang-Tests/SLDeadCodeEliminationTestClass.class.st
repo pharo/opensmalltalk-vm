@@ -148,6 +148,28 @@ SLDeadCodeEliminationTestClass >> methodWithDeadCodeInTimesRepeat [
 	3 timesRepeat: [ :elm | 5. instancesVariable. var. self method: elm ]
 ]
 
+{ #category : 'dead-code-in-do-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInToByDo [
+
+	| var |
+	1 to: 4 by: 2 do: [ :index |
+		5.
+		instancesVariable.
+		var.
+		self method: index ]
+]
+
+{ #category : 'dead-code-in-do-iterative' }
+SLDeadCodeEliminationTestClass >> methodWithDeadCodeInToDo [
+
+	| var |
+	1 to: 4 do: [ :index |
+		5.
+		instancesVariable.
+		var.
+		self method: index ]
+]
+
 { #category : 'dead-code-in-binary-iterative' }
 SLDeadCodeEliminationTestClass >> methodWithDeadCodeInWhileFalseBinaryNoSendInReceiver [
 
