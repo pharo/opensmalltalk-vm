@@ -1159,7 +1159,7 @@ CoInterpreter >> ceCounterTripped: condition [
 	(self lookupInMethodCacheSel: counterTrippedSelector classTag: classTag) ifFalse:
 	 	[messageSelector := counterTrippedSelector.
 		 classObj := objectMemory classForClassTag: classTag.
-		 (self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
+		 (self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0 ifTrue:
 			[cogit resetCountersIn: (self mframeHomeMethod: framePointer).
 			 ^condition]].
 
@@ -1196,8 +1196,7 @@ CoInterpreter >> ceInterpretMethodFromPIC: aMethodObj receiver: rcvr [
 	 cogged, jump to machine code, otherwise interpret."
 	pic cmType = CMMegamorphicIC ifTrue:
 		[self assert: (self methodHasCogMethod: aMethodObj) not.
-		 (self methodShouldBeCogged: aMethodObj) ifTrue:
-			[cogit cog: aMethodObj selector: pic selector]].
+		 cogit cogMethodIfPossible: aMethodObj selector: pic selector].
 	(self methodHasCogMethod: aMethodObj) ifTrue:
 		[self executeCogMethod: (self cogMethodOf: aMethodObj)
 			fromUnlinkedSendWithReceiver: rcvr.
@@ -1409,99 +1408,43 @@ CoInterpreter >> ceReturnToInterpreter: anOop [
 ]
 
 { #category : 'trampolines' }
-CoInterpreter >> ceSend: selector above: methodClass to: rcvr numArgs: numArgs [
-	"Entry-point for an unlinked directed super send in a CogMethod.  Smalltalk stack looks like
-					receiver
-					args
-		head sp ->	sender return pc
-	methodClass is the class above which to start the lookup.
+CoInterpreter >> ceSend: maybeForwardedSelector above: methodClass to: receiver numArgs: numArgs [
+	"Entry-point for an unlinked directed super send in a CogMethod.
+	 methodClass is the class above which to start the lookup.
+	 Smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc"
 
-	If an MNU then defer to handleMNUInMachineCodeTo:... which will dispatch the MNU and
-	may choose to allocate a closed PIC with a fast MNU dispatch for this send.  Otherwise
-	attempt to link the send site as efficiently as possible.  All link attempts may fail; e.g.
-	because we're out of code memory.
-
-	Continue execution via either executeMethod or interpretMethodFromMachineCode:
-	depending on whether the target method is cogged or not."
 	<api>
-	<option: #BytecodeSetHasDirectedSuperSend>
-	| classTag classObj errSelIdx cogMethod |
+	<story: #pic>
 	<inline: false>
-	<var: #cogMethod type: #'CogMethod *'>
-	<var: #newCogMethod type: #'CogMethod *'>
-	"self printExternalHeadFrame"
-	"self printStringOf: selector"
-	cogit assertCStackWellAligned.
-	self assert: (objectMemory addressCouldBeOop: rcvr).
-	self sendBreakpoint: selector receiver: rcvr.
-	classTag := objectMemory classTagForClass: (self superclassOf: (objectMemory followMaybeForwarded: methodClass)).
-	argumentCount := numArgs.
-	(self lookupInMethodCacheSel: selector classTag: classTag)
-		ifTrue:"check for coggability because method is in the cache"
-			[self
-				ifAppropriateCompileToNativeCode: newMethod
-				selector: selector]
-		ifFalse:
-			[self deny: (objectMemory isForwardedClassTag: classTag).
-			 (objectMemory isOopForwarded: selector) ifTrue:
-				[^self
-					ceSend: (self handleForwardedSelectorFaultFor: selector)
-					above: methodClass
-					to: rcvr
-					numArgs: numArgs].
-			 messageSelector := selector.
-			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
-				[(errSelIdx = SelectorDoesNotUnderstand
-				  and: [(cogMethod := cogit cogMNUPICSelector: messageSelector
-											receiver: rcvr
-											methodOperand: (self mnuMethodOrNilFor: rcvr)
-											numArgs: argumentCount) asUnsignedInteger
-						> cogit minCogMethodAddress]) ifTrue:
-						[cogit
-							linkSendAt: (stackPages longAt: stackPointer)
-							in: (self mframeHomeMethod: framePointer)
-							to: cogMethod
-							offset: cogit noCheckEntryOffset
-							receiver: rcvr].
-				self handleMNU: errSelIdx
-					InMachineCodeTo: rcvr
-					classForMessage: classObj.
-				self unreachable]].
-	"Method found and has a cog method.  Attempt to link to it.  The receiver's class may be young.
-	 We must not link to an Open PIC since they perform normal sends."
-	(self maybeMethodHasCogMethod: newMethod) ifTrue:
-		[cogMethod := self cogMethodOf: newMethod.
-		 cogMethod selector = objectMemory nilObject
-			ifTrue: [cogit setSelectorOf: cogMethod to: selector]
-			ifFalse:
-				["Deal with anonymous accessors, e.g. in Newspeak.  The cogMethod may not have the
-				  correct selector.  If not, try and compile a new method with the correct selector."
-				 cogMethod selector ~= selector ifTrue:
-					[(cogit cog: newMethod selector: selector) ifNotNil:
-						[:newCogMethod| cogMethod := newCogMethod]]].
-		 cogMethod selector = selector ifTrue:
-			[cogit
-				linkSendAt: (stackPages longAt: stackPointer)
-				in: (self mframeHomeMethod: framePointer)
-				to: cogMethod
-				offset: cogit noCheckEntryOffset
-				receiver: rcvr].
-		 instructionPointer := self popStack.
-		 self executeNewMethod.
-		 self unreachable].
-	instructionPointer := self popStack.
-	self interpretMethodFromMachineCode.
+	<option: #BytecodeSetHasDirectedSuperSend>
+	| classTag classObj |
+	self assert: (objectMemory addressCouldBeOop: receiver).
+
+	classObj := self superclassOf:
+		            (objectMemory followMaybeForwarded: methodClass).
+	classTag := objectMemory classTagForClass: classObj.
+
+	self
+		handleUnlinkedSendFor: maybeForwardedSelector
+		to: receiver
+		isSuper: true
+		classTag: classTag
+		numArgs: numArgs
+		classObjGetter: [ classObj ].
 	self unreachable
 ]
 
 { #category : 'trampolines' }
 CoInterpreter >> ceSend: selector aboveClassBinding: methodClassBinding to: rcvr numArgs: numArgs [
-	"Entry-point for an unlinked directed super send in a CogMethod.  Smalltalk stack looks like
-					receiver
-					args
-		head sp ->	sender return pc
-	methodClassBinding is an association whose value is the class above which to start the lookup."
+	"Entry-point for an unlinked directed super send in a CogMethod.
+	 methodClassBinding is an association whose value is the class above which to start the lookup.
+	 Smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc"
 	<api>
 	<option: #BytecodeSetHasDirectedSuperSend>
 	self ceSend: selector
@@ -1512,104 +1455,54 @@ CoInterpreter >> ceSend: selector aboveClassBinding: methodClassBinding to: rcvr
 ]
 
 { #category : 'trampolines' }
-CoInterpreter >> ceSend: selector super: superNormalBar to: rcvr numArgs: numArgs [
-	"Entry-point for an unlinked send in a CogMethod.  Smalltalk stack looks like
-					receiver
-					args
-		head sp ->	sender return pc
-		
-	If an MNU then defer to handleMNUInMachineCodeTo:... which will dispatch the MNU and
-	may choose to allocate a closed PIC with a fast MNU dispatch for this send.  Otherwise
-	attempt to link the send site as efficiently as possible.  All link attempts may fail; e.g.
-	because we're out of code memory.
+CoInterpreter >> ceSend: maybeForwardedSelector super: isSuperSend to: maybeForwardedReceiver numArgs: numArgs [
+	"Entry-point for an unlinked send in a CogMethod.
+	 Smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc"
 
-	Continue execution via either executeMethod or interpretMethodFromMachineCode:
-	depending on whether the target method is cogged or not."
 	<api>
-	| classTag classObj errSelIdx cogMethod |
+	<story: #pic>
 	<inline: false>
-	<var: #cogMethod type: #'CogMethod *'>
-	<var: #newCogMethod type: #'CogMethod *'>
-	"self printExternalHeadFrame"
-	"self printStringOf: selector"
-	cogit assertCStackWellAligned.
-	self assert: (objectMemory addressCouldBeOop: rcvr).
-	self sendBreakpoint: selector receiver: rcvr.
-	superNormalBar = 0
-		ifTrue: [classTag := objectMemory fetchClassTagOf: rcvr]
-		ifFalse: [classTag := objectMemory classTagForClass: (self superclassOf: (self methodClassOf: (self frameMethodObject: framePointer)))].
-	argumentCount := numArgs.
-	(self lookupInMethodCacheSel: selector classTag: classTag)
-		ifTrue:"check for coggability because method is in the cache"
-			[self
-				ifAppropriateCompileToNativeCode: newMethod
-				selector: selector]
-		ifFalse:
-			[(objectMemory isOopForwarded: selector) ifTrue:
-				[^self
-					ceSend: (self handleForwardedSelectorFaultFor: selector)
-					super: superNormalBar
-					to: rcvr
-					numArgs: numArgs].
-			 (objectMemory isForwardedClassTag: classTag) ifTrue:
-				[self assert: superNormalBar = 0.
-				^self
-					ceSend: selector
-					super: superNormalBar
-					to: (self handleForwardedSendFaultForReceiver: rcvr stackDelta: 1 "skip return pc")
-					numArgs: numArgs].
-			 messageSelector := selector.
-			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
-				[(errSelIdx = SelectorDoesNotUnderstand
-				  and: [(cogMethod := cogit cogMNUPICSelector: messageSelector
-											receiver: rcvr
-											methodOperand: (self mnuMethodOrNilFor: rcvr)
-											numArgs: argumentCount) asUnsignedInteger
-						> cogit minCogMethodAddress]) ifTrue:
-						[cogit
-							linkSendAt: (stackPages longAt: stackPointer)
-							in: (self mframeHomeMethod: framePointer)
-							to: cogMethod
-							offset: (superNormalBar = 0
-									ifTrue: [cogit entryOffset]
-									ifFalse: [cogit noCheckEntryOffset])
-							receiver: rcvr].
-				self handleMNU: errSelIdx InMachineCodeTo: rcvr classForMessage: classObj.
-				self unreachable]].
-	"Method found and has a cog method.  Attempt to link to it.  The receiver's class may be young.
-	 If the Cogit can't store young classes in inline caches we can link to an open PIC instead."
-	(self maybeMethodHasCogMethod: newMethod) ifTrue:
-		[cogMethod := self cogMethodOf: newMethod.
-		 cogMethod selector = objectMemory nilObject
-			ifTrue: [cogit setSelectorOf: cogMethod to: selector]
-			ifFalse:
-				["Deal with anonymous accessors, e.g. in Newspeak.  The cogMethod may not have the
-				  correct selector.  If not, try and compile a new method with the correct selector."
-				 cogMethod selector ~= selector ifTrue:
-					[(cogit cog: newMethod selector: selector) ifNotNil:
-						[:newCogMethod| cogMethod := newCogMethod]]].
-		 cogMethod selector = selector
-			ifTrue:
-				[cogit
-					linkSendAt: (stackPages longAt: stackPointer)
-					in: (self mframeHomeMethod: framePointer)
-					to: cogMethod
-					offset: (superNormalBar = 0
-								ifTrue: [cogit entryOffset]
-								ifFalse: [cogit noCheckEntryOffset])
-					receiver: rcvr]
-			ifFalse: "If patchToOpenPICFor:.. returns we're out of code memory"
-				[superNormalBar = 0 ifTrue: "Open PICs perform normal sends. Can't patch if this is a super send."
-					[cogit
-						patchToOpenPICFor: selector
-						numArgs: numArgs
-						receiver: rcvr]].
-		 instructionPointer := self popStack.
-		 self executeNewMethod.
-		 self unreachable].
-	instructionPointer := self popStack.
-	self interpretMethodFromMachineCode.
+	isSuperSend = 0
+		ifTrue: [
+			| classTag receiver |
+			classTag := objectMemory fetchClassTagOf: maybeForwardedReceiver.
+
+			receiver := maybeForwardedReceiver.
+			(objectMemory isForwardedClassTag: classTag) ifTrue: [
+				receiver := self
+					            handleForwardedSendFaultForReceiver:
+					            maybeForwardedReceiver
+					            rcvrStackOffsetFromTop: numArgs + 1.
+				classTag := objectMemory fetchClassTagOf: receiver ].
+
+			self
+				handleUnlinkedSendFor: maybeForwardedSelector
+				to: receiver
+				isSuper: isSuperSend
+				classTag: classTag
+				numArgs: numArgs
+				classObjGetter: [ objectMemory classForClassTag: classTag ] ]
+		ifFalse: [
+			| classTag classObj |
+			"Super sends should always get an up-to-date receiver"
+			self assert: (objectMemory isNotForwarded: maybeForwardedReceiver).
+
+			classObj := self superclassOf:
+				            (self methodClassOf:
+					             (self frameMethodObject: framePointer)).
+			classTag := objectMemory classTagForClass: classObj.
+
+			self
+				handleUnlinkedSendFor: maybeForwardedSelector
+				to: maybeForwardedReceiver
+				isSuper: isSuperSend
+				classTag: classTag
+				numArgs: numArgs
+				classObjGetter: [ classObj ] ].
+
 	self unreachable
 ]
 
@@ -1639,7 +1532,7 @@ CoInterpreter >> ceSendAbort: selector to: rcvr numArgs: numArgs [
 		ifFalse:
 			[messageSelector := selector.
 			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
+			 (errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj) ~= 0 ifTrue:
 				[self handleMNU: errSelIdx InMachineCodeTo: rcvr classForMessage: classObj.
 				self unreachable]].
 	instructionPointer := self popStack.
@@ -1652,44 +1545,53 @@ CoInterpreter >> ceSendAbort: selector to: rcvr numArgs: numArgs [
 
 { #category : 'trampolines' }
 CoInterpreter >> ceSendFromInLineCacheMiss: cogMethodOrPIC [
-	"Send from an Open PIC when the first-level method lookup probe has failed,
+	"Send from an Megamorphic IC when the first-level method lookup probe has failed,
 	 or to continue when PIC creation has failed (e.g. because we're out of code space),
 	 or when a send has failed due to a forwarded receiver."
+
 	<api>
 	<var: #cogMethodOrPIC type: #'CogMethod *'>
 	| numArgs rcvr classTag classObj errSelIdx |
-	"self printFrame: stackPage headFP WithSP: stackPage headSP"
-	"self printStringOf: selector"
 	numArgs := cogMethodOrPIC cmNumArgs.
 	rcvr := self stackValue: numArgs + 1. "skip return pc"
 	self assert: (objectMemory addressCouldBeOop: rcvr).
 	classTag := objectMemory fetchClassTagOf: rcvr.
 	argumentCount := numArgs.
-	false ifTrue: "would like to assert this but must also allow for an interpretable method in the cache."
-		[self deny: (cogMethodOrPIC cmType = CMMegamorphicIC
-					and: [self newMethodInLookupCacheAt: cogMethodOrPIC selector and: classTag])].
-	(self lookupInMethodCacheSel: cogMethodOrPIC selector classTag: classTag)
-		ifTrue:"check for coggability because method is in the cache"
-			[self
+
+	"If selector or receiver are forwarders, retry"
+	(objectMemory isOopForwarded: cogMethodOrPIC selector) ifTrue: [
+		cogit
+			setSelectorOf: cogMethodOrPIC
+			to: (self handleForwardedSelectorFaultFor: cogMethodOrPIC selector).
+		^ self ceSendFromInLineCacheMiss: cogMethodOrPIC ].
+	(objectMemory isForwardedClassTag: classTag) ifTrue: [
+		self
+			handleForwardedSendFaultForReceiver: rcvr
+			rcvrStackOffsetFromTop: numArgs + 1. "skip return pc"
+		^ self ceSendFromInLineCacheMiss: cogMethodOrPIC ].
+
+	(self
+		 lookupInMethodCacheSel: cogMethodOrPIC selector
+		 classTag: classTag)
+		ifTrue: [ "check for coggability because method is in the cache"
+			self
 				ifAppropriateCompileToNativeCode: newMethod
-				selector: cogMethodOrPIC selector]
-		ifFalse:
-			[(objectMemory isOopForwarded: cogMethodOrPIC selector) ifTrue:
-				[
-				 cogit setSelectorOf: cogMethodOrPIC to: (self handleForwardedSelectorFaultFor: cogMethodOrPIC selector).
-				 ^self ceSendFromInLineCacheMiss: cogMethodOrPIC].
-			 (objectMemory isForwardedClassTag: classTag) ifTrue:
-				[self handleForwardedSendFaultForReceiver: rcvr stackDelta: 1 "skip return pc".
-				 ^self ceSendFromInLineCacheMiss: cogMethodOrPIC].
-			 messageSelector := cogMethodOrPIC selector.
-			 classObj := objectMemory classForClassTag: classTag.
-			 (errSelIdx := self lookupOrdinaryNoMNUEtcInClass: classObj) ~= 0 ifTrue:
-				[self handleMNU: errSelIdx InMachineCodeTo: rcvr classForMessage: classObj.
-				self unreachable]].
+				selector: cogMethodOrPIC selector ]
+		ifFalse: [
+			messageSelector := cogMethodOrPIC selector.
+			classObj := objectMemory classForClassTag: classTag.
+			(errSelIdx := self lookupMethodWithoutMNUProcessingInClass:
+				              classObj) ~= 0 ifTrue: [
+				self
+					handleMNU: errSelIdx
+					InMachineCodeTo: rcvr
+					classForMessage: classObj.
+				self unreachable ] ].
+
 	instructionPointer := self popStack.
-	(self maybeMethodHasCogMethod: newMethod) ifTrue:
-		[self executeNewMethod.
-		 self unreachable].
+	(self maybeMethodHasCogMethod: newMethod) ifTrue: [
+		self executeNewMethod.
+		self unreachable ].
 	self interpretMethodFromMachineCode.
 	self unreachable
 ]
@@ -2033,27 +1935,6 @@ CoInterpreter >> commenceCogCompiledCodeCompaction [
 	objectMemory checkForLeaks ~= 0 ifTrue:
 		[objectMemory clearLeakMapAndMapAccessibleObjects.
 		 self assert: (self checkCodeIntegrity: false)]
-]
-
-{ #category : 'debug support' }
-CoInterpreter >> compilationBreak: selectorOop point: selectorLength isMNUCase: isMNUCase [
-	<api>
-	<cmacro: '(sel, len, isMNU) do { \
-	if ((len) == (isMNU ? -breakSelectorLength : breakSelectorLength) \
-	 && !strncmp((char *)((sel) + BaseHeaderSize), breakSelector, (isMNU ? -breakSelectorLength : breakSelectorLength))) { \
-		suppressHeartbeatFlag = 1; \
-		compilationBreakpointFor(sel); \
-	} \
-} while (0)'>
-	| bsl i |
-	bsl := isMNUCase ifTrue: [breakSelectorLength negated] ifFalse: [breakSelectorLength].
-	bsl = selectorLength ifTrue:
-		[i := bsl.
-		 [i > 0] whileTrue:
-			[(objectMemory byteAt: selectorOop + i + objectMemory baseHeaderSize - 1) = (breakSelector at: i) asInteger
-				ifTrue: [(i := i - 1) = 0 ifTrue:
-							[self compilationBreakpointFor: selectorOop]]
-				ifFalse: [i := 0]]]
 ]
 
 { #category : 'debug support' }
@@ -2927,26 +2808,29 @@ CoInterpreter >> getMethodCompilationMSecs [
 ]
 
 { #category : 'message sending' }
-CoInterpreter >> handleForwardedSendFaultForReceiver: forwardedReceiver stackDelta: stackDelta [
+CoInterpreter >> handleForwardedSendFaultForReceiver: forwardedReceiver rcvrStackOffsetFromTop: rcvrStackIndex [
 	"Handle a send fault that may be due to a send to a forwarded object.
 	 Unforward the receiver on the stack and answer it."
+
 	<option: #SpurObjectMemory>
-	| rcvrStackIndex rcvr |
 	<inline: false>
-	"should *not* be a super send, so the receiver should be forwarded."
+	| rcvr |
 	self assert: (objectMemory isOopForwarded: forwardedReceiver).
-	rcvrStackIndex := argumentCount + stackDelta.
+	"should *not* be a super send, so the receiver should be forwarded."
 	self assert: (self stackValue: rcvrStackIndex) = forwardedReceiver.
 	rcvr := objectMemory followForwarded: forwardedReceiver.
 	self stackValue: rcvrStackIndex put: rcvr.
-	self followForwardedFrameContents: framePointer
-		stackPointer: stackPointer + (rcvrStackIndex + 1 * objectMemory wordSize). "don't repeat effort"
-	(objectMemory isPointers: (self frameReceiver: framePointer)) ifTrue:
-		[objectMemory
-			followForwardedObjectFields: (self frameReceiver: framePointer)
-			toDepth: 0].
+	self
+		followForwardedFrameContents: framePointer
+		stackPointer:
+		stackPointer + (rcvrStackIndex + 1 * objectMemory wordSize). "don't repeat effort"
+	(objectMemory isPointers: (self frameReceiver: framePointer))
+		ifTrue: [
+			objectMemory
+				followForwardedObjectFields: (self frameReceiver: framePointer)
+				toDepth: 0 ].
 	self followForwardedFieldsInCurrentMethod.
-	^rcvr
+	^ rcvr
 ]
 
 { #category : 'message sending' }
@@ -2954,6 +2838,7 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 	"A message send from either an open PIC or an unlinked send has not  been
 	 understood.  Create a message and execute the relevant resulting MNU method.
 	 messageSelector is an implicit argument (yuck)."
+	<inline: false>
 	| errSelIdx classForThisMessage |
 	self assert: (objectMemory addressCouldBeOop: rcvr).
 	instructionPointer := self popStack.
@@ -2965,7 +2850,7 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 				ifAppropriateCompileToNativeCode: newMethod
 				selector: messageSelector]
 		ifFalse:
-			[errSelIdx := self lookupMNUInClass: (classForThisMessage := lkupClass).
+			[errSelIdx := self lookupMethodWithoutMNUProcessingInClass: (classForThisMessage := lkupClass).
 			 errSelIdx ~= 0 ifTrue:
 				[selectorIndex = SelectorDoesNotUnderstand ifTrue:
 					[self error: 'Recursive not understood error encountered'].
@@ -2978,6 +2863,124 @@ CoInterpreter >> handleMNU: selectorIndex InMachineCodeTo: rcvr classForMessage:
 		 self unreachable].
 	self interpretMethodFromMachineCode.
 	^self unreachable
+]
+
+{ #category : 'trampolines' }
+CoInterpreter >> handleUnlinkedSendFor: maybeForwardedSelector to: receiver isSuper: isSuper classTag: classTag numArgs: numArgs classObjGetter: classObjGetter [
+	"Entry-point for unlinked sends in a CogMethod. Inlined into every related
+	 trampoline (regular sends, super sends, directed super sends).
+
+	 We have a `classObjGetter` as parameter (as oposed to just the object)
+	 because it is not needed on our fastpath and it may not be cheap to obtain
+	 (`classForClassTag:` causes a class table traversal).
+
+	 We will handle a forwarded selector but not a forwarded receiver (this is
+	 explicited on our parameter names).
+
+	 As a result of invoking this method the following inline-cache state
+	 transitions may ocurr:
+	 - Method not found, `doesNotUnderstand:` implementation found: Transition to
+	   a polymorphic IC with an MNU case.
+	 - Neither method nor `doesNotUnderstand:` found: proceed with the execution,
+	   leave inline cache unlinked. This covers rDNU and `cannotInterpret:`
+	   faults.
+	 - Found an uncogged method: Proceed on the interpreter, leave the inline
+	   cache unlinked.
+	 - Found a method whose selector is not the expected one: Transition to a
+	   megamorphic IC (ONLY IF THIS IS A NORMAL SEND).
+	 - Found a cogged method: Transition to a monomorphic IC.
+
+	 When this method is invoked the smalltalk stack looks like:
+                   receiver
+	                args
+	     head sp -> sender return pc
+
+	 Link attempts may fail; e.g. because we're out of code memory."
+
+	<story: #pic>
+	<inline: #always>
+	<var: #cogMethod type: #'CogMethod *'>
+	<var: #mnuPIC type: #'CogMethod *'>
+	| selector found cogMethod |
+	cogit assertCStackWellAligned.
+	self deny: (objectMemory isForwardedClassTag: classTag).
+	self assert: (objectMemory isNotForwarded: receiver).
+	argumentCount := numArgs.
+
+	selector := maybeForwardedSelector.
+	(objectMemory isOopForwarded: maybeForwardedSelector) ifTrue: [
+		selector := self handleForwardedSelectorFaultFor:
+			            maybeForwardedSelector ].
+
+	found := self lookupInMethodCacheSel: selector classTag: classTag.
+	found ifTrue: [ "
+		check for coggability because method is in the cache"
+		self ifAppropriateCompileToNativeCode: newMethod selector: selector ].
+
+	found ifFalse: [
+		| classObj errSelIdx |
+		messageSelector := selector.
+		classObj := classObjGetter value.
+		self assert: (objectMemory isNotForwarded: receiver).
+		errSelIdx := self lookupMethodWithoutMNUProcessingInClass: classObj.
+		errSelIdx ~= 0 ifTrue: [
+			errSelIdx = SelectorDoesNotUnderstand ifTrue: [
+				| mnuPIC |
+				mnuPIC := (cogit
+					           cogMNUPICSelector: messageSelector
+					           receiver: receiver
+					           methodOperand: (self mnuMethodOrNilFor: receiver)
+					           numArgs: argumentCount) asUnsignedInteger.
+				mnuPIC > cogit minCogMethodAddress ifTrue: [
+					cogit
+						linkSendAt: (stackPages longAt: stackPointer)
+						in: (self mframeHomeMethod: framePointer)
+						to: mnuPIC
+							offset: (isSuper = 0
+								 ifTrue: [ cogit entryOffset ]
+								 ifFalse: [ cogit noCheckEntryOffset ])
+						receiver: receiver ] ].
+				self
+					handleMNU: errSelIdx
+					InMachineCodeTo: receiver
+					classForMessage: classObj.
+				self unreachable ] ].
+
+	"Method has been found, either in the cache or in by doing a lookup.
+	It's not a MNU, it has been handled before."
+
+	(self maybeMethodHasCogMethod: newMethod) ifFalse: [ "
+		Method has no cog method, transfer control to the interpreter"
+		instructionPointer := self popStack.
+		self interpretMethodFromMachineCode.
+		self unreachable ].
+
+	"Method has a cog method.  Attempt to link to it.  The receiver's class may be young.
+	If the Cogit can't store young classes in inline caches we can link to an open PIC instead."
+	cogMethod := self cogMethodOf: newMethod.
+	cogMethod selector = objectMemory nilObject ifTrue: [
+		cogit setSelectorOf: cogMethod to: selector ].
+
+	cogMethod selector = selector
+		ifTrue: [
+			cogit
+				linkSendAt: (stackPages longAt: stackPointer)
+				in: (self mframeHomeMethod: framePointer)
+				to: cogMethod
+				offset: (isSuper = 0
+						 ifTrue: [ cogit entryOffset ]
+						 ifFalse: [ cogit noCheckEntryOffset ])
+				receiver: receiver ]
+		ifFalse: [
+			isSuper = 0 ifTrue: [ "
+				Megamorphic PICs perform normal sends. Can't patch if this is a super send."
+				cogit
+					patchToMegamorphicICFor: selector
+					numArgs: numArgs
+					receiver: receiver ] ].
+	instructionPointer := self popStack.
+	self executeNewMethod.
+	self unreachable
 ]
 
 { #category : 'message sending' }
@@ -3308,39 +3311,21 @@ CoInterpreter >> lookupAddress: address [
 ]
 
 { #category : 'cog jit support' }
-CoInterpreter >> lookupMNU: selector receiver: rcvr [
-	<api>
+CoInterpreter >> lookupMethodWithoutMNUProcessingForSelector: selector receiver: rcvr [
 	"Lookup selector in rcvr, without doing MNU processing, and answer either a
 	 method or an error code if the message was not understood.  Used to populate closed PICs."
-	| classTag inCache erridx |
-	"self printFrame: stackPage headFP WithSP: stackPage headSP"
-	"self printStringOf: selector"
-	classTag := objectMemory fetchClassTagOf: rcvr.
-	inCache := self lookupInMethodCacheSel: selector classTag: classTag.
-	inCache ifFalse:
-		[messageSelector := selector.
-		 erridx := self lookupMNUInClass: (objectMemory classForClassTag: classTag).
-		 erridx ~= 0 ifTrue:
-			[self assert: erridx <= self maxLookupNoMNUErrorCode.
-			 ^erridx]].
-	^newMethod
-]
 
-{ #category : 'cog jit support' }
-CoInterpreter >> lookupOrdinary: selector receiver: rcvr [
 	<api>
-	"Lookup selector in rcvr, without doing MNU processing, and answer either a
-	 method or an error code if the message was not understood.  Used to populate closed PICs."
 	| classTag erridx |
-	"self printFrame: stackPage headFP WithSP: stackPage headSP"
-	"self printStringOf: selector"
 	classTag := objectMemory fetchClassTagOf: rcvr.
-	(self lookupInMethodCacheSel: selector classTag: classTag) ifFalse:
-		[messageSelector := selector.
-		 (erridx := self lookupOrdinaryNoMNUEtcInClass: (objectMemory classForClassTag: classTag)) ~= 0 ifTrue:
-			[self assert: erridx <= self maxLookupNoMNUErrorCode.
-			 ^erridx]].
-	^newMethod
+	(self lookupInMethodCacheSel: selector classTag: classTag) ifFalse: [
+		messageSelector := selector.
+		erridx := self lookupMethodWithoutMNUProcessingInClass:
+			          (objectMemory classForClassTag: classTag).
+		erridx ~= 0 ifTrue: [
+			self assert: erridx <= self maxLookupNoMNUErrorCode.
+			^ erridx ] ].
+	^ newMethod
 ]
 
 { #category : 'cog jit support' }
