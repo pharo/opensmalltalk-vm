@@ -111,7 +111,6 @@ def runBuild(platformName, configuration, headless = true, someAdditionalParamet
 	def additionalParameters = someAdditionalParameters
 	
 	additionalParameters += headless ? "" : " -DALWAYS_INTERACTIVE=1 "
-	additionalParameters += isRelease() ? " -DBUILD_IS_RELEASE=ON " : " -DBUILD_IS_RELEASE=OFF "
 
 	if(configuration == 'StackVM'){
 		additionalParameters += " -DFEATURE_MESSAGE_COUNT=TRUE "
