@@ -616,7 +616,7 @@ ProcessorSimulator >> pushWord: anInteger [
 ProcessorSimulator >> readFloat64Register: aRegisterID [
 
 	| registerValue |
-	registerValue := ByteArray new: 8.
+	registerValue := ByteArray new: 32.
 	simulator register: aRegisterID value readInto: registerValue.
 
 	^ registerValue doubleAt: 1
@@ -861,7 +861,7 @@ ProcessorSimulator >> wordSize [
 ProcessorSimulator >> writeFloat64Register: aRegister value: aDouble [
 
 	| value |
-	value := ByteArray new: 8.
+	value := ByteArray new: 32.
 	value integerAt: 1 put: aDouble size: 8 signed: false.
 	simulator register: aRegister value write: value.
 
