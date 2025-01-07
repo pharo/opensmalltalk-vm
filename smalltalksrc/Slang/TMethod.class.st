@@ -118,7 +118,7 @@ TMethod >> addVarsDeclarationsAndLabelsOf: methodToBeInlined except: doNotRename
 
     | newLocals |
 
-   newLocals := methodToBeInlined args , methodToBeInlined allLocals asOrderedCollection .
+   newLocals := methodToBeInlined allLocals copyWithAll: methodToBeInlined args.
 
 	self addLocals: (newLocals copyWithoutAll: doNotRename).
 
@@ -1635,27 +1635,27 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 	 otherwise the assignee variable type must match the return type of the inlinee.  Return
 	 types are not propagated."
 
-	| sel meth methArgs exitLabel inlineStmts label exitType elidedArgs |
+	| sel callee calleeParameters exitLabel inlineStmts label exitType omittedParameters |
 	sel := aSendNode selector.
-	meth := aCodeGen methodNamed: sel.
-	methArgs := meth args.
+	callee := aCodeGen methodNamed: sel.
+	calleeParameters := callee args.
 	"convenient for debugging..."
 	aCodeGen maybeBreakForInlineOf: aSendNode in: self.
-	elidedArgs := #(  ).
-	(methArgs notEmpty and: [ methArgs first beginsWith: 'self_in_' ])
+	omittedParameters := #(  ).
+	(calleeParameters notEmpty and: [ calleeParameters first beginsWith: 'self_in_' ])
 		ifTrue: [ "If the first arg is not used we can and should elide it."
 			| varNode |
-			varNode := TVariableNode new setName: methArgs first.
-			(meth parseTree noneSatisfy: [ :node | varNode isSameAs: node ])
-				ifTrue: [ elidedArgs := { methArgs first } ].
-			methArgs := methArgs allButFirst ].
-	methArgs size = aSendNode arguments size ifFalse: [ ^ nil ].
-	meth := meth copy.
+			varNode := TVariableNode new setName: calleeParameters first.
+			(callee parseTree noneSatisfy: [ :node | varNode isSameAs: node ])
+				ifTrue: [ omittedParameters := { calleeParameters first } ].
+			calleeParameters := calleeParameters allButFirst ].
+	calleeParameters size = aSendNode arguments size ifFalse: [ ^ nil ].
+	callee := callee copy.
 
-	(meth statements size > 1 and: [
-		 meth statements first isSend and: [
-			 meth statements first selector == #flag: ] ]) ifTrue: [
-		meth statements removeFirst ].
+	(callee statements size > 1 and: [
+		 callee statements first isSend and: [
+			 callee statements first selector == #flag: ] ]) ifTrue: [
+		callee statements removeFirst ].
 
 	"Propagate the return type of an inlined method"
 	(directReturn or: [ exitVar notNil ]) ifTrue: [
@@ -1663,42 +1663,42 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 			            ifTrue: [ returnType ]
 			            ifFalse: [
 			            (self typeFor: exitVar in: aCodeGen) ifNil: [ #sqInt ] ].
-		(exitType = #void or: [ exitType = meth returnType ]) ifFalse: [
-			meth propagateReturnIn: aCodeGen ] ].
+		(exitType = #void or: [ exitType = callee returnType ]) ifFalse: [
+			callee propagateReturnIn: aCodeGen ] ].
 
 	"Propagate any unusual argument types to untyped argument variables"
-	methArgs with: aSendNode arguments do: [ :formal :actual |
-		(meth declarationAt: formal ifAbsent: nil) ifNil: [
+	calleeParameters with: aSendNode arguments do: [ :formal :actual |
+		(callee declarationAt: formal ifAbsent: nil) ifNil: [
 			| type |
 			(actual isVariable and: [
 				 (type := self typeFor: actual name in: aCodeGen) notNil ])
 				ifTrue: [
 					type ~= #sqInt ifTrue: [
-						meth declarationAt: formal put: (type last = $*
+						callee declarationAt: formal put: (type last = $*
 								 ifTrue: [ type , formal ]
 								 ifFalse: [ type , ' ' , formal ]) ] ] ] ].
 
-	meth renameVarsForInliningInto: self except: elidedArgs in: aCodeGen.
-	meth renameLabelsForInliningInto: self.
-	self addVarsDeclarationsAndLabelsOf: meth except: elidedArgs.
-	meth hasReturn ifTrue: [
+	callee renameVarsForInliningInto: self except: omittedParameters in: aCodeGen.
+	callee renameLabelsForInliningInto: self.
+	self addVarsDeclarationsAndLabelsOf: callee except: omittedParameters.
+	callee hasReturn ifTrue: [
 		directReturn ifFalse: [
 			exitLabel := self unusedLabelForInliningInto: self.
-			(meth exitVar: exitVar label: exitLabel)
+			(callee exitVar: exitVar label: exitLabel)
 				ifTrue: [ labels add: exitLabel ]
 				ifFalse: [ "is label used?" exitLabel := nil ] ] ].
 	(inlineStmts := OrderedCollection new:
-			                meth statements size + meth args size + 2)
+			                callee statements size + callee args size + 2)
 		add: (label := TLabeledCommentNode new setComment: 'begin ' , sel);
 		addAll: (self
-				 argAssignmentsFor: meth
+				 argAssignmentsFor: callee
 				 send: aSendNode
-				 except: elidedArgs
+				 except: omittedParameters
 				 in: aCodeGen);
-		addAll: meth statements. "method body"
+		addAll: callee statements. "method body"
 	directReturn ifTrue: [
-		meth parseTree parent: aSendNode parent.
-		meth endsWithReturn
+		callee parseTree parent: aSendNode parent.
+		callee endsWithReturn
 			ifTrue: [
 				exitVar ifNotNil: [ "don't remove the returns if being invoked in the context of a return"
 					inlineStmts
@@ -2590,7 +2590,8 @@ TMethod >> removeLocal: local [
 TMethod >> removeLocal: local ifAbsent: aBlock [
 
 	cachedLocals := nil.
-	self locals remove: local ifAbsent: aBlock
+	self locals remove: local ifAbsent: aBlock.
+	self declarations removeKey: local ifAbsent: [ ] "We assume local-declarations are a subset of locals"
 ]
 
 { #category : 'dead-code-elimination' }

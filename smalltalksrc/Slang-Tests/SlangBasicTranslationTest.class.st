@@ -1239,7 +1239,6 @@ static sqInt
 methodUseParametersWithAnnotationstowith(unsigned int *pFrom, unsigned int *pTo, sqInt anInteger)
 {
 	sqInt i;
-	sqInt pFrom1;
 	unsigned int *pTo1;
 
 	/* begin methodFromWithAnnotations:to:len: */
@@ -1280,7 +1279,6 @@ methodUseParametersWithAnnotationsBuiltIntowith(unsigned int *pFrom, unsigned in
 {
 	sqInt i;
 	sqInt pFrom1;
-	sqInt pTo1;
 
 	/* begin methodFromWithAnnotations:to: */
 	pFrom1 = ((sqInt) (pFrom + anInteger) );
