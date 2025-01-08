@@ -205,7 +205,11 @@ TStatementListNode >> asCASTExpressionIn: aBuilder [
 	statements withIndexDo: [ :node :idx |
 		(node isLeaf and: [
 			 node isLabel not and: [ node ~~ self lastNonCommentStatement ] ])
-			ifFalse: [ expressionList , (node asCASTExpressionIn: aBuilder) ] ].
+			ifFalse: [
+				| expr |
+				expr := node asCASTExpressionIn: aBuilder.
+				expr parent: expressionList.
+				expressionList , expr ] ].
 	^ expressionList
 ]
 

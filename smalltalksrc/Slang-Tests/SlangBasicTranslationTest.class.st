@@ -942,7 +942,8 @@ SlangBasicTranslationTest >> testCaseStatementIsTranslatedAsSwitch [
 		someBytecode();
 	}
 	break;
-}'
+}
+'
 ]
 
 { #category : 'tests-case' }
@@ -966,7 +967,8 @@ SlangBasicTranslationTest >> testCaseStatementWithDifferentBodyAreDifferentCases
 		someBytecode2();
 	}
 	break;
-}'
+}
+'
 ]
 
 { #category : 'tests-case' }
@@ -986,7 +988,8 @@ SlangBasicTranslationTest >> testCaseStatementWithSameBodyAreSameCase [
 		someBytecode();
 	}
 	break;
-}'
+}
+'
 ]
 
 { #category : 'tests-constants' }
@@ -1189,7 +1192,8 @@ SlangBasicTranslationTest >> testGoto [
 	
 	translation := self translate: (TGoToNode label: 'lab').
 
-	self assert: translation equals: 'goto lab'
+	self assert: translation equals: 'goto lab;
+'
 ]
 
 { #category : 'tests-inlinemethod' }
@@ -1245,7 +1249,7 @@ methodUseParametersWithAnnotationstowith(unsigned int *pFrom, unsigned int *pTo,
 	pTo1 = ((unsigned int *) (yourself(pTo)) );
 	for (i = 0; i < 5; i += 1) {
 		pTo1[i] = (pFrom + anInteger)[i];
-	};
+	}
 	return 0;
 	/* end methodFromWithAnnotations:to:len: */
 }'
@@ -1284,7 +1288,7 @@ methodUseParametersWithAnnotationsBuiltIntowith(unsigned int *pFrom, unsigned in
 	pFrom1 = ((sqInt) (pFrom + anInteger) );
 	for (i = 0; i <= 10; i += 1) {
 		pTo[i] = pFrom1[i];
-	};
+	}
 	/* end methodFromWithAnnotations:to: */
 	return 0;
 }'
@@ -1306,7 +1310,8 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotInitializeReadBeforeWrittenArr
 
 		bar = foo;
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1325,7 +1330,8 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotInitializeReadBeforeWrittenExt
 
 		bar = foo;
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1345,7 +1351,8 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotInitializeReadBeforeWrittenIni
 		foo = 0;
 		bar = foo;
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1364,7 +1371,8 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotInitializeReadBeforeWrittenSta
 
 		bar = foo;
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1380,9 +1388,9 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotRemoveExternalTemp [
 	{
 		extern int foo;
 
-
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1398,9 +1406,9 @@ SlangBasicTranslationTest >> testInlineNodeDoesNotRemoveStaticTemp [
 	{
 		static int foo;
 
-
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1417,7 +1425,8 @@ SlangBasicTranslationTest >> testInlineNodeRemovesUnusedTemps [
 	VM_LABEL(methodDefiningSingleVariable);
 	{
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1443,7 +1452,8 @@ SlangBasicTranslationTest >> testInlineNodeSortsLocalTemps [
 		bar = aaa;
 		ddd = zzz + foo;
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1460,7 +1470,8 @@ SlangBasicTranslationTest >> testInlineNodeWithSharedCase [
 	VM_LABEL(methodWithSharedCase);
 	{
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinenode' }
@@ -1477,7 +1488,8 @@ SlangBasicTranslationTest >> testInlineNodeWithSharedLabelInCase [
 	VM_LABEL(methodWithSharedLabelInCase);
 	{
 	}
-}'
+}
+'
 ]
 
 { #category : 'tests-inlinemethod' }
@@ -1652,7 +1664,7 @@ SlangBasicTranslationTest >> testLabel [
 	translation := self translate: label.
 
 	self assert: translation equals: 'aLabel:
-;'
+'
 ]
 
 { #category : 'tests-labels' }
@@ -1676,7 +1688,7 @@ SlangBasicTranslationTest >> testLabelWithASMLabelWithinInterpret [
 	label := TLabeledCommentNode new asmLabel: 'vm_label'.
 	translation := self translate: label.
 
-	self assert: translation equals: 'VM_LABEL(vm_label);'
+	self assert: translation equals: 'VM_LABEL(vm_label)'
 ]
 
 { #category : 'tests-labels' }
@@ -1752,7 +1764,6 @@ methodWithAnOptionPragma(void)
 {
 	return 0;
 }
-
 #endif /* OPTION */'
 ]
 
@@ -1773,7 +1784,6 @@ methodWithOptionPragma(void)
 {
 	return 0;
 }
-
 #endif /* OPTION1 && OPTION3 */'
 ]
 
@@ -2118,7 +2128,8 @@ SlangBasicTranslationTest >> testNonContiguousCaseStatementWithSameBodyAreCollap
 		someBytecode2();
 	}
 	break;
-}'
+}
+'
 ]
 
 { #category : 'tests-blocks' }
@@ -2173,7 +2184,8 @@ SlangBasicTranslationTest >> testReturnCaseStatementDoesNotReplaceGotoByReturn [
 	default:
 	error("Case not found");
 	return -1;
-}'
+}
+'
 ]
 
 { #category : 'tests-case' }
@@ -2194,7 +2206,8 @@ SlangBasicTranslationTest >> testReturnCaseStatementMovesReturnIntoSwitch [
 	default:
 	error("Case not found");
 	return -1;
-}'
+}
+'
 ]
 
 { #category : 'tests-return' }
@@ -2214,7 +2227,8 @@ SlangBasicTranslationTest >> testReturnIfTrue [
 		
 	self assert: translation equals: 'return ((aBoolean)
 	 ? 1
-	 : 2)'
+	 : 2);
+'
 ]
 
 { #category : 'tests-return' }
@@ -2228,7 +2242,8 @@ SlangBasicTranslationTest >> testReturnLeafInVoidMethod [
 		setExpression: (TVariableNode new setName: 'var');
 		yourself).
 		
-	self assert: translation equals: 'return;'
+	self assert: translation equals: 'return;
+'
 ]
 
 { #category : 'tests-return' }
@@ -2245,7 +2260,8 @@ SlangBasicTranslationTest >> testReturnNonLeafExpressionInVoidMethod [
 		yourself).
 		
 	self assert: translation equals: 'var = 7;
-return;'
+return;
+'
 ]
 
 { #category : 'tests-switch' }
@@ -2323,7 +2339,8 @@ SlangBasicTranslationTest >> testReturnVariable [
 		setExpression: (TVariableNode new setName: 'var');
 		yourself).
 		
-	self assert: translation equals: 'return var'
+	self assert: translation equals: 'return var;
+'
 ]
 
 { #category : 'tests-builtins' }
@@ -3182,7 +3199,8 @@ SlangBasicTranslationTest >> testSendCppIfIfTrueWithSingleExpressionDoesNotAddsS
 	self assert: translation trimBoth equals: 'return 
 #  if FEATURE
 		(a = 0)
-#  endif /* FEATURE */'
+#  endif /* FEATURE */
+		;'
 ]
 
 { #category : 'tests-builtins' }
@@ -6107,9 +6125,9 @@ SlangBasicTranslationTest >> testSendWhileFalseWithoutArguments [
 		        arguments: {  }.
 	translation := self translate: send.
 
-	self assert: translation trimBoth equals: 'do{
+	self assert: translation trimBoth equals: 'do {
 	var -= 7;
-}while(!(var >= 21))'
+} while (!(var >= 21));'
 ]
 
 { #category : 'tests-builtins' }
@@ -6174,9 +6192,9 @@ SlangBasicTranslationTest >> testSendWhileTrueWithNilAsArgument [
 				         { (TVariableNode new setName: 'nil') }) }.
 	translation := self translate: send.
 
-	self assert: translation trimBoth equals: 'do{
+	self assert: translation trimBoth equals: 'do {
 	var -= 7;
-}while(a < b)'
+} while (a < b);'
 ]
 
 { #category : 'tests-builtins' }
@@ -6235,9 +6253,9 @@ SlangBasicTranslationTest >> testSendWhileTrueWithTemporary [
 		        arguments: {  }.
 	translation := self translate: send.
 
-	self assert: translation trimBoth equals: 'do{
+	self assert: translation trimBoth equals: 'do {
 	var -= 7;
-}while(var >= 21)'
+} while (var >= 21);'
 ]
 
 { #category : 'tests-builtins' }
@@ -6267,11 +6285,11 @@ SlangBasicTranslationTest >> testSendWhileTrueWithTemporaryDeclaration [
 		        arguments: {  }.
 	translation := self translate: send.
 
-	self assert: translation trimBoth equals: 'do{
+	self assert: translation trimBoth equals: 'do {
 	int temp;
 
 	var -= 7;
-}while(var >= 21)'
+} while (var >= 21);'
 ]
 
 { #category : 'tests-builtins' }
@@ -6299,9 +6317,9 @@ SlangBasicTranslationTest >> testSendWhileTrueWithoutArguments [
 		        arguments: {  }.
 	translation := self translate: send.
 
-	self assert: translation trimBoth equals: 'do{
+	self assert: translation trimBoth equals: 'do {
 	var -= 7;
-}while(var >= 21)'
+} while (var >= 21);'
 ]
 
 { #category : 'tests-assignment' }
@@ -6355,7 +6373,8 @@ switch (currentBytecode) {
 		someBytecode();
 	}
 	break;
-}'
+}
+'
 ]
 
 { #category : 'tests-switch' }

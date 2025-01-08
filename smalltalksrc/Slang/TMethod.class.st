@@ -358,7 +358,7 @@ TMethod >> asCASTFunctionPrototypeIn: aCodeGen isPrototype: isPrototype [
 { #category : 'CAST translation' }
 TMethod >> asCASTIn: aCodeGen [
 
-	| compoundStatement functionDefinition body|
+	| compoundStatement functionDefinition body |
 	aCodeGen currentMethod: self.
 	compoundStatement := CCompoundStatementNode new
 		                     needsBrackets: false;
