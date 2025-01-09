@@ -479,7 +479,11 @@ try{
 		def platform = platf
 		
 		builders[platform] = {
-			node(platform){
+            def nodeName = platform
+            if (nodeName == 'Linux-x86_64'){
+                nodeName = 'old-linux-vm-build'
+            }
+			node(nodeName){
 				timeout(40){
 					runBuild(platform, "CoInterpreter")
 				}
