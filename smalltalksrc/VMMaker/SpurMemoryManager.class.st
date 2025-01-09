@@ -1949,6 +1949,21 @@ SpurMemoryManager >> allocateMemoryOfSize: memoryBytes initialAddress: initialAd
 ]
 
 { #category : 'initialization' }
+SpurMemoryManager >> allocateMemoryOfSize: memoryBytes newSpaceSize: newSpaceBytes stackSize: stackBytes codeSize: codeBytes [
+	"Add default values for bootstrapping"
+
+	self
+		allocateMemoryOfSize: memoryBytes
+		newSpaceSize: newSpaceBytes
+		stackSize: stackBytes
+		codeSize: codeBytes
+		methodCacheSize: 0
+		primitiveTraceLogSize: 0
+		rumpCStackSize: 0
+		permSpaceSize: 0
+]
+
+{ #category : 'initialization' }
 SpurMemoryManager >> allocateMemoryOfSize: memoryBytes newSpaceSize: newSpaceBytes stackSize: stackBytes codeSize: codeBytes methodCacheSize: methodCacheSize primitiveTraceLogSize: primitiveLogSize rumpCStackSize: rumpCStackSize permSpaceSize: permSpaceSize [
 
 	"Intialize the receiver for bootsraping an image.
@@ -1980,10 +1995,6 @@ SpurMemoryManager >> allocateMemoryOfSize: memoryBytes newSpaceSize: newSpaceByt
 	newSpaceActualBytes := memoryMap newSpaceEnd - memoryMap newSpaceStart.
 	
 	self assert: newSpaceActualBytes >= newSpaceBytes.
-		
-	freeStart := newSpaceActualBytes + memoryMap newSpaceStart.
-	
-	scavengeThreshold := memoryMap newSpaceStart.
 
 	scavenger := SpurGenerationScavenger simulatorClass new.
 	scavenger manager: self.
@@ -1991,6 +2002,8 @@ SpurMemoryManager >> allocateMemoryOfSize: memoryBytes newSpaceSize: newSpaceByt
 		newSpaceStart: memoryMap newSpaceStart
 		newSpaceBytes: newSpaceActualBytes
 		survivorBytes: newSpaceActualBytes // self scavengerDenominator.
+
+	self initializeNewSpaceVariables.
 
 	compactor := self class compactorClass simulatorClass new
 		             manager: self;
@@ -4782,7 +4795,7 @@ SpurMemoryManager >> ensureMemoryManager [
 
 	<doNotGenerate>
 
-	memoryManager ifNil: [ 
+	^ memoryManager ifNil: [ 
 		memoryManager := SlangMemoryManager new.
 		memoryManager wordSize: self wordSize ]
 
@@ -4798,7 +4811,7 @@ SpurMemoryManager >> ensureMemoryMap [
 		inSmalltalk: [ 
 			memoryMap := VMMemoryMap new.
 			memoryMap objectMemory: self.
-			memoryMap memoryManager: memoryManager ].
+			memoryMap memoryManager: self ensureMemoryManager ].
 		
 	memoryMap initializeMemoryMap.
 ]
@@ -11844,15 +11857,6 @@ SpurMemoryManager >> rtRefCountOf: obj put: refCount [
 	"Set the rt reference count of obj; this is the three bit field comprised
 	 of isGrey,isPinned,isRemembered.  See computeRefCountToShrinkRT."
 	self subclassResponsibility
-]
-
-{ #category : 'debug support' }
-SpurMemoryManager >> runLeakCheckerFor: gcModes [
-	<inline: false>
-	^self
-		inLineRunLeakCheckerFor: gcModes
-		excludeUnmarkedObjs: false
-		classIndicesShouldBeValid: true
 ]
 
 { #category : 'debug support' }
