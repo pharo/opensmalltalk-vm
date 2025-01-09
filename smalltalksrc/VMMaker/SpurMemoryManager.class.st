@@ -3007,7 +3007,77 @@ SpurMemoryManager >> changeClassOf: rcvr to: argClass [
 	 Fail if the format of the receiver is incompatible with the format of the argument,
 	 or if the argument is a fixed class and the receiver's size differs from the size
 	 that an instance of the argument should have."
-	self subclassResponsibility
+
+	<inline: false>
+	| classFormat fixedFields instFormat newFormat classIndex instSlots instBytes |
+	(self isObjImmutable: rcvr) ifTrue: [ ^ PrimErrNoModification ].
+	classFormat := self formatOfClass: argClass.
+	fixedFields := self fixedFieldsOfClassFormat: classFormat.
+	classFormat := self instSpecOfClassFormat: classFormat.
+	instFormat := self formatOf: rcvr.
+
+	"Fail for inability to access classIndex before making contexts snapshot-safe."
+	(classIndex := self ensureBehaviorHash: argClass) < 0 ifTrue: [
+		^ classIndex negated ].
+
+	"Now check the instance for compatibility and compute odd bits if necessary."
+	classFormat <= self lastPointerFormat
+		ifTrue: [
+			instFormat > self lastPointerFormat ifTrue: [
+				^ PrimErrInappropriate ].
+			((instSlots := self numSlotsOf: rcvr) < fixedFields or: [
+				 instSlots > fixedFields and: [
+					 self isFixedSizePointerFormat: classFormat ] ]) ifTrue: [
+				^ PrimErrBadReceiver ].
+			(instFormat = self indexablePointersFormat and: [
+				 self isContextNonImm: rcvr ]) ifTrue: [
+				coInterpreter makeContextSnapshotSafe: rcvr ].
+			newFormat := classFormat ]
+		ifFalse: [ "Fail if the class's format is somehow invalid."
+			classFormat ~= (self classFormatForInstanceFormat: classFormat)
+				ifTrue: [ ^ PrimErrBadArgument ].
+
+			instBytes := self numBytesOf: rcvr.
+			classFormat
+				caseOf: {
+						([ self sixtyFourBitIndexableFormat ] -> [
+						 (instBytes anyMask: 7) ifTrue: [ ^ PrimErrBadReceiver ].
+						 newFormat := classFormat ]).
+						([ self firstLongFormat ] -> [
+						 (instBytes anyMask: 3) ifTrue: [ ^ PrimErrBadReceiver ].
+						 newFormat := classFormat
+						              +
+						              (self
+							               paddingForFormatInstBytes: instBytes
+							               shiftForElement: 2) ]).
+						([ self firstShortFormat ] -> [
+						 (instBytes anyMask: 1) ifTrue: [ ^ PrimErrBadReceiver ].
+						 newFormat := classFormat
+						              +
+						              (self
+							               paddingForFormatInstBytes: instBytes
+							               shiftForElement: 1) ]).
+						([ self firstByteFormat ] -> [
+						 newFormat := classFormat
+						              +
+						              (self
+							               paddingForFormatInstBytes: instBytes
+							               shiftForElement: 0) ]).
+						([ self firstCompiledMethodFormat ] -> [
+						 classFormat ~= self firstCompiledMethodFormat ifTrue: [
+							 ^ PrimErrInappropriate ].
+						 newFormat := instFormat ]) }
+				otherwise: [ "bits instances cannot be adopted by pointer-like classes..."
+					^ PrimErrInappropriate ] ].
+
+	self set: rcvr classIndexTo: classIndex formatTo: newFormat.
+
+	self assert:
+		(self numBytesOf: rcvr) = (classFormat <= self lastPointerFormat
+			 ifTrue: [ instSlots * self bytesPerOop ]
+			 ifFalse: [ instBytes ]).
+	"ok"
+	^ 0
 ]
 
 { #category : 'object access' }
@@ -10472,6 +10542,21 @@ SpurMemoryManager >> outOfPlaceBecome: obj1 and: obj2 copyHashFlag: copyHashFlag
 SpurMemoryManager >> outerContextOf: aBlockClosureOop [
 
 	^ self fetchPointer: FullClosureOuterContextIndex ofObject: aBlockClosureOop
+]
+
+{ #category : 'interpreter access' }
+SpurMemoryManager >> paddingForFormatInstBytes: instBytes shiftForElement: shiftForElement [
+	"NOTE: shiftForElement is elementSizeInBytes log: 2.
+	This means elementSizeInBytes should be a power of two."
+
+	| trailingBytes paddingBytes |
+	"Cheap way to do instBytes \\ self wordSize (assumes self wordSize is a power of two)"
+	trailingBytes := instBytes bitAnd: self wordSize - 1.
+	paddingBytes := self wordSize - trailingBytes.
+	"self wordSize - 0 is self wordSize, but we want to say 'there is no padding' in that case"
+	paddingBytes := paddingBytes bitAnd: self wordSize - 1.
+	"Cheap way to do paddingBytes // elementSizeInBytes"
+	^ paddingBytes >> shiftForElement
 ]
 
 { #category : 'accessing' }
