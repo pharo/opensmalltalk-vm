@@ -224,6 +224,12 @@ TAssignmentNode >> isAssignment [
 ]
 
 { #category : 'testing' }
+TAssignmentNode >> isExpression [
+
+	^ true
+]
+
+{ #category : 'testing' }
 TAssignmentNode >> isSameAs: aTParseNode [
 	^aTParseNode isAssignment
 	 and: [(variable isSameAs: aTParseNode variable)

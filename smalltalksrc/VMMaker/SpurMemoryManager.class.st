@@ -846,13 +846,16 @@ SpurMemoryManager class >> initializeObjectHeaderConstants [
 
 { #category : 'class initialization' }
 SpurMemoryManager class >> initializeSpecialObjectIndices [
-	"Initialize indices into specialObjects array."
+	"Initialize indices into specialObjects array.
+
+	See `SmalltalkImage>>#newSpecialObjectsArray` for the image side version.
+	Note: offsets here are zero-relative (so shifted by one in indexed array access)."
 
 	NilObject := 0.
 	FalseObject := 1.
 	TrueObject := 2.
 	SchedulerAssociation := 3.
-	ClassBitmap := 4.
+	ClassBitmap := 4. "plugin support only"
 	ClassSmallInteger := 5.
 	ClassByteString := ClassString := 6. "N.B.  Actually class ByteString"
 	ClassArray := 7.
@@ -864,6 +867,7 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	SuspendedProcessInCallout := 11.
 	ClassPoint := 12.
 	ClassLargePositiveInteger := 13.
+	"ClassDisplay := 14. unused by the VM"
 	ClassMessage := 15.
 	"ClassCompiledMethod := 16. unused by the VM"
 	TheLowSpaceSemaphore := 17.
@@ -873,10 +877,11 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	SelectorCannotReturn := 21.
 	ProcessSignalingLowSpace := 22.	"was TheInputSemaphore"
 	SpecialSelectors := 23.
+	"24. was an array of 255 characters"
 	SelectorMustBeBoolean := 25.
 	ClassByteArray := 26.
 	"ClassProcess := 27. unused"
-	CompactClasses := 28.
+	"CompactClasses := 28. unused"
 	TheTimerSemaphore := 29.
 	TheInterruptSemaphore := 30.
 	ClassFloat32Register := 31.
@@ -886,7 +891,7 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	"Was ClassBlockClosure := 36."
 	"Was BlockContextProto := 37."
 	ExternalObjectsArray := 38.
-	ClassMutex := 39.
+	ClassMutex := 39. "Only used for debugging (StackInterpreter>>#printAllStacks)"
 	"Was: ClassTranslatedMethod := 40."
 	ProcessInExternalCodeTag := 40.
 	TheFinalizationSemaphore := 41.
@@ -900,9 +905,9 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	SelectorAttemptToAssign := 50.
 	"PrimErrTableIndex := 51. in VMClass class>>initializePrimitiveErrorCodes"
 
-	ClassWeakFinalizer := 55.
+	"ClassWeakFinalizer := 55. obsoleted by ephemerons"
 
-	ForeignCallbackProcess := 56.
+	"ForeignCallbackProcess := 56. unused"
 
 	SelectorUnknownBytecode := 57.
 	SelectorCounterTripped := 58.
@@ -5744,6 +5749,21 @@ SpurMemoryManager >> formatOfClass: classPointer [
 	^self integerValueOf: (self fetchPointer: InstanceSpecificationIndex ofObject: classPointer)
 ]
 
+{ #category : 'object format' }
+SpurMemoryManager >> formatOfClassSafe: oop [
+	"like formatOfClass: but check the existence of the format.
+	return -1 there is no format or a non integer format"
+	<api>
+	<inline: true>
+	| classObj classFormat |
+	classObj := self followMaybeForwarded: oop. 
+	(self isNonImmediate: classObj) ifFalse: [ ^-1].
+	(self numSlotsOfAny: classObj) >= InstanceSpecificationIndex ifFalse: [^-1].
+	classFormat := self fetchPointer: InstanceSpecificationIndex ofObject: classObj.
+	(self isIntegerObject: classFormat) ifFalse: [^-1].
+	^self integerValueOf: classFormat
+]
+
 { #category : 'object access' }
 SpurMemoryManager >> formatOfHeader: header [
 	"0 = 0 sized objects (UndefinedObject True False et al)
@@ -7220,18 +7240,23 @@ SpurMemoryManager >> instantiateClass: classObj isPinned: isPinned [
 { #category : 'instantiation' }
 SpurMemoryManager >> instantiateClass: classObj isPinned: isPinned isOldSpace: isOldSpace [
 	| instSpec classFormat numSlots classIndex newObj |
-	classFormat := self formatOfClass: classObj.
+	classFormat := self formatOfClassSafe: classObj.
+	classFormat == -1 ifTrue:
+		[self primitiveFailFor: PrimErrBadReceiver. "no format"
+		 ^nil].
 	instSpec := self instSpecOfClassFormat: classFormat.
 	(self isFixedSizePointerFormat: instSpec) ifFalse:
-		[^nil].
+		[self primitiveFailFor: PrimErrBadReceiver. "bad format"
+		 ^nil].
 	classIndex := self ensureBehaviorHash: classObj.
 	classIndex < 0 ifTrue:
 		[coInterpreter primitiveFailFor: classIndex negated.
-		^nil].
+		 ^nil].
 	numSlots := self fixedFieldsOfClassFormat: classFormat.
 	newObj := self allocateSlots: numSlots format: instSpec classIndex: classIndex isPinned: isPinned isOldSpace: isOldSpace.
 	newObj ifNotNil:
-		[self fillObj: newObj numSlots: numSlots with: nilObj].
+		[self fillObj: newObj numSlots: numSlots with: nilObj]
+		ifNil: [ self primitiveFailFor: PrimErrNoMemory ].
 	^newObj
 ]
 
@@ -12119,7 +12144,6 @@ SpurMemoryManager >> setMaxOldSpaceSize: limit [
 SpurMemoryManager >> setMinimalPermSpaceSize: min [
 
 	<api>
-	<var: #limit type: #usqInt>
 	
 	self ensureMemoryMap.
 	self getMemoryMap minPermSpaceSize: min.
@@ -12221,13 +12245,6 @@ SpurMemoryManager >> shouldRemapOop: oop [
 	<inline: true>
 	^(self isNonImmediate: oop)
 	   and: [self shouldRemapObj: oop]
-]
-
-{ #category : 'simulation only' }
-SpurMemoryManager >> showDisplayBits: aForm Left: l Top: t Right: r Bottom: b [
-	"hack around the CoInterpreter/ObjectMemory split refactoring"
-	<doNotGenerate>
-	^coInterpreter showDisplayBits: aForm Left: l Top: t Right: r Bottom: b
 ]
 
 { #category : 'free space' }

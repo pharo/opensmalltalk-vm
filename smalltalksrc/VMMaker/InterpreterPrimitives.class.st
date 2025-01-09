@@ -75,8 +75,7 @@ Class {
 		'profileProcess',
 		'profileSemaphore',
 		'nextProfileTick',
-		'preemptionYields',
-		'ffiExceptionResponse'
+		'preemptionYields'
 	],
 	#classVars : [
 		'CrossedX',
@@ -269,7 +268,7 @@ InterpreterPrimitives >> initPrimCall [
 InterpreterPrimitives >> initialize [
 
 	"Here we can initialize the variables C initializes to zero.  #initialize methods do /not/ get translated."
-	argumentCount := primFailCode := nextProfileTick := osErrorCode := exceptionPC := ffiExceptionResponse := 0
+	argumentCount := primFailCode := nextProfileTick := osErrorCode := exceptionPC := 0
 ]
 
 { #category : 'simulation support' }
@@ -2728,11 +2727,6 @@ InterpreterPrimitives >> primitiveNew [
 
 	(objectMemory instantiateClass: self stackTop)
 		ifNotNil: [ :obj | self pop: argumentCount + 1 thenPush: obj ]
-		ifNil: [ 
-			self primitiveFailFor: ((objectMemory isFixedSizePointerFormat:
-					  (objectMemory instSpecOfClass: self stackTop))
-					 ifTrue: [ PrimErrNoMemory ]
-					 ifFalse: [ PrimErrBadReceiver ]) ]
 ]
 
 { #category : 'compiled methods' }
@@ -2812,13 +2806,6 @@ InterpreterPrimitives >> primitiveNewWithArg [
 		 instantiateClass: (self stackValue: 1)
 		 indexableSize: size)
 		ifNotNil: [ :obj | self pop: argumentCount + 1 thenPush: obj ]
-		ifNil: [ 
-			instSpec := objectMemory instSpecOfClass: (self stackValue: 1).
-			self primitiveFailFor:
-				(((objectMemory isIndexableFormat: instSpec) and: [ 
-					  (objectMemory isCompiledMethodFormat: instSpec) not ])
-					 ifTrue: [ PrimErrNoMemory ]
-					 ifFalse: [ PrimErrBadReceiver ]) ]
 ]
 
 { #category : 'object access primitives' }

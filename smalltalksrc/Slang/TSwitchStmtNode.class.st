@@ -343,6 +343,12 @@ TSwitchStmtNode >> expression: expr cases: aTBraceNode otherwiseOrNil: otherwise
 	self otherwiseOrNil: otherwiseOrNilNode
 ]
 
+{ #category : 'testing' }
+TSwitchStmtNode >> isExpression [
+
+	^ true
+]
+
 { #category : 'comparing' }
 TSwitchStmtNode >> isSameAs: anotherNode [
 

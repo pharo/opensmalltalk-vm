@@ -156,7 +156,7 @@ TVariableNode >> printOn: aStream level: level [
 { #category : 'accessing' }
 TVariableNode >> setName: aString [
 
-	name := aString.
+	name := aString
 ]
 
 { #category : 'testing' }

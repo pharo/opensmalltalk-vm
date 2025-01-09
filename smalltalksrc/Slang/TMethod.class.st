@@ -95,6 +95,11 @@ TMethod >> addLocal: aString [
 	self locals add: aString
 ]
 
+{ #category : 'adding' }
+TMethod >> addLocals: locals [ 
+	locals do: [ :local | self addLocal: local ]
+]
+
 { #category : 'initialization' }
 TMethod >> addTypeForSelf [
 	"If self should be typed then add a suitable type declaration.
@@ -111,10 +116,12 @@ TMethod >> addTypeForSelf [
 TMethod >> addVarsDeclarationsAndLabelsOf: methodToBeInlined except: doNotRename [
 	"Prepare to inline the body of the given method into the receiver by making the args and locals of the argument to the receiver be locals of the receiver. Record any type declarations for these variables. Record labels. Assumes that the variables have already be renamed to avoid name clashes."
 
-	self locals
-		addAll: (methodToBeInlined args reject: [ :v | doNotRename includes: v]);
-		addAll: (methodToBeInlined locals reject: [ :v | doNotRename includes: v]);
-		yourself.
+    | newLocals |
+
+   newLocals := methodToBeInlined args , methodToBeInlined allLocals asOrderedCollection .
+
+	self addLocals: (newLocals copyWithoutAll: doNotRename).
+
 	methodToBeInlined declarations keysAndValuesDo:
 		[ :v :decl |
 		(doNotRename includes: v) ifFalse:
@@ -700,9 +707,11 @@ TMethod >> declarationAt: aVariableName ifPresent: presentBlock [
 ]
 
 { #category : 'accessing' }
-TMethod >> declarationAt: aVariableName  "<String>" put: aDeclaration [ "<String>" "^aDeclaration"
+TMethod >> declarationAt: aVariableName put: aDeclaration [
 
-	^declarations at: aVariableName put: aDeclaration
+	self validateVariableDeclarationExists: aVariableName.
+
+	^ declarations at: aVariableName put: aDeclaration
 ]
 
 { #category : 'accessing' }
@@ -726,6 +735,15 @@ TMethod >> declareNonConflictingLocalNamedLike: aString [
 	cachedLocals := nil.
 	self locals add: newVarName.
 	^ newVarName
+]
+
+{ #category : 'testing' }
+TMethod >> declaresVariableWithName: aVariableName [
+
+	| referencesInScope |
+	referencesInScope := self allLocals , self args.
+
+	^ referencesInScope includes: aVariableName
 ]
 
 { #category : 'testing' }
@@ -2556,7 +2574,10 @@ TMethod >> recordDeclarationsIn: aCCodeGen [
 				declarationAt: varName
 				put: varType , varName ].
 		pragma selector = #returnTypeC: ifTrue: [ 
-			self returnType: pragma arguments last ] ]
+			self returnType: pragma arguments last ] ].
+	
+		"reset cache since declarations changed"
+		cachedLocals := nil
 ]
 
 { #category : 'accessing' }
@@ -2891,7 +2912,7 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 	definingClass := class.
 	args := argList asOrderedCollection collect: [:arg | arg name].
 	declarations := Dictionary new.
-	self addTypeForSelf.
+	
 	primitive := aNumber.
 	properties := methodProperties.
 	comment := aComment.
@@ -2904,7 +2925,7 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 
 	self parseTree: (aBlockNode asTranslatorNodeIn: self).
 	self locals: tempParseTree locals, (localList  collect: [:arg | arg name]).
-	
+	self addTypeForSelf.
 	
 	complete := false.  "set to true when all possible inlining has been done"
 	export := self extractExportDirective.
@@ -3376,6 +3397,20 @@ TMethod >> usesVariableUninlinably: argName in: aCodeGen [
 				  node arguments anySatisfy: [ :argNode | 
 					  argNode anySatisfy: [ :subNode | 
 						  subNode isVariable and: [ subNode name = argName ] ] ] ] ] ]
+]
+
+{ #category : 'accessing' }
+TMethod >> validateVariableDeclarationExists: aVariableName [
+
+	| shouldCheckVariable |
+	shouldCheckVariable := (aVariableName beginsWithAnyOf:
+		                       #( #self #cascade #toDoLimit #std )) not.
+
+	(shouldCheckVariable and: [
+		 (self declaresVariableWithName: aVariableName) not]) ifTrue: [
+		TranslationError signal:
+			'Undefined local or argument ' , aVariableName
+			, ' type declaration' ]
 ]
 
 { #category : 'utilities' }
