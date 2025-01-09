@@ -1238,6 +1238,7 @@ methodToBeTranslatedWithIfAndShiftRight(void)
 	((usqInt) (((2 < 0)
 		 ? 0
 		 : 2)) ) >> ((2 - 1) * 32);
+	/* end methodWithIfAndShiftRight: */
 	return 0;
 }
 '.
@@ -1269,6 +1270,7 @@ methodUseParametersWithAnnotationstowith(unsigned int *pFrom, unsigned int *pTo,
 		pTo1[i] = (pFrom + anInteger)[i];
 	};
 	return 0;
+	/* end methodFromWithAnnotations:to:len: */
 }'
 ]
 
@@ -1307,6 +1309,7 @@ methodUseParametersWithAnnotationsBuiltIntowith(unsigned int *pFrom, unsigned in
 	for (i = 0; i <= 10; i += 1) {
 		pTo[i] = pFrom1[i];
 	};
+	/* end methodFromWithAnnotations:to: */
 	return 0;
 }'
 ]

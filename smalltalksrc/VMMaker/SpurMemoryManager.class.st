@@ -3500,17 +3500,25 @@ SpurMemoryManager >> classArray: anOop [
 
 { #category : 'class table' }
 SpurMemoryManager >> classAtIndex: classIndex [
+
 	<api>
 	<inline: true>
 	| classTablePage |
-	self assert: (classIndex >= 0 and: [classIndex <= self tagMask or: [classIndex >= self arrayClassIndexPun and: [classIndex <= self classIndexMask]]]).
-	classTablePage := self fetchPointer: classIndex >> self classTableMajorIndexShift
-							ofObject: hiddenRootsObj.
-	classTablePage = nilObj ifTrue:
-		[^nil].
-	^self
-		fetchPointer: (classIndex bitAnd: self classTableMinorIndexMask)
-		ofObject: classTablePage
+	self assert: (classIndex >= 0 and: [
+			 classIndex <= self tagMask or: [
+				 classIndex
+					 between: self arrayClassIndexPun
+					 and: self classIndexMask ] ]).
+	classTablePage := self
+		                  fetchPointer:
+		                  classIndex >> self classTableMajorIndexShift
+		                  ofObject: hiddenRootsObj.
+	^ classTablePage = nilObj
+		  ifTrue: [ nil ]
+		  ifFalse: [
+			  self
+				  fetchPointer: (classIndex bitAnd: self classTableMinorIndexMask)
+				  ofObject: classTablePage ]
 ]
 
 { #category : 'class table' }
@@ -3634,6 +3642,7 @@ SpurMemoryManager >> classFormatFromInstFormat: instFormat [
 
 { #category : 'header format' }
 SpurMemoryManager >> classIndexFieldWidth [
+	<api>
 	"22-bit class mask => ~ 4M classes"
 	^22
 ]
@@ -7844,6 +7853,15 @@ SpurMemoryManager >> isNormalObject: objOop [
 ]
 
 { #category : 'object testing' }
+SpurMemoryManager >> isNotForwarded: oop [
+	"Note that (sadly) this is not the negation of `isForwarded`.
+	 `isForwarded` performs an unconditional memory access that can cause a crash
+	 (or an erroneous result) when applied on immediates."
+	<api>
+	^ (self isImmediate: oop) or: [ (self isForwarded: oop) not ]
+]
+
+{ #category : 'object testing' }
 SpurMemoryManager >> isObjEphemeron: objOop [
 	^self isEphemeronFormat: (self formatOf: objOop)
 ]
@@ -8130,6 +8148,7 @@ SpurMemoryManager >> isValidClassIndex: classIndex [
 SpurMemoryManager >> isValidClassTag: classIndex [
 	<api>
 	| classOrNil |
+
 	self assert: (classIndex between: 0 and: 1 << self classIndexFieldWidth - 1).
 	classOrNil := self classOrNilAtIndex: classIndex.
 	^classOrNil ~= nilObj

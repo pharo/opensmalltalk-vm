@@ -293,7 +293,6 @@ add_compile_options(
     -Wno-deprecated-declarations
     -Wno-pointer-to-int-cast
     -Wno-compare-distinct-pointer-types
-    -Wno-unused-local-typedef
     -Wno-unknown-warning-option
 )
 
