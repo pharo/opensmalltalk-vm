@@ -1256,10 +1256,10 @@ StackInterpreter class >> initializePrimitiveTable [
 		(249 primitiveArrayBecomeOneWayCopyHash)
 
 		"VM Implementor Primitives (250-255)"
-		(250 primitiveClearVMProfile)
-		(251 primitiveControlVMProfiling "primitiveStartVMProfiling")
-		(252 primitiveVMProfileSamplesInto "primitiveStopVMProfiling")
-		(253 primitiveFail "N.B. primitiveCollectCogCodeConstituents in CoInterpreter below")
+		(250 primitiveFail)
+		(251 primitiveFail)
+		(252 primitiveFail)
+		(253 primitiveFail)
 		(254 primitiveVMParameter)
 		(255 primitiveFail)
 
@@ -3737,19 +3737,6 @@ StackInterpreter >> charsOfLong: long [
 			ifFalse: [$?]] as: Array
 ]
 
-{ #category : 'debug support' }
-StackInterpreter >> checkAllAccessibleObjectsOkay [
-
-	"Ensure that all accessible objects in the heap are okay."
-
-	<api>
-	| ok |
-	ok := true.
-	objectMemory allObjectsDo: [ :oop | 
-		ok := ok and: [ self checkOkayFields: oop ] ].
-	^ ok
-]
-
 { #category : 'primitive support' }
 StackInterpreter >> checkAllocFiller [
 	"If allocCheckFiller is true, words in newSpace from freeStart to scavengeThreshold
@@ -3829,13 +3816,21 @@ StackInterpreter >> checkForAndFollowForwardedPrimitiveState: primitiveIndex [
 	 point the accessor depth is taken from the slot in newMethod's first literal."
 
 	| accessorDepth |
-	accessorDepth := ((self isMetaPrimitiveIndex: primitiveIndex) and: [ metaAccessorDepth > -2 ])
+	accessorDepth := ((self isMetaPrimitiveIndex: primitiveIndex) and: [
+		                  metaAccessorDepth > -2 ])
 		                 ifTrue: [ metaAccessorDepth ]
 		                 ifFalse: [
-			                 (primitiveIndex = PrimNumberExternalCall and: [ primitiveFunctionPointer ~~ #primitiveExternalCall ])
-				                 ifTrue: [ self primitiveAccessorDepthForExternalPrimitiveMethod: newMethod ]
-				                 ifFalse: [ primitiveAccessorDepthTable at: primitiveIndex ] ].
-	self assert: (self saneFunctionPointerForFailureOfPrimIndex: primitiveIndex).
+			                 (primitiveIndex = PrimNumberExternalCall and: [
+				                  primitiveFunctionPointer
+				                  ~~ #primitiveExternalCall ])
+				                 ifTrue: [
+				                 self
+					                 primitiveAccessorDepthForExternalPrimitiveMethod:
+					                 newMethod ]
+				                 ifFalse: [
+				                 primitiveAccessorDepthTable at: primitiveIndex ] ].
+	self assert:
+		(self saneFunctionPointerForFailureOfPrimIndex: primitiveIndex).
 	^ self followForwardedForAccessorDepth: accessorDepth
 ]
 
@@ -4078,125 +4073,6 @@ StackInterpreter >> checkMethodIntegrityInFrame: theFP [
 				at: theFP + FoxMethod.
 			^ false ].
 	^ true
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> checkOkayFields: oop [
-	"Check if the argument is an ok object.
-	 If this is a pointers object, check that its fields are all okay oops."
-
-	| hasYoung i fieldOop |
-	(oop = nil or: [ oop = 0 ]) ifTrue: [ ^ true ]. "?? eem 1/16/2013"
-	(objectMemory isIntegerObject: oop) ifTrue: [ ^ true ].
-	(objectMemory checkOkayOop: oop) ifFalse: [ ^ false ].
-	(objectMemory checkOopHasOkayClass: oop) ifFalse: [ ^ false ].
-	((objectMemory isPointersNonImm: oop) or: [
-		 objectMemory isCompiledMethod: oop ]) ifFalse: [ ^ true ].
-	hasYoung := false.
-	(objectMemory isCompiledMethod: oop)
-		ifTrue: [
-		i := (objectMemory literalCountOf: oop) + LiteralStart - 1 ]
-		ifFalse: [
-			(objectMemory isContext: oop)
-				ifTrue: [
-				i := CtxtTempFrameStart + (self fetchStackPointerOf: oop) - 1 ]
-				ifFalse: [ i := (objectMemory lengthOf: oop) - 1 ] ].
-	[ i >= 0 ] whileTrue: [
-		fieldOop := objectMemory fetchPointer: i ofObject: oop.
-		(objectMemory isIntegerObject: fieldOop) ifFalse: [
-			(i = 0 and: [ objectMemory isCompiledMethod: oop ])
-				ifFalse: [
-					hasYoung := hasYoung or: [ objectMemory isYoung: fieldOop ].
-					(objectMemory checkOkayOop: fieldOop) ifFalse: [ ^ false ].
-					(objectMemory checkOopHasOkayClass: fieldOop) ifFalse: [ ^ false ] ]
-				ifTrue: [
-					self
-						checkMethodHeader: fieldOop
-						ofMethod: oop
-						ifInvalid: [ ^ false ] ] ].
-		i := i - 1 ].
-	hasYoung ifTrue: [ ^ objectMemory checkOkayYoungReferrer: oop ].
-	^ true
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> checkOkayInterpreterObjects: writeBack [
-	<api>
-	| ok oopOrZero oop |
-	ok := true.
-	ok := ok and: [ (self checkOkayFields: objectMemory nilObject) ].
-	ok := ok and: [ (self checkOkayFields: objectMemory falseObject) ].
-	ok := ok and: [ (self checkOkayFields: objectMemory trueObject) ].
-	ok := ok and: [ (self checkOkayFields: objectMemory specialObjectsOop) ].
-	ok := ok and: [ (self checkOkayFields: messageSelector) ].
-	ok := ok and: [ (self checkOkayFields: newMethod) ].
-	ok := ok and: [ (self checkOkayFields: lkupClass) ].
-	0 to: MethodCacheEntries - 1 by: MethodCacheEntrySize do:
-		[ :i |
-		oopOrZero := methodCache at: i + MethodCacheSelector.
-		oopOrZero = 0 ifFalse:
-			[ok := ok and: [ (self checkOkayFields: (methodCache at: i + MethodCacheSelector)) ].
-			ok := ok and: [ (self checkOkayFields: (methodCache at: i + MethodCacheMethod))]] ].
-	1 to: objectMemory remapBufferCount do:
-		[ :i |
-		oop := objectMemory remapBuffer at: i.
-		(objectMemory isImmediate: oop) ifFalse:
-			[ok := ok and: [ (self checkOkayFields: oop)]] ].
-	ok := ok and: [ (self checkOkayStackZone: writeBack) ].
-	^ok
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> checkOkayStackPage: thePage [
-	| theSP theFP ok frameRcvrOffset callerFP oop |
-	<var: #thePage type: #'StackPage *'>
-	<var: #theSP type: #'char *'>
-	<var: #theFP type: #'char *'>
-	<var: #frameRcvrOffset type: #'char *'>
-	<var: #callerFP type: #'char *'>
-	<inline: false>
-	theSP := thePage headSP.
-	theFP := thePage  headFP.
-	ok := true.
-	"Skip the instruction pointer on top of stack of inactive pages."
-	thePage = stackPage ifFalse:
-		[theSP := theSP + objectMemory wordSize].
-	[frameRcvrOffset := self frameReceiverLocation: theFP.
-	 [theSP <= frameRcvrOffset] whileTrue:
-		[oop := stackPages unsignedLongAt: theSP.
-		 (objectMemory isIntegerObject: oop) ifFalse:
-			[ok := ok and: [ (self checkOkayFields: oop)] ].
-		 theSP := theSP + objectMemory wordSize].
-	(self frameHasContext: theFP) ifTrue:
-		[self assert: (objectMemory isContext: (self frameContext: theFP)).
-		 ok := ok and: [ (self checkOkayFields: (self frameContext: theFP))] ].
-	ok := ok and: [ (self checkOkayFields: (self frameMethodObject: theFP)) ].
-	(callerFP := self frameCallerFP: theFP) ~= 0] whileTrue:
-		[theSP := theFP + FoxCallerSavedIP + objectMemory wordSize.
-		 theFP := callerFP].
-	theSP := self isCog
-				ifTrue: [theFP + FoxCallerSavedIP + objectMemory wordSize] "caller ip is ceBaseReturnPC"
-				ifFalse: [theFP + FoxCallerSavedIP]. "caller ip is frameCallerContext in a base frame"
-	[theSP <= thePage baseAddress] whileTrue:
-		[oop := stackPages unsignedLongAt: theSP.
-		 (objectMemory isIntegerObject: oop) ifFalse:
-			[ok := ok and: [ (self checkOkayFields: oop)] ].
-		 theSP := theSP + objectMemory wordSize].
-	^ok
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> checkOkayStackZone: writeBack [
-	"Check that all objects in the stack zone are okay"
-	| ok |
-	<var: #thePage type: #'StackPage *'>
-	<inline: false>
-	writeBack ifTrue: [ self writeBackHeadFramePointers ].
-	
-	ok := true.
-	self usedStackPagesDo: [ :thePage |
-		ok := ok and: [ (self checkOkayStackPage: thePage) ] ].
-	^ ok
 ]
 
 { #category : 'process primitive support' }
@@ -6228,18 +6104,6 @@ StackInterpreter >> firstBytecodeOfAlternateHeader: methodHeader method: theMeth
 	 + objectMemory baseHeaderSize
 ]
 
-{ #category : 'plugin primitive support' }
-StackInterpreter >> floatArg: index [
-	"Like #stackFloatValue: but access method arguments left-to-right"
-	<returnTypeC: #double>
-	<doNotGenerate> "Obsolete; was never used; replaced with methodReturnString: in the VirtualMachine struct."
-	| oop |
-	self deprecated.
-	oop := self methodArg: index.
-	oop = 0 ifTrue:[^0.0]. "methodArg: failed"
-	^objectMemory floatValueOf: oop
-]
-
 { #category : 'memory access' }
 StackInterpreter >> floatAtPointer: anOop [
 
@@ -7956,17 +7820,6 @@ StackInterpreter >> instructionPointerForFrame: spouseFP currentFP: currentFP cu
 						ifTrue: [stackPages longAt: thePage headSP]
 						ifFalse:[self oopForPointer: (self frameCallerSavedIP: theFPAbove)]].
 	^self contextInstructionPointer: theIP frame: spouseFP
-]
-
-{ #category : 'plugin primitive support' }
-StackInterpreter >> integerArg: index [
-	"Like #stackIntegerValue: but access method arguments left-to-right"
-	<doNotGenerate> "Obsolete; was never used; replaced with methodReturnInteger: in the VirtualMachine struct."
-	| oop |
-	self deprecated.
-	oop := self methodArg: index.
-	oop = 0 ifTrue:[^0]. "methodArg: failed"
-	^self checkedIntegerValueOf: oop
 ]
 
 { #category : 'return bytecodes' }
@@ -10104,19 +9957,6 @@ StackInterpreter >> method: oop [
 ]
 
 { #category : 'plugin primitive support' }
-StackInterpreter >> methodArg: index [
-	"Like #stackValue: but access method arguments left-to-right"
-	<doNotGenerate> "Obsolete; was never used; replaced with methodReturnBool: in the VirtualMachine struct."
-	self deprecated.
-	index > argumentCount + 1 ifTrue:
-		[self cCode: 'vm_printf("[VM]: Attempt to access method args beyond range\n")'.
-		self printCallStack.
-		self primitiveFail.
-		^0].
-	^self stackValue: argumentCount - index
-]
-
-{ #category : 'plugin primitive support' }
 StackInterpreter >> methodArgumentCount [
 	^argumentCount
 ]
@@ -10548,18 +10388,6 @@ StackInterpreter >> objCouldBeClassObj: objOop [
 	  and: [(objectMemory isIntegerObject: (objectMemory fetchPointer: InstanceSpecificationIndex ofObject: objOop))]]]]
 ]
 
-{ #category : 'plugin primitive support' }
-StackInterpreter >> objectArg: index [
-	"Like #stackObjectValue: but access method arguments left-to-right"
-	<doNotGenerate> "Obsolete; was never used; replaced with methodReturnFloat: in the VirtualMachine struct."
-	| oop |
-	self deprecated.
-	oop := self methodArg: index.
-	oop = 0 ifTrue:[^0]. "methodArg: failed"
-	(objectMemory isImmediate: oop) ifTrue: [self primitiveFail. ^ nil].
-	^oop
-]
-
 { #category : 'simulation support' }
 StackInterpreter >> objectMemory [
 	<doNotGenerate>
@@ -10570,63 +10398,6 @@ StackInterpreter >> objectMemory [
 StackInterpreter >> objectMemory: anObjectMemory [
 	<doNotGenerate>
 	objectMemory := anObjectMemory
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> okayFields: oop [
-	"Check if the argument is an ok object.
-	 If this is a pointers object, check that its fields are all okay oops."
-
-	| i fieldOop |
-	(oop = nil or: [oop = 0]) ifTrue: [ ^true ].
-	(objectMemory isIntegerObject: oop) ifTrue: [ ^true ].
-	(objectMemory okayOop: oop) ifFalse: [ ^false ].
-	(objectMemory oopHasOkayClass: oop) ifFalse: [ ^false ].
-	((objectMemory isPointersNonImm: oop) or: [objectMemory isCompiledMethod: oop]) ifFalse: [ ^true ].
-	(objectMemory isCompiledMethod: oop)
-		ifTrue:
-			[i := (objectMemory literalCountOf: oop) + LiteralStart - 1]
-		ifFalse:
-			[(objectMemory isContext: oop)
-				ifTrue: [i := CtxtTempFrameStart + (self fetchStackPointerOf: oop) - 1]
-				ifFalse: [i := (objectMemory lengthOf: oop) - 1]].
-	[i >= 0] whileTrue: [
-		fieldOop := objectMemory fetchPointer: i ofObject: oop.
-		(objectMemory isIntegerObject: fieldOop) ifFalse: [
-			(objectMemory okayOop: fieldOop) ifFalse: [ ^false ].
-			(self oopHasOkayClass: fieldOop) ifFalse: [ ^false ].
-		].
-		i := i - 1.
-	].
-	^true
-]
-
-{ #category : 'debug support' }
-StackInterpreter >> okayInterpreterObjects [
-
-	| oopOrZero oop |
-	self okayFields: objectMemory nilObject.
-	self okayFields: objectMemory falseObject.
-	self okayFields: objectMemory trueObject.
-	self okayFields: objectMemory specialObjectsOop.
-	self okayFields: messageSelector.
-	self okayFields: newMethod.
-	self okayFields: lkupClass.
-	0 to: MethodCacheEntries - 1 by: MethodCacheEntrySize do: [ :i |
-		oopOrZero := methodCache at: i + MethodCacheSelector.
-		oopOrZero = 0 ifFalse: [
-			self okayFields: (methodCache at: i + MethodCacheSelector).
-			self okayFields: (methodCache at: i + MethodCacheClass).
-			self okayFields: (methodCache at: i + MethodCacheMethod).
-		].
-	].
-	1 to: objectMemory remapBufferCount do: [ :i |
-		oop := objectMemory remapBuffer at: i.
-		(objectMemory isImmediate: oop) ifFalse: [
-			self okayFields: oop.
-		].
-	].
-	self okayStackZone.
 ]
 
 { #category : 'simulation' }

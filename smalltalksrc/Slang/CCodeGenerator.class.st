@@ -564,26 +564,6 @@ CCodeGenerator >> bytesPerWord [
 	^ 8
 ]
 
-{ #category : 'utilities' }
-CCodeGenerator >> cCodeForMethod: selector [
-
-	"Answer a string containing the C code for the given method."
-
-	"Example:
-		((CCodeGenerator new initialize addClass: TestCClass1; prepareMethods)
-			cCodeForMethod: #ifTests)"
-
-	| m s cast |
-	m := self methodNamed: selector.
-	m = nil ifTrue: [ 
-		self error: 'method not found in code base: ' , selector ].
-
-	s := ReadWriteStream on: ''.
-	cast := m asCASTIn: self.
-	cast prettyPrintOn: s.
-	^ s contents
-]
-
 { #category : 'C code generator' }
 CCodeGenerator >> cFunctionNameFor: aSelector [
 	"Create a C function name from the given selector by finding
@@ -920,7 +900,7 @@ CCodeGenerator >> conventionalTypeForType: aCTypeString [
 	 C type comparisons are simple string comparisons; therefore the convention matters.
 	 Ensure there is a space between the base type and any trailing *'s. Trim whitespace."
 	| type index |
-	type := aCTypeString withBlanksTrimmed.
+	type := aCTypeString trimBoth.
 	index := type size.
 	[(type at: index) == $*] whileTrue:
 		[index := index - 1].
@@ -1247,6 +1227,7 @@ CCodeGenerator >> emitCMethods: methodList on: aStream [
 			methodList doWithIndex: [ :m :i | 
 				bar value: i.
 				(m isRealMethod and: [ self shouldGenerateMethod: m ]) ifTrue: [ | cast |
+					(m hasProperty: #halt) ifTrue: [self halt].
 					cast := m asCASTIn: self.
 					cast prettyPrintOn: aStream ] ] ]
 ]
@@ -1389,7 +1370,7 @@ CCodeGenerator >> fileHeaderVersionStampForSourceClass: sourceClass [
 								do: [:ex| self class monticelloDescriptionFor: sourceClass]]]
 		on: Error
 		do: [:ex| | now |
-			now := Time dateAndTimeNow printString.
+			now := DateAndTime now printString.
 			^String streamContents:
 				[:s|
 				s nextPutAll: '/* Automatically generated from Squeak on '.
@@ -1751,6 +1732,28 @@ CCodeGenerator >> generateCASTBytesPerOop: tast [
 CCodeGenerator >> generateCASTBytesPerWord: tast [
 
 	^ CIdentifierNode name: 'BytesPerWord'
+]
+
+{ #category : 'CAST translation' }
+CCodeGenerator >> generateCASTCCallAsArgument: aTSendNode [
+	"Support only calls where the first arg (the function name) is a constant string"
+
+	| functionNameNode callArguments |
+	functionNameNode := aTSendNode arguments first.
+	(functionNameNode isConstant and: [ functionNameNode value isString ])
+		ifFalse: [ self error: 'unsupported' ].
+
+	callArguments := aTSendNode arguments size > 1
+		                 ifFalse: [ #(  ) ]
+		                 ifTrue: [ "Only accept literal statement lists as second argument"
+			                 self assert:
+				                 aTSendNode arguments second isStatementList.
+			                 aTSendNode arguments second statements collect: [
+				                 :e | e asCASTExpressionIn: self ] ].
+
+	^ CCallNode
+		  identifier: (CIdentifierNode name: functionNameNode value)
+		  arguments: callArguments
 ]
 
 { #category : 'CAST translation' }
@@ -3253,6 +3256,8 @@ CCodeGenerator >> initializeCASTTranslationDictionary [
 	#isIntegerObject: 			#generateCASTIsIntegerObject:
 	#cCode:					#generateCASTInlineCCode:
 	#cCode:inSmalltalk:			#generateCASTInlineCCode:
+	#cCall:                  #generateCASTCCallAsArgument:
+	#cCall:withArguments:    #generateCASTCCallAsArgument:
 	#cppIf:ifTrue:ifFalse:		#generateCASTInlineCppIfElse:
 	#cppIf:ifTrue:				#generateCASTInlineCppIfElse:
 	#cCoerce:to:				#generateCASTCCoercion:
@@ -4837,9 +4842,9 @@ CCodeGenerator >> sizeOfIntegralCType: anIntegralCType [ "<String>"
 	(anIntegralCType beginsWith: 'register ') ifTrue:
 		[^self sizeOfIntegralCType: (anIntegralCType allButFirst: 9)].
 	prunedCType := (anIntegralCType beginsWith: 'unsigned ')
-						ifTrue: [(anIntegralCType allButFirst: 9) withBlanksTrimmed]
+						ifTrue: [(anIntegralCType allButFirst: 9) trimBoth]
 						ifFalse: [(anIntegralCType beginsWith: 'signed ')
-									ifTrue: [(anIntegralCType allButFirst: 7) withBlanksTrimmed]
+									ifTrue: [(anIntegralCType allButFirst: 7) trimBoth]
 									ifFalse: [anIntegralCType]].
 	
 	^prunedCType asString caseOf: {
@@ -4869,7 +4874,7 @@ CCodeGenerator >> sizeOfIntegralCType: anIntegralCType [ "<String>"
 		[((anIntegralCType beginsWith: 'unsigned') "e.g. 'unsigned  : 8'"
 		  and: [(anIntegralCType includesAnyOf: '[*]') not
 		  and: [(index := anIntegralCType indexOf: $:) > 0]])
-			ifTrue: [(Integer readFrom: (anIntegralCType copyFrom: index + 1 to: anIntegralCType size) withBlanksTrimmed readStream) + 7 // 8]
+			ifTrue: [(Integer readFrom: (anIntegralCType copyFrom: index + 1 to: anIntegralCType size) trimBoth readStream) + 7 // 8]
 			ifFalse: [self error: 'unrecognized integral type']]
 ]
 
@@ -5146,7 +5151,7 @@ CCodeGenerator >> typeForDereference: sendNode in: aTMethod [
 	(self typeFor: sendNode receiver in: aTMethod) ifNotNil:
 		[:type|
 		 type last = $* ifTrue:
-			[^type allButLast withBlanksTrimmed]].
+			[^type allButLast trimBoth]].
 	"It would be nice to warn here, but there are contexts when the type is unknown, for example determining
 	 the return types of apiMethods.  inferTypesForImplicitlyTypedVariablesAndMethods could provide a signal
 	 handler to suppress the warnings in that case but that's too fancy.  Instead we live with the default."

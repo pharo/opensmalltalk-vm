@@ -1185,6 +1185,28 @@ SlangBasicTranslationTest >> testConstantsStatementsInBlockValueAreIgnored [
 }'
 ]
 
+{ #category : 'tests-inlinemethod' }
+SlangBasicTranslationTest >> testDoNotInlineArgumentsOfCCall [
+	
+	| translation tMethod |
+	tMethod := self getTMethodFrom: #methodCallingCFunction.
+	tMethod recordDeclarationsIn: generator.
+	generator doBasicInlining: true.
+	
+	translation := self translate: tMethod.
+	translation := translation trimBoth.
+	
+	self
+		assert: translation
+		equals: '/* SlangBasicTranslationTestClass>>#methodCallingCFunction */
+static sqInt
+methodCallingCFunction(void)
+{
+	cCallwithArguments("function", methodWithInlinePragma());
+	return 0;
+}'
+]
+
 { #category : 'tests-goto' }
 SlangBasicTranslationTest >> testGoto [
 
@@ -2807,6 +2829,38 @@ SlangBasicTranslationTest >> testSendBytesPerWord [
 			                arguments: { }).
 
 	self assert: translation equals: 'BytesPerWord'
+]
+
+{ #category : 'tests-builtins' }
+SlangBasicTranslationTest >> testSendCCall [
+
+	| translation send |
+	send := TAssignmentNode new
+		        setVariable: (TVariableNode named: 'y')
+		        expression: (TSendNode new
+				         setSelector: #cCall:
+				         receiver: (TVariableNode new setName: 'self')
+				         arguments: { (TConstantNode value: #foo) }).
+	translation := self translate: send.
+
+	self assert: translation equals: 'y = foo()'
+]
+
+{ #category : 'tests-builtins' }
+SlangBasicTranslationTest >> testSendCCallWithArguments [
+
+	| translation send |
+	send := TAssignmentNode new
+		        setVariable: (TVariableNode named: 'y')
+		        expression: (TSendNode new
+				         setSelector: #cCall:withArguments:
+				         receiver: (TVariableNode new setName: 'self')
+				         arguments: { 
+								(TConstantNode value: #foo).
+								(TStatementListNode statements: { (TConstantNode value: 2). (TConstantNode value: 3) }) }).
+	translation := self translate: send.
+
+	self assert: translation equals: 'y = foo(2, 3)'
 ]
 
 { #category : 'tests-builtins' }

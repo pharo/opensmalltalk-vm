@@ -13,8 +13,9 @@ Class {
 		'previousRememberedSetSize',
 		'doFullScan'
 	],
-	#category : 'VMMaker',
-	#package : 'VMMaker'
+	#category : 'VMMaker-Memory',
+	#package : 'VMMaker',
+	#tag : 'Memory'
 }
 
 { #category : 'translation' }

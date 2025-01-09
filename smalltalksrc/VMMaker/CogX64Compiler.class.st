@@ -4738,26 +4738,31 @@ CogX64Compiler >> stop [
 
 { #category : 'generate machine code' }
 CogX64Compiler >> stopsFrom: startAddr to: endAddr [
+
 	self
-		cCode: [self me: startAddr ms: self stop et: endAddr - startAddr + 1]
-		inSmalltalk:
-			[| alignedEnd alignedStart stops |
+		cCode: [
+			self cCall: 'memset' withArguments: {
+					startAddr.
+					self stop.
+					(endAddr - startAddr + 1) } ]
+		inSmalltalk: [
+			| alignedEnd alignedStart stops |
 			stops := self stop << 8 + self stop.
 			stops := stops << 16 + stops.
 			stops := stops << 32 + stops.
 			alignedStart := startAddr + 7 // 8 * 8.
 			alignedEnd := endAddr - 1 // 8 * 8.
 			alignedEnd <= startAddr
-				ifTrue:
-					[startAddr to: endAddr do:
-						[:addr | objectMemory byteAt: addr put: self stop]]
-				ifFalse:
-					[startAddr to: alignedStart - 1 do:
-						[:addr | objectMemory byteAt: addr put: self stop].
-					 alignedStart to: alignedEnd by: 8 do:
-						[:addr | objectMemory long64At: addr put: stops].
-					 alignedEnd + 8 to: endAddr do:
-						[:addr | objectMemory byteAt: addr put: self stop]]]
+				ifTrue: [
+					startAddr to: endAddr do: [ :addr |
+					objectMemory byteAt: addr put: self stop ] ]
+				ifFalse: [
+					startAddr to: alignedStart - 1 do: [ :addr |
+					objectMemory byteAt: addr put: self stop ].
+					alignedStart to: alignedEnd by: 8 do: [ :addr |
+					objectMemory long64At: addr put: stops ].
+					alignedEnd + 8 to: endAddr do: [ :addr |
+					objectMemory byteAt: addr put: self stop ] ] ]
 ]
 
 { #category : 'inline cacheing' }

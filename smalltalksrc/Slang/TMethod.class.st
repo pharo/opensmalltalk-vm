@@ -240,7 +240,7 @@ TMethod >> argConversionExprFor: varName stackIndex: stackIndex [
 	| exprList decl type stmtList |
 	exprList := OrderedCollection new.
 	((decl := declarations at: varName ifAbsent: []) notNil
-	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') withBlanksTrimmed)])
+	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') trimBoth)])
 		ifTrue:
 			[(decl includes: $*) ifTrue: "array"
 				[(decl includesSubstring: 'char')
@@ -824,39 +824,6 @@ TMethod >> emitCFunctionPrototype: aStream generator: aCodeGen isPrototype: isPr
 ]
 
 { #category : 'C code generation' }
-TMethod >> emitCLocalsOn: aStream generator: aCodeGen [
-	"Emit a C function header for this method onto the given stream."
-
-	| volatileVariables maybeExternFunctions |
-	volatileVariables := properties includesKey: #volatile.
-	self refersToGlobalStruct ifTrue:
-		[aStream
-			next: 3 put: Character space; "there's already an opening ${ on this line; see sender"
-			nextPutAll: (volatileVariables
-						ifTrue: ['DECL_MAYBE_VOLATILE_SQ_GLOBAL_STRUCT']
-						ifFalse: ['DECL_MAYBE_SQ_GLOBAL_STRUCT'])].
-	aStream cr.
-	maybeExternFunctions := (declarations select: [:decl| decl beginsWith: 'extern']) keys.
-	(locals isEmpty and: [maybeExternFunctions isEmpty]) ifFalse:
-		[(aCodeGen sortStrings: locals, maybeExternFunctions) do:
-			[ :var | | decl |
-			decl := self declarationAt: var
-							ifAbsent: [aCodeGen defaultType, ' ', var].
-			(volatileVariables
-			 or: [(decl beginsWith: 'static')
-			 or: [(decl beginsWith: 'extern')
-			 or: [usedVariablesCache includes: var]]]) ifTrue:
-				[aStream next: 4 put: Character space.
-				 volatileVariables ifTrue:
-					[aStream nextPutAll: #volatile; space].
-				 aStream
-					nextPutAll: decl;
-					nextPut: $;;
-					cr]].
-		 aStream cr]
-]
-
-{ #category : 'C code generation' }
 TMethod >> emitInlineOn: aStream level: level generator: aCodeGen [
 	"Emit C code for this method onto the given stream. All calls to inlined methods should already have been expanded."
 	self removeUnusedTempsAndNilIfRequiredIn: aCodeGen.
@@ -1313,6 +1280,12 @@ TMethod >> functionAttributes: aString [
 { #category : 'testing' }
 TMethod >> hasProperties [
 	^properties notNil and: [properties notEmpty]
+]
+
+{ #category : 'transformations' }
+TMethod >> hasProperty: aName [
+
+	^ self hasProperties and: [ properties includesKey: aName ]
 ]
 
 { #category : 'testing' }
@@ -2942,10 +2915,18 @@ TMethod >> statementsListsForInliningIn: aCodeGen [
 		unless: [ :node | 
 			node isSend and: [ 
 				node selector == #cCode:inSmalltalk: or: [ 
-					aCodeGen isAssertSelector: node selector ] ] ].
+					node selector == #cCall: or: [ 
+						node selector == #cCall:withArguments: or: [ 
+							aCodeGen isAssertSelector: node selector ] ] ] ] ].
 	parseTree nodesDo: [ :node | 
 		node isSend ifTrue: [ 
 			node selector = #cCode:inSmalltalk: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall:withArguments: ifTrue: [ 
 				node nodesDo: [ :ccisNode | 
 					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
 			(node selector = #cppIf:ifTrue:ifFalse: or: [ 
@@ -3246,8 +3227,6 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 	 Answer if something was inlined."
 
 	| didSomething statementLists |
-	"complete ifTrue:
-		[^false]."
 	self definedAsMacro ifTrue: [
 		complete ifTrue: [ ^ false ].
 		^ complete := true ].
@@ -3261,9 +3240,11 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 		                didSomething ].
 
 	didSomething ifTrue: [ writtenToGlobalVarsCache := nil ].
+	
+	"marking a method complete is progress"
 	complete ifFalse: [
 		self checkForCompletenessIn: aCodeGen.
-		complete ifTrue: [ didSomething := true ] ]. "marking a method complete is progress"
+		complete ifTrue: [ didSomething := true ] ]. 
 	^ didSomething
 ]
 
