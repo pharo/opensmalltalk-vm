@@ -612,11 +612,11 @@ If ffi is put as a separate header, slang will sort the header and put it outsid
 		declareCAsUSqLong:
 			#( nextPollUsecs nextWakeupUsecs longRunningPrimitiveGCUsecs
 			   longRunningPrimitiveStartUsecs longRunningPrimitiveStopUsecs
+	"these are high-frequency enough that they're overflowing quite quickly on modern hardware"
 			   statProcessSwitch statForceInterruptCheck
 			   statCheckForEvents statStackOverflow statStackPageDivorce
 			   statIdleUsecs )
 		in: aCCodeGenerator.
-	"these are high-frequency enough that they're overflowing quite quickly on modern hardware"
 	aCCodeGenerator var: #nextProfileTick type: #sqLong.
 	aCCodeGenerator
 		var: #reenterInterpreter
