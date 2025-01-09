@@ -265,11 +265,6 @@ CurrentImageCoInterpreterFacade >> compactClassFieldWidth [
 	^objectMemory compactClassFieldWidth
 ]
 
-{ #category : 'debug support' }
-CurrentImageCoInterpreterFacade >> compilationBreak: aString point: length isMNUCase: isMNUCase [
-	^self
-]
-
 { #category : 'printing' }
 CurrentImageCoInterpreterFacade >> cr [
 	coInterpreter transcript cr; flush
@@ -652,7 +647,7 @@ CurrentImageCoInterpreterFacade >> lookupAddress: address [
 ]
 
 { #category : 'cog jit support' }
-CurrentImageCoInterpreterFacade >> lookupOrdinary: selectorOop receiver: receiverOop [
+CurrentImageCoInterpreterFacade >> lookupMethodWithoutMNUProcessingForSelector: selectorOop receiver: receiverOop [
 	| rcvr selector |
 	rcvr := self objectForOop: receiverOop.
 	selector := self objectForOop: selectorOop.

@@ -877,7 +877,7 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	SelectorCannotReturn := 21.
 	ProcessSignalingLowSpace := 22.	"was TheInputSemaphore"
 	SpecialSelectors := 23.
-	"24. was an array of 255 characters"
+	SelectorStackOverflow := 24.
 	SelectorMustBeBoolean := 25.
 	ClassByteArray := 26.
 	"ClassProcess := 27. unused"
@@ -887,9 +887,6 @@ SpurMemoryManager class >> initializeSpecialObjectIndices [
 	ClassFloat32Register := 31.
 	ClassFloat64Register := 32.
 	SelectorCannotInterpret := 34.
-	"Was MethodContextProto := 35."
-	"Was ClassBlockClosure := 36."
-	"Was BlockContextProto := 37."
 	ExternalObjectsArray := 38.
 	ClassMutex := 39. "Only used for debugging (StackInterpreter>>#printAllStacks)"
 	"Was: ClassTranslatedMethod := 40."
@@ -3568,17 +3565,25 @@ SpurMemoryManager >> classArray: anOop [
 
 { #category : 'class table' }
 SpurMemoryManager >> classAtIndex: classIndex [
+
 	<api>
 	<inline: true>
 	| classTablePage |
-	self assert: (classIndex >= 0 and: [classIndex <= self tagMask or: [classIndex >= self arrayClassIndexPun and: [classIndex <= self classIndexMask]]]).
-	classTablePage := self fetchPointer: classIndex >> self classTableMajorIndexShift
-							ofObject: hiddenRootsObj.
-	classTablePage = nilObj ifTrue:
-		[^nil].
-	^self
-		fetchPointer: (classIndex bitAnd: self classTableMinorIndexMask)
-		ofObject: classTablePage
+	self assert: (classIndex >= 0 and: [
+			 classIndex <= self tagMask or: [
+				 classIndex
+					 between: self arrayClassIndexPun
+					 and: self classIndexMask ] ]).
+	classTablePage := self
+		                  fetchPointer:
+		                  classIndex >> self classTableMajorIndexShift
+		                  ofObject: hiddenRootsObj.
+	^ classTablePage = nilObj
+		  ifTrue: [ nil ]
+		  ifFalse: [
+			  self
+				  fetchPointer: (classIndex bitAnd: self classTableMinorIndexMask)
+				  ofObject: classTablePage ]
 ]
 
 { #category : 'class table' }
@@ -7506,6 +7511,13 @@ SpurMemoryManager >> isContextNonImm: oop [
 	^(self classIndexOf: oop) = ClassMethodContextCompactIndex
 ]
 
+{ #category : 'object testing' }
+SpurMemoryManager >> isContextObject: anOop [
+  
+  <inline: true>
+  ^(self classIndexOfHeader: (self baseHeader: anOop)) = ClassMethodContextCompactIndex
+]
+
 { #category : 'obj stacks' }
 SpurMemoryManager >> isEmptyObjStack: objStack [
 	objStack = nilObj ifTrue:
@@ -7903,6 +7915,15 @@ SpurMemoryManager >> isNonIntegerObject: oop [
 { #category : 'object enumeration' }
 SpurMemoryManager >> isNormalObject: objOop [
 	^(self classIndexOf: objOop) > self lastClassIndexPun
+]
+
+{ #category : 'object testing' }
+SpurMemoryManager >> isNotForwarded: oop [
+	"Note that (sadly) this is not the negation of `isForwarded`.
+	 `isForwarded` performs an unconditional memory access that can cause a crash
+	 (or an erroneous result) when applied on immediates."
+	<api>
+	^ (self isImmediate: oop) or: [ (self isForwarded: oop) not ]
 ]
 
 { #category : 'object testing' }
@@ -9420,8 +9441,8 @@ SpurMemoryManager >> methodHeaderFromSavedFirstField: oop [
 { #category : 'memory access' }
 SpurMemoryManager >> methodHeaderOf: methodObj [
 	"Answer the method header of a CompiledMethod object."
-	self assert: (self isCompiledMethod: methodObj).
-	^self fetchPointer: HeaderIndex ofObject: methodObj
+	<inline: true>
+	^ self rawHeaderOf: methodObj
 ]
 
 { #category : 'simulation only' }
@@ -11428,6 +11449,13 @@ SpurMemoryManager >> rawHashBitsOf: objOop [
 	<api>
 	self flag: #endianness.
 	^(self uint32AtPointer: objOop + 4) bitAnd: self identityHashHalfWordMask
+]
+
+{ #category : 'compiled methods' }
+SpurMemoryManager >> rawHeaderOf: methodPointer [
+
+	<api>
+	^ self fetchPointer: HeaderIndex ofObject: methodPointer
 ]
 
 { #category : 'object access' }

@@ -372,7 +372,7 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionInstructionPointerInCorrectAd
 		lastInstruction := cogit Call: cogit methodZoneBase + 16rFFFFF0.  ].
 	
 	invalidAddressHandled := false.
-	
+
 	self machineSimulator invalidAccessHandler: [:invalidAccess | 
 		invalidAddressHandled := true.
 		self 
