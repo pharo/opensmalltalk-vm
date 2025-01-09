@@ -6,6 +6,12 @@ Class {
 	#tag : 'JIT'
 }
 
+{ #category : 'testing' }
+CogX86Compiler class >> isAbstract [
+
+	^ self == CogX86Compiler
+]
+
 { #category : 'smalltalk calling convention' }
 CogX86Compiler >> genPushRegisterArgsForAbortMissNumArgs: numArgs [
 	"Ensure that the register args are pushed before the outer and

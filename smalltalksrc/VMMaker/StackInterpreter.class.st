@@ -4921,17 +4921,17 @@ StackInterpreter >> currentBytecode [
 	^ currentBytecode
 ]
 
-{ #category : 'frame access' }
-StackInterpreter >> defaultCallerSavedIP [
-
-	^ objectMemory nilObject
-]
-
 { #category : 'indexing primitive support' }
 StackInterpreter >> currentBytecode: anInteger [
 
 	<doNotGenerate>
 	currentBytecode := anInteger
+]
+
+{ #category : 'frame access' }
+StackInterpreter >> defaultCallerSavedIP [
+
+	^ objectMemory nilObject
 ]
 
 { #category : 'initialization' }

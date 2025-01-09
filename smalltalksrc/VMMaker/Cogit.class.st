@@ -311,13 +311,17 @@ Class {
 
 { #category : 'translation' }
 Cogit class >> activeCompilerClass [
-	^InitializationOptions
-		at: #CogCompilerClass
-		ifPresent: [:compilerClassName| Smalltalk classNamed: compilerClassName]
-		ifAbsent:
-			[(CogAbstractInstruction subclasses detect:
-				[:compilerClass|
-				 compilerClass ISA == (InitializationOptions at: #ISA ifAbsent: [#IA32])]) defaultCompilerClass]
+
+	^ InitializationOptions
+		  at: #CogCompilerClass
+		  ifPresent: [ :compilerClassName |
+		  Smalltalk classNamed: compilerClassName ]
+		  ifAbsent: [
+			  (CogAbstractInstruction allSubclasses detect: [ :compilerClass |
+				   compilerClass isAbstract not and: [
+					   compilerClass ISA
+					   == (InitializationOptions at: #ISA ifAbsent: [ #IA32 ]) ] ])
+				  defaultCompilerClass ]
 ]
 
 { #category : 'translation' }
