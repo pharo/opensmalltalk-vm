@@ -2770,7 +2770,6 @@ CCodeGenerator >> generateCASTTimesRepeat: tast [
 	| repeat |
 	repeat := CCompoundStatementNode statements: OrderedCollection new.
 	repeat needsBrackets: false.
-	repeat needsSeparator: false.
 
 	tast receiver value timesRepeat: [
 		repeat add: (tast arguments first asCASTIn: self) ].
