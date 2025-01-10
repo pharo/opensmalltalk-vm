@@ -714,7 +714,6 @@ methodWithEmptyIfTrueInIfFalseIfTrueAndNoSendInReceiver(SLDeadCodeEliminationTes
 {
 	int i;
 
-	;
 	{
 		return;
 	}
@@ -774,7 +773,6 @@ methodWithEmptyIfTrueInIfTrueIfFalseAndNoSendInReceiver(SLDeadCodeEliminationTes
 {
 	int i;
 
-	;
 	{
 		return;
 	}
@@ -834,7 +832,6 @@ methodWithEmptyifNilInIfNilIfNotNilAndNoSendInReceiver(SLDeadCodeEliminationTest
 {
 	int i;
 
-	;
 	{
 		return;
 	}
@@ -894,7 +891,6 @@ methodWithEmptyifNilInIfNotNilIfNilAndNoSendInReceiver(SLDeadCodeEliminationTest
 {
 	int i;
 
-	;
 	{
 		return;
 	}
@@ -3846,7 +3842,5 @@ switchWithOnlyCommentSendInReceiver(SLDeadCodeEliminationTestClass * self_in_swi
 SLDeadCodeEliminationTest >> translate: tast [
 
 	^ String streamContents: [ :str | 
-		self
-			perform: (#astTranslate , #':inStream:') asSymbol
-			withArguments: { tast . str } ]
+		self astTranslate: tast inStream: str ]
 ]

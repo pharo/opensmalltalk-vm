@@ -204,9 +204,12 @@ Class {
 		'ceEnterCogCodePopReceiverReg',
 		'ceCallCogCodePopReceiverReg',
 		'ceCallCogCodePopReceiverAndClassRegs',
+		'cePrimReturnEnterCogCode',
+		'cePrimReturnEnterCogCodeProfiling',
 		'ceNonLocalReturnTrampoline',
 		'ceFetchContextInstVarTrampoline',
 		'ceStoreContextInstVarTrampoline',
+		'ceEnclosingObjectTrampoline',
 		'ceFlushICache',
 		'ceCheckFeaturesFunction',
 		'ceTraceLinkedSendTrampoline',
@@ -255,9 +258,7 @@ Class {
 		'statCompileFullBlockUsecs',
 		'statCompileMethodCount',
 		'statCompileMethodUsecs',
-		'jitCodeZoneWriteEnabled',
-		'cePrimReturnEnterCogCode',
-		'cePrimReturnEnterCogCodeProfiling'
+		'jitCodeZoneWriteEnabled'
 	],
 	#classVars : [
 		'AnnotationConstantNames',
@@ -287,8 +288,7 @@ Class {
 		'NumObjRefsInRuntime',
 		'NumSpecialSelectors',
 		'NumTrampolines',
-		'ProcessorClass',
-		'RRRName'
+		'ProcessorClass'
 	],
 	#pools : [
 		'CogAbstractRegisters',
@@ -311,13 +311,17 @@ Class {
 
 { #category : 'translation' }
 Cogit class >> activeCompilerClass [
-	^InitializationOptions
-		at: #CogCompilerClass
-		ifPresent: [:compilerClassName| Smalltalk classNamed: compilerClassName]
-		ifAbsent:
-			[(CogAbstractInstruction subclasses detect:
-				[:compilerClass|
-				 compilerClass ISA == (InitializationOptions at: #ISA ifAbsent: [#IA32])]) defaultCompilerClass]
+
+	^ InitializationOptions
+		  at: #CogCompilerClass
+		  ifPresent: [ :compilerClassName |
+		  Smalltalk classNamed: compilerClassName ]
+		  ifAbsent: [
+			  (CogAbstractInstruction allSubclasses detect: [ :compilerClass |
+				   compilerClass isAbstract not and: [
+					   compilerClass ISA
+					   == (InitializationOptions at: #ISA ifAbsent: [ #IA32 ]) ] ])
+				  defaultCompilerClass ]
 ]
 
 { #category : 'translation' }
@@ -402,67 +406,10 @@ Cogit class >> assumptions [
 	 64k of code per method more than enough"
 ]
 
-{ #category : 'in-image compilation support' }
-Cogit class >> attemptToComputeInstVarNamesFor: aCompiledMethod [
-	(aCompiledMethod methodClass instSize > 0) ifTrue:
-		[InitializationOptions
-			at: #instVarNames
-			put: (aCompiledMethod methodClass allInstVarNames)]
-]
-
-{ #category : 'in-image compilation support' }
-Cogit class >> attemptToComputeTempNamesFor: aCompiledMethod [
-	(aCompiledMethod respondsTo: #tempNames) ifTrue:
-		[| schematicTemps blocks |
-		 schematicTemps := aCompiledMethod methodNode schematicTempNamesString.
-		 blocks := aCompiledMethod embeddedBlockClosures.
-		 InitializationOptions
-			at: #tempNames
-			put: (Dictionary newFrom: {aCompiledMethod initialPC -> (self decomposeSchematicTemps: (schematicTemps copyUpTo: $[))},
-				(blocks
-					ifEmpty: [#()]
-					ifNotEmpty:
-						[aCompiledMethod embeddedBlockClosures
-							with: (schematicTemps first = $[
-									ifTrue: [schematicTemps piecesCutWhere: [:a :b| b = $[]]
-									ifFalse: [(schematicTemps piecesCutWhere: [:a :b| b = $[]) allButFirst])
-							collect: [:c :s| c startpc -> (self decomposeSchematicTemps: (s copyWithoutAll: '[]'))]]))]
-]
-
 { #category : 'accessing class hierarchy' }
 Cogit class >> chooseCogitClass [
 	^Smalltalk at: ([:choices| choices at: (UIManager default chooseFrom: choices) ifAbsent: [^nil]]
 						value: (Cogit allSubclasses collect: [:ea| ea  name]) sorted)
-]
-
-{ #category : 'in-image compilation' }
-Cogit class >> cog: aCompiledMethod [
-	^self cog: aCompiledMethod options: #()
-]
-
-{ #category : 'in-image compilation' }
-Cogit class >> cog: aCompiledMethod options: optionsArray [
-	^self cog: aCompiledMethod selectorOrNumCopied: aCompiledMethod selector options: optionsArray
-]
-
-{ #category : 'in-image compilation' }
-Cogit class >> cog: aCompiledMethod selector: aSelector [
-	^self cog: aCompiledMethod selectorOrNumCopied: aSelector options: #()
-]
-
-{ #category : 'in-image compilation' }
-Cogit class >> cog: aCompiledMethod selectorOrNumCopied: selectorOrNumCopied options: optionsDictionaryOrArray [
-	"StackToRegisterMappingCogit cog: (Integer >> #benchFib) selector: #benchFib options: #()"
-	| cogit coInterpreter |
-	cogit := self initializedInstanceForTests: optionsDictionaryOrArray.
-	coInterpreter := cogit coInterpreter.
-	self attemptToComputeTempNamesFor: aCompiledMethod.
-	self attemptToComputeInstVarNamesFor: aCompiledMethod.
-	^{ coInterpreter.
-		cogit.
-		selectorOrNumCopied isInteger
-			ifTrue: [ cogit cogFullBlockMethod: (coInterpreter oopForObject: aCompiledMethod) numCopied: selectorOrNumCopied ]
-			ifFalse: [ cogit cog: (coInterpreter oopForObject: aCompiledMethod) selector: (coInterpreter oopForObject: selectorOrNumCopied) ] }
 ]
 
 { #category : 'documentation' }
@@ -605,19 +552,6 @@ Cogit class >> declareCVarsIn: aCCodeGenerator [
 	aCCodeGenerator addSelectorTranslation: #halt: to: 'haltmsg'
 ]
 
-{ #category : 'in-image compilation support' }
-Cogit class >> decomposeSchematicTemps: aString [
-	^Array streamContents:
-		[:ws| | rs |
-		rs := aString readStream.
-		[rs atEnd] whileFalse:
-			[ws nextPut: (rs peek = $(
-						ifTrue: [[rs upThrough: $)]
-									on: MessageNotUnderstood
-									do: [:ex| (rs upTo: $)), ')']]
-						ifFalse: [rs upTo: Character space])]]
-]
-
 { #category : 'translation' }
 Cogit class >> defineAtCompileTime: anObject [
 	"Override to define at translation time those variables that need to
@@ -634,14 +568,6 @@ Cogit class >> defineAtCompileTime: anObject [
 Cogit class >> doInlining [
 	"inline only those methods that are marked with <inline: true>"
 	^#asSpecifiedOrQuick
-]
-
-{ #category : 'in-image compilation' }
-Cogit class >> genAndDisPICoptions: optionsDictionaryOrArray [
-	"StackToRegisterMappingCogit genAndDisPICoptions: #(ISA ARMv5 CogCompilerClass CogOutOfLineLiteralsARMCompiler)"
-	| cogit |
-	cogit := self initializedInstanceForTests: optionsDictionaryOrArray.
-	cogit disassembleFrom: cogit cPICPrototype + (cogit sizeof: CogMethod) to: cogit cPICPrototype + cogit closedPICSize
 ]
 
 { #category : 'translation' }
@@ -1229,37 +1155,6 @@ Cogit class >> initializeWithOptions: optionsDictionary [
 	self initializeAnnotationConstants.
 	self initializeNumTrampolines.
 	self initializePrimitiveTable
-]
-
-{ #category : 'in-image compilation support' }
-Cogit class >> initializedInstanceForTests: optionsDictionaryOrArray [
-	"Answer an instance of a Cogit suitable for running tests that has initialized
-	 its method zone (generated trampolines etc)"
-	| cogit coInterpreter |
-	cogit := self instanceForTests: optionsDictionaryOrArray.
-	coInterpreter := CurrentImageCoInterpreterFacade forCogit: cogit.
-	[cogit
-		setInterpreter: coInterpreter;
-		singleStep: true;
-		initializeCodeZoneFrom: 1024 upTo: coInterpreter memory size.
-	 cogit methodZone freeStart: (cogit methodZone freeStart roundUpTo: 1024)]
-		on: Notification
-		do: [:ex|
-			(ex messageText beginsWith: 'cannot find receiver for') ifTrue:
-				[ex resume: coInterpreter].
-			ex pass].
-	^cogit
-]
-
-{ #category : 'in-image compilation support' }
-Cogit class >> instanceForTests: optionsDictionaryOrArray [
-	"Initialize all the relevant classes from the options and answer a new instance of me."
-	| initOptions |
-	initOptions := self asOptionsDictionary: optionsDictionaryOrArray.
-	CoInterpreter initializeWithOptions: initOptions.
-	CoInterpreter objectMemoryClass initializeWithOptions: initOptions.
-	self initializeWithOptions: initOptions.
-	^self new
 ]
 
 { #category : 'translation' }
@@ -3087,27 +2982,9 @@ Cogit >> addCogMethodsToHeapMap [
 
 { #category : 'method map' }
 Cogit >> addToMap: annotation instruction: instruction byte: byte at: address for: mcpc [
+
 	<inline: true>
-	objectMemory byteAt: address put: byte.
-	self cCode: [] inSmalltalk:
-		[| s bytecode |
-		(compilationTrace anyMask: 64) ifTrue:
-			[(s := coInterpreter transcript)
-				newLine;
-				print: annotation; nextPut: $/; nextPutAll: byte hex; space;
-				nextPutAll: address hex; space; nextPutAll: mcpc hex; space;
-				nextPutAll: (AnnotationConstantNames detect: [:name| (Cogit classPool at: name ifAbsent: []) = annotation]); cr; flush.
-			 (instruction notNil
-			  and: [instruction bcpc isInteger]) ifTrue:
-				[s tab; print: instruction bcpc; nextPut: $/.
-				 instruction bcpc printOn: s base: 16.
-				 s space.
-				 instruction printStateOn: s.
-				 s space.
-				 bytecode := objectMemory fetchByte: instruction bcpc ofObject: methodObj.
-				 bytecode := bytecode.
-				 (self generatorAt: bytecode) printStateOn: s.
-				 s cr; flush]]]
+	objectMemory byteAt: address put: byte
 ]
 
 { #category : 'testing' }
@@ -3757,7 +3634,7 @@ Cogit >> callCogCodePopReceiver [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverReg]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverReg']
 		inSmalltalk: [self ceCallCogCodePopReceiverReg].
 	"(and this exists only to reference Debug)"
 	Debug ifFalse: [self error: 'what??']
@@ -3770,7 +3647,7 @@ Cogit >> callCogCodePopReceiverAndClassRegs [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCECallCogCodePopReceiverAndClassRegs]
+	self cCode: [self cCall: 'realCECallCogCodePopReceiverAndClassRegs']
 		inSmalltalk: [self ceCallCogCodePopReceiverAndClassRegs]
 ]
 
@@ -5938,60 +5815,9 @@ Cogit >> disableCodeZoneWrite [
 	
 	self 
 		cppIf: #'READ_ONLY_CODE_ZONE'
-		ifTrue:[	self pthread_jit_write_protect_np: true ].
+		ifTrue:[	self cCall: 'pthread_jit_write_protect_np' withArguments: {true} ].
 	
 	jitCodeZoneWriteEnabled := false
-]
-
-{ #category : 'disassembly' }
-Cogit >> disassembleFrom: startAddress to: endAddress [
-	<doNotGenerate>
-	self disassembleFrom: startAddress to: endAddress labels: Dictionary new on: coInterpreter transcript
-]
-
-{ #category : 'disassembly' }
-Cogit >> disassembleFrom: startAddress to: endAddress labels: labelDictionary on: aStream [
-	<doNotGenerate>
-	| previousTVP |
-	aStream ensureCr.
-	previousTVP := processor class printTempNames.
-	processor class
-		printTempNames: (self class initializationOptions includesKey: #tempNames);
-		setReceiverResultReg: ((self class initializationOptions includesKey: #instVarNames) ifTrue:
-									[ReceiverResultReg]).
-	[processor
-		disassembleFrom: startAddress
-		to: endAddress
-		in: coInterpreter memory
-		for: self
-		labels: labelDictionary
-		on: aStream] ensure:
-			[processor class
-				printTempNames: previousTVP;
-				setReceiverResultReg: nil].
-	aStream flush
-]
-
-{ #category : 'disassembly' }
-Cogit >> disassembleTrampolineFor: pc [
-	<doNotGenerate>
-	| limit |
-	limit := methodZoneBase - 1.
-	pc > methodZoneBase ifTrue: [^self].
-	trampolineTableIndex - 1 to: 0 by: -2 do:
-		[:i| | addr |
-		pc >= (addr := (trampolineAddresses at: i) asInteger) ifTrue:
-			[^self disassembleFrom: addr to: limit].
-		limit := addr - 1]
-]
-
-{ #category : 'debugging' }
-Cogit >> disassembleTrampolineTable [
-	<doNotGenerate>
-	0 to: trampolineTableIndex - 1 by: 2 do:
-		[:i|
-		self disassembleTrampolineFor: (trampolineAddresses at: i + 1) asInteger.
-		coInterpreter transcript newLine]
 ]
 
 { #category : 'simulation only' }
@@ -6021,7 +5847,7 @@ Cogit >> enableCodeZoneWrite [
 	
 	self 
 		cppIf: #'READ_ONLY_CODE_ZONE'
-		ifTrue:[	self pthread_jit_write_protect_np: false ].
+		ifTrue:[	self cCall: 'pthread_jit_write_protect_np' withArguments: {false} ].
 			
 	jitCodeZoneWriteEnabled := true.
 
@@ -6074,29 +5900,40 @@ Cogit >> endPCOf: aMethod [
 { #category : 'initialization' }
 Cogit >> ensureAndClearAbstractOpcodes: numberOfAbstractOpcodes [
 
-	| opcodeBytes fixupBytes allocBytes clearFixupsBytes clearOpcodesBytes|
+	| opcodeBytes fixupBytes allocBytes clearFixupsBytes clearOpcodesBytes |
 	numAbstractOpcodes := numberOfAbstractOpcodes.
-	
-	opcodeBytes := (self sizeof: CogAbstractInstruction) * MaxNumberOfAbstractOpcodes.
-	fixupBytes := (self sizeof: CogBytecodeFixup) * MaxNumberOfAbstractOpcodes.
-	allocBytes := opcodeBytes + fixupBytes.
-	
-	clearOpcodesBytes := (self sizeof: CogAbstractInstruction) * numberOfAbstractOpcodes.
-	clearFixupsBytes := (self sizeof: CogBytecodeFixup) * numberOfAbstractOpcodes.
-		
-	self
-		cCode:
-			[abstractOpcodes 
-				ifNil: [
-					abstractOpcodes := self malloc: allocBytes.
-					fixups := (abstractOpcodes asUnsignedInteger + opcodeBytes) asVoidPointer].
-				
-			 self b: abstractOpcodes zero: clearOpcodesBytes.
-			 self b: fixups zero: clearFixupsBytes]
-		inSmalltalk:
-			[abstractOpcodes := CArrayAccessor on: ((1 to: numAbstractOpcodes) collect: [:ign| CogCompilerClass for: self]).
-			 fixups := CArrayAccessor on: ((1 to: numAbstractOpcodes) collect: [:ign| self bytecodeFixupClass for: self])].
 
+	opcodeBytes := (self sizeof: CogAbstractInstruction)
+	               * MaxNumberOfAbstractOpcodes.
+	fixupBytes := (self sizeof: CogBytecodeFixup)
+	              * MaxNumberOfAbstractOpcodes.
+	allocBytes := opcodeBytes + fixupBytes.
+
+	clearOpcodesBytes := (self sizeof: CogAbstractInstruction)
+	                     * numberOfAbstractOpcodes.
+	clearFixupsBytes := (self sizeof: CogBytecodeFixup)
+	                    * numberOfAbstractOpcodes.
+
+	self
+		cCode: [
+			abstractOpcodes ifNil: [
+				abstractOpcodes := self malloc: allocBytes.
+				fixups := (abstractOpcodes asUnsignedInteger + opcodeBytes)
+					          asVoidPointer ].
+
+			self cCall: 'bzero' withArguments: {
+					abstractOpcodes.
+					clearOpcodesBytes }.
+			self cCall: 'bzero' withArguments: {
+					fixups.
+					clearFixupsBytes } ]
+		inSmalltalk: [
+			abstractOpcodes := CArrayAccessor on:
+				                   ((1 to: numAbstractOpcodes) collect: [ :ign |
+					                    CogCompilerClass for: self ]).
+			fixups := CArrayAccessor on:
+				          ((1 to: numAbstractOpcodes) collect: [ :ign |
+					           self bytecodeFixupClass for: self ]) ]
 ]
 
 { #category : 'compile abstract instructions' }
@@ -6120,7 +5957,7 @@ Cogit >> enterCogCodePopReceiver [
 	<api>
 	<inline: false>
 	"This exists only for break-pointing."
-	self cCode: [self realCEEnterCogCodePopReceiverReg]
+	self cCode: [self cCall: 'realCEEnterCogCodePopReceiverReg']
 		inSmalltalk: [self ceEnterCogCodePopReceiverReg].
 	"(and this exists only to reference Debug)"
 	Debug ifFalse: [self error: 'what??']
@@ -8554,19 +8391,25 @@ Cogit >> initializeBackend [
 
 { #category : 'initialization' }
 Cogit >> initializeCodeZoneFrom: startAddress upTo: endAddress [
+
 	<api>
 	self initializeBackend.
-	
-	self enableCodeZoneWriteDuring: [backEnd stopsFrom: startAddress to: endAddress - 1].
 
-	self cCode: [self sqMakeMemoryExecutableFrom: startAddress To: endAddress]
-		inSmalltalk:
-			[startAddress = self class guardPageSize ifTrue:
-				[backEnd stopsFrom: 0 to: endAddress - 1].
-			 self initializeProcessor].
+	self enableCodeZoneWriteDuring: [
+		backEnd stopsFrom: startAddress to: endAddress - 1 ].
+
+	self
+		cCode: [
+			self cCall: 'sqMakeMemoryExecutableFromTo' withArguments: {
+					startAddress.
+					endAddress } ]
+		inSmalltalk: [
+			startAddress = self class guardPageSize ifTrue: [
+				backEnd stopsFrom: 0 to: endAddress - 1 ].
+			self initializeProcessor ].
 	codeBase := methodZoneBase := startAddress.
 	minValidCallAddress := (codeBase min: coInterpreter interpretAddress)
-								min: coInterpreter primitiveFailAddress.
+		                       min: coInterpreter primitiveFailAddress.
 	methodZone manageFrom: methodZoneBase to: endAddress.
 	self enableCodeZoneWriteDuring: [
 		self maybeGenerateCheckFeatures.
@@ -10288,15 +10131,6 @@ Cogit >> offsetAndSendTableFor: entryPoint annotation: annotation into: binaryBl
 		value: sendTable
 ]
 
-{ #category : 'debug printing' }
-Cogit >> opcodePrintStringFrom: startIndex to: stopIndex [
-	^(String streamContents:
-		[:s|
-		startIndex to: stopIndex do:
-			[:i|
-			(abstractOpcodes at: i) printStateOn: s]]) allButFirst
-]
-
 { #category : 'accessing' }
 Cogit >> openPICSize [
 	<doNotGenerate>
@@ -10506,66 +10340,122 @@ Cogit >> printInstructions: aBoolean [
 
 { #category : 'disassembly' }
 Cogit >> printMethodHeader: cogMethod on: aStream [
+
 	<doNotGenerate>
-	self cCode: ''
-		inSmalltalk:
-			[cogMethod isInteger ifTrue:
-				[^self printMethodHeader: (self cogMethodSurrogateAt: cogMethod) on: aStream]].
+	self cCode: '' inSmalltalk: [
+		cogMethod isInteger ifTrue: [
+			^ self
+				  printMethodHeader: (self cogMethodSurrogateAt: cogMethod)
+				  on: aStream ] ].
 	aStream newLine.
 	cogMethod asInteger printOn: aStream base: 16.
-	cogMethod cmType = CMMethod ifTrue:
-		[aStream newLine; tab; nextPutAll: 'objhdr: '.
-		cogMethod objectHeader printOn: aStream base: 16].
+	cogMethod cmType = CMMethod ifTrue: [
+		aStream
+			newLine;
+			tab;
+			nextPutAll: 'objhdr: '.
+		cogMethod objectHeader printOn: aStream base: 16 ].
 	aStream
-		newLine; tab; nextPutAll: 'nArgs: ';	print: cogMethod cmNumArgs;
-		tab;    nextPutAll: 'type: ';	print: cogMethod cmType.
-	(cogMethod cmType ~= 0) ifTrue:
-		[aStream newLine; tab; nextPutAll: 'blksiz: '.
+		newLine;
+		tab;
+		nextPutAll: 'nArgs: ';
+		print: cogMethod cmNumArgs;
+		tab;
+		nextPutAll: 'type: ';
+		print: cogMethod cmType.
+	cogMethod cmType ~= 0 ifTrue: [
+		aStream
+			newLine;
+			tab;
+			nextPutAll: 'blksiz: '.
 		cogMethod blockSize printOn: aStream base: 16.
-		cogMethod cmType = CMMethod ifTrue:
-			[aStream newLine; tab; nextPutAll: 'method: '.
-			 cogMethod methodObject printOn: aStream base: 16.
-			 aStream newLine; tab; nextPutAll: 'mthhdr: '.
-			 cogMethod methodHeader printOn: aStream base: 16].
-		aStream newLine; tab; nextPutAll: 'selctr: '.
+		cogMethod cmType = CMMethod ifTrue: [
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'method: '.
+			cogMethod methodObject printOn: aStream base: 16.
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'mthhdr: '.
+			cogMethod methodHeader printOn: aStream base: 16 ].
+		aStream
+			newLine;
+			tab;
+			nextPutAll: 'selctr: '.
 		cogMethod selector printOn: aStream base: 16.
-		(coInterpreter lookupAddress: cogMethod selector) ifNotNil:
-			[:string| aStream nextPut: $=; nextPutAll: string].
-		cogMethod selector = objectMemory nilObject ifTrue:
-			[aStream space; nextPut: $(; nextPutAll: (coInterpreter stringOf: (coInterpreter maybeSelectorOfMethod: cogMethod methodObject)); nextPut: $)]. 
-		cogMethod cmType = CMMethod ifTrue:
-			[aStream newLine; tab; nextPutAll: 'blkentry: '.
-			 cogMethod picUsage printOn: aStream base: 16.
-			 cogMethod picUsage ~= 0 ifTrue:
-				[aStream nextPutAll: ' => '.
-				 cogMethod asInteger + cogMethod picUsage printOn: aStream base: 16]]].
+		(coInterpreter lookupAddress: cogMethod selector) ifNotNil: [
+			:string |
+			aStream
+				nextPut: $=;
+				nextPutAll: string ].
+		cogMethod selector = objectMemory nilObject ifTrue: [
+			aStream
+				space;
+				nextPut: $(;
+				nextPutAll: (coInterpreter stringOf:
+							 (coInterpreter maybeSelectorOfMethod: cogMethod methodObject));
+				nextPut: $) ].
+		cogMethod cmType = CMMethod ifTrue: [
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'blkentry: '.
+			cogMethod picUsage printOn: aStream base: 16.
+			cogMethod picUsage ~= 0 ifTrue: [
+				aStream nextPutAll: ' => '.
+				cogMethod asInteger + cogMethod picUsage printOn: aStream base: 16 ] ] ].
 	cogMethod cmType = CMPolymorphicIC
-		ifTrue:
-			[aStream newLine; tab; nextPutAll: 'cPICNumCases: '.
-			 cogMethod cPICNumCases printOn: aStream base: 16.
-			 aStream tab; nextPutAll: 'cpicHasMNUCase: ';
-			 nextPutAll: (cogMethod cpicHasMNUCase ifTrue: ['yes'] ifFalse: ['no'])]
-		ifFalse:
-			[aStream newLine; tab; nextPutAll: 'stackCheckOffset: '.
-			 cogMethod stackCheckOffset printOn: aStream base: 16.
-			 cogMethod stackCheckOffset > 0 ifTrue:
-				[aStream nextPut: $/.
-				 cogMethod asInteger + cogMethod stackCheckOffset printOn: aStream base: 16].
-				 aStream
-						newLine; tab;
-						nextPutAll: 'cmRefersToYoung: ';
-						nextPutAll: (cogMethod cmRefersToYoung ifTrue: ['yes'] ifFalse: ['no']);
+		ifTrue: [
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'cPICNumCases: '.
+			cogMethod cPICNumCases printOn: aStream base: 16.
+			aStream
+				tab;
+				nextPutAll: 'cpicHasMNUCase: ';
+				nextPutAll: (cogMethod cpicHasMNUCase
+						 ifTrue: [ 'yes' ]
+						 ifFalse: [ 'no' ]) ]
+		ifFalse: [
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'stackCheckOffset: '.
+			cogMethod stackCheckOffset printOn: aStream base: 16.
+			cogMethod stackCheckOffset > 0 ifTrue: [
+				aStream nextPut: $/.
+				cogMethod asInteger + cogMethod stackCheckOffset
+					printOn: aStream
+					base: 16 ].
+			aStream
+				newLine;
+				tab;
+				nextPutAll: 'cmRefersToYoung: ';
+				nextPutAll: (cogMethod cmRefersToYoung
+						 ifTrue: [ 'yes' ]
+						 ifFalse: [ 'no' ]);
+				tab;
+				nextPutAll: 'cmIsFullBlock: ';
+				nextPutAll: (cogMethod cmIsFullBlock
+						 ifTrue: [ 'yes' ]
+						 ifFalse: [ 'no' ]).
+			cogMethod cmType = CMMethod ifTrue: [
+				([ cogMethod counters ]
+					 on: MessageNotUnderstood
+					 do: [ :ex | nil ]) ifNotNil: [ :cntrs |
+					aStream
+						newLine;
 						tab;
-						nextPutAll: 'cmIsFullBlock: ';
-						nextPutAll: (cogMethod cmIsFullBlock ifTrue: ['yes'] ifFalse: ['no']).
-			cogMethod cmType = CMMethod ifTrue:
-				[([cogMethod nextMethodOrIRCs] on: MessageNotUnderstood do: [:ex| nil]) ifNotNil:
-					[:nmoircs| aStream newLine; tab; nextPutAll: 'nextMethodOrIRCs: '.
-						nmoircs = 0 ifTrue: [aStream print: nmoircs] ifFalse: [coInterpreter printHex: nmoircs]].
-				 ([cogMethod counters] on: MessageNotUnderstood do: [:ex| nil]) ifNotNil:
-					[:cntrs| aStream newLine; tab; nextPutAll: 'counters: '.
-						cntrs = 0 ifTrue: [aStream print: cntrs] ifFalse: [coInterpreter printHex: cntrs]]]].
-	aStream cr; flush
+						nextPutAll: 'counters: '.
+					cntrs = 0
+						ifTrue: [ aStream print: cntrs ]
+						ifFalse: [ coInterpreter printHex: cntrs ] ] ] ].
+	aStream
+		cr;
+		flush
 ]
 
 { #category : 'printing' }
@@ -10583,63 +10473,73 @@ Cogit >> printOnTrace [
 
 { #category : 'method map' }
 Cogit >> printPCMapPairsFor: cogMethod [
-	<doNotGenerate>
 	"<api>
 	<var: 'cogMethod' type: #'CogMethod *'>
 	<var: 'mapByte' type: #'unsigned char'>"
+
+	<doNotGenerate>
 	| mcpc map mapByte annotation value |
 	mcpc := self firstMappedPCFor: cogMethod.
 	map := self mapStartFor: cogMethod.
-	[(mapByte := objectMemory byteAt: map) ~= MapEnd] whileTrue:
-		[annotation := mapByte >> AnnotationShift.
-		 annotation = IsAnnotationExtension
-			ifTrue:
-				[value := (mapByte bitAnd: DisplacementMask) + IsSendCall]
-			ifFalse:
-				[value := annotation.
-				 mcpc := mcpc + (backEnd codeGranularity
-									* (annotation = IsDisplacementX2N
-										ifTrue: [mapByte - DisplacementX2N << AnnotationShift]
-										ifFalse: [mapByte bitAnd: DisplacementMask]))].
-		 coInterpreter
+	[ (mapByte := objectMemory byteAt: map) ~= MapEnd ] whileTrue: [
+		annotation := mapByte >> AnnotationShift.
+		annotation = IsAnnotationExtension
+			ifTrue: [ value := (mapByte bitAnd: DisplacementMask) + IsSendCall ]
+			ifFalse: [
+				value := annotation.
+				mcpc := mcpc
+				        +
+					        (backEnd codeGranularity
+					         * (annotation = IsDisplacementX2N
+							          ifTrue: [
+							          mapByte - DisplacementX2N << AnnotationShift ]
+							          ifFalse: [ mapByte bitAnd: DisplacementMask ])) ].
+		coInterpreter
 			printHexnp: map;
-		 	print: ': '.
-		 self
-			cCode: [self print: '%02x' f: mapByte]
-			inSmalltalk:
-				[mapByte < 16 ifTrue:
-					[coInterpreter putchar: $0].
-				 coInterpreter printHexnp: mapByte].
-		 coInterpreter
-		 	printChar: $ ;
+			print: ': '.
+		self cCode: [ '%02x' printf: mapByte ] inSmalltalk: [
+			mapByte < 16 ifTrue: [ coInterpreter putchar: $0 ].
+			coInterpreter printHexnp: mapByte ].
+		coInterpreter
+			printChar: $ ;
 			printNum: annotation;
 			print: ' ('.
-		 (BytecodeSetHasDirectedSuperSend
-		    and: [value between: IsDirectedSuperSend and: IsDirectedSuperBindingSend]) ifTrue:
-			[value
-				caseOf: {
-					[IsDirectedSuperSend]			->	[coInterpreter print: 'DirectedSuperSend'].
-					[IsDirectedSuperBindingSend]	->	[coInterpreter print: 'DirectedSuperBindingSend'] }] ifFalse:
-		 [value
-			caseOf: {
-				[IsDisplacementX2N]		->	[coInterpreter print: 'DisplacementX2N'].
-				[IsAnnotationExtension]	->	[coInterpreter print: 'AnnotationExtension'].
-				[IsObjectReference]			->	[coInterpreter print: 'ObjectReference'].
-				[IsAbsPCReference]			->	[coInterpreter print: 'AbsPCReference'].
-				[HasBytecodePC]			->	[coInterpreter print: 'HasBytecodePC'].
-				[IsRelativeCall]				->	[coInterpreter print: 'RelativeCall'].
-				[IsSendCall]				->	[coInterpreter print: 'SendCall'].
-				[IsSuperSend]				->	[coInterpreter print: 'SuperSend'] }
-			otherwise: [coInterpreter print: '??? '; printHexnp: value]].
-		 coInterpreter
+		(BytecodeSetHasDirectedSuperSend and: [
+			 value between: IsDirectedSuperSend and: IsDirectedSuperBindingSend ])
+			ifTrue: [
+				value caseOf: {
+						([ IsDirectedSuperSend ]
+						 -> [ coInterpreter print: 'DirectedSuperSend' ]).
+						([ IsDirectedSuperBindingSend ]
+						 -> [ coInterpreter print: 'DirectedSuperBindingSend' ]) } ]
+			ifFalse: [
+				value
+					caseOf: {
+							([ IsDisplacementX2N ]
+							 -> [ coInterpreter print: 'DisplacementX2N' ]).
+							([ IsAnnotationExtension ]
+							 -> [ coInterpreter print: 'AnnotationExtension' ]).
+							([ IsObjectReference ]
+							 -> [ coInterpreter print: 'ObjectReference' ]).
+							([ IsAbsPCReference ]
+							 -> [ coInterpreter print: 'AbsPCReference' ]).
+							([ HasBytecodePC ] -> [ coInterpreter print: 'HasBytecodePC' ]).
+							([ IsRelativeCall ] -> [ coInterpreter print: 'RelativeCall' ]).
+							([ IsSendCall ] -> [ coInterpreter print: 'SendCall' ]).
+							([ IsSuperSend ] -> [ coInterpreter print: 'SuperSend' ]) }
+					otherwise: [
+						coInterpreter
+							print: '??? ';
+							printHexnp: value ] ].
+		coInterpreter
 			print: ') ';
 			printHexnp: (mapByte bitAnd: DisplacementMask);
 			printChar: $ ;
 			printChar: $@;
-		 printHex: mcpc;
-		 cr;
-		 flush.
-		 map := map - 1]
+			printHex: mcpc;
+			cr;
+			flush.
+		map := map - 1 ]
 ]
 
 { #category : 'method map' }
@@ -10802,7 +10702,7 @@ Cogit >> promptForBreakPC [
 	<doNotGenerate>
 	| s first pc |
 	s := UIManager default request: 'Break pc (hex, + to add, - to remove)'.
-	s := s withBlanksTrimmed.
+	s := s trimBoth.
 	s isEmpty ifTrue: [^self].
 	('+-' includes: s first) ifTrue: [first := s first. s := s allButFirst].
 	(s isEmpty and: [first = $-]) ifTrue:
@@ -10862,26 +10762,6 @@ Cogit >> recordInstruction: thing [
 	^thing
 ]
 
-{ #category : 'simulation only' }
-Cogit >> recordLastInstruction [
-	<doNotGenerate>
-	| inst pc |
-	(EagerInstructionDecoration or: [printInstructions])
-		ifTrue:
-			[inst := processor
-						disassembleNextInstructionIn: coInterpreter memory
-						for: self.
-			 printInstructions ifTrue:
-				[pc := Integer readFrom: (ReadStream on: inst from: 1 to: (inst indexOf: $:) - 1) base: 16.
-				 (self relativeLabelForPC: pc) ifNotNil:
-					[:label| inst := inst, ' ', label]]]
-		ifFalse:
-			[inst := processor
-						disassembleNextInstructionIn: coInterpreter memory
-						for: nil].
-	^self recordInstruction: inst
-]
-
 { #category : 'debugging' }
 Cogit >> recordOverflowTrace [
 	<api>
@@ -10901,29 +10781,6 @@ Cogit >> recordPrimTraceFunc [
 	"This one for C support code."
 	<api>
 	^self recordPrimTrace
-]
-
-{ #category : 'simulation only' }
-Cogit >> recordProcessing [
-	| inst |
-	self recordRegisters.
-	inst := self recordLastInstruction.
-	"Set RRRName ito the selector that accesses ReceiverResultReg (RRR) to alter instruction printing to add the value of RRR as a suffix
-		(RRRName := #rdx)
-		(RRRName := #edx)
-		(RRRName := nil)"
-	printRegisters ifTrue:
-		[RRRName ifNil: [processor printRegistersOn: coInterpreter transcript].
-		 printInstructions ifFalse:
-			[coInterpreter transcript cr]].
-	printInstructions ifTrue:
-		[printRegisters ifTrue:
-			[coInterpreter transcript cr].
-		 coInterpreter transcript nextPutAll: inst.
-		 RRRName ifNotNil:
-			[coInterpreter transcript space; nextPutAll: RRRName; space.
-			 (processor perform: RRRName) printOn: coInterpreter transcript base: 16 length: 8 padded: false].
-		 coInterpreter transcript cr; flush]
 ]
 
 { #category : 'simulation only' }
@@ -11236,56 +11093,6 @@ Cogit >> reportError: anInteger [
 	self halt: 'Compilation error ', anInteger printString
 ]
 
-{ #category : 'debugging' }
-Cogit >> reportLastNInstructions [
-	<doNotGenerate>
-	| skipNext printInst |
-	skipNext := false.
-	printInst := [:inst|
-				coInterpreter transcript nextPutAll:
-					(EagerInstructionDecoration
-						ifTrue: [inst]
-						ifFalse: [processor
-									decorateDisassembly: inst
-									for: self
-									fromAddress: ((inst at: 3) = $r
-													ifTrue: [Integer readFrom: inst readStream]
-													ifFalse: [Integer readFrom: inst readStream base: 16])]); cr].
-	lastNInstructions withIndexDo:
-		[:thing :idx| | next pc label |
-		skipNext
-			ifTrue: [skipNext := false]
-			ifFalse:
-				[thing isArray
-					ifTrue:
-						[thing first isString "i.e. { '(simulated return to '. processor retpcIn: coInterpreter memory. ')'}"
-							ifTrue:
-								[thing do:
-									[:stringOrNumber|
-									coInterpreter transcript nextPutAll: (stringOrNumber isString
-															ifTrue: [stringOrNumber]
-															ifFalse: [stringOrNumber hex])].
-									coInterpreter transcript cr]
-							ifFalse: "if possible, add the label to the instruction line to condense the output"
-								[coInterpreter transcript cr.
-								 pc := thing at: processor registerStatePCIndex.
-								 label := self relativeLabelForPC: pc.
-								 ((next := lastNInstructions at: idx + 1 ifAbsent: []) notNil
-								  and: [next isString
-								  and: [(Integer readFrom: next readStream radix: 16) = pc]])
-									ifTrue: "Decorate instruction and eliminate pc line"
-										[skipNext := true.
-										 processor printRegisterStateExceptPC: thing on: coInterpreter transcript.
-										 label ifNotNil: [coInterpreter transcript nextPutAll: label; space].
-										 printInst value: next]
-									ifFalse:
-										[label ifNotNil: [coInterpreter transcript nextPutAll: label; nextPut: $:; cr].
-										 processor printRegisterState: thing on: coInterpreter transcript]]]
-					ifFalse:
-						[printInst value: thing]]].
-	coInterpreter transcript flush
-]
-
 { #category : 'tests-method map' }
 Cogit >> resolveToOopOrNil: proxyOrSpecialSelector [
 	"Answer the oop of a proxy or a special selector.  When testing pc mapping on simulation
@@ -11581,29 +11388,26 @@ Cogit >> shouldBeImplemented [
 { #category : 'simulation processor access' }
 Cogit >> simulateCallOf: address nextpc: nextpc memory: aMemory [
 	<doNotGenerate>
-	self assertCorrectProcessorOwnership.
+
 	^processor simulateCallOf: address nextpc: nextpc memory: aMemory
 ]
 
 { #category : 'simulation only' }
 Cogit >> simulateCogCodeAt: address [
-
 	"<Integer>"
 
 	<doNotGenerate>
 	processor pc: address.
-	[ 
-	[ 
+	[
+	[
 	singleStep
-		ifTrue: [ 
-			[ 
-			self recordProcessing.
-			self maybeBreakAt: processor pc ] value. "So that the Debugger's Over steps over all this"
+		ifTrue: [
+			[ self maybeBreakAt: processor pc ] value. "So that the Debugger's Over steps over all this"
 			processor
 				singleStepIn: coInterpreter memory
 				minimumAddress: guardPageSize
 				readOnlyBelow: methodZone zoneEnd ]
-		ifFalse: [ 
+		ifFalse: [
 			processor
 				runInMemory: nil
 				minimumAddress: guardPageSize
@@ -11679,7 +11483,6 @@ Cogit >> simulateLeafCallOf: someFunction [
 { #category : 'simulation processor access' }
 Cogit >> simulateLeafReturnIn: aMemory [
 	<doNotGenerate>
-	self assertCorrectProcessorOwnership.
 	^processor simulateLeafReturnIn: aMemory
 ]
 
@@ -11930,17 +11733,26 @@ Cogit >> trampolineName: routinePrefix numArgs: numArgs [
 { #category : 'initialization' }
 Cogit >> trampolineName: routinePrefix numArgs: numArgs limit: argsLimit [
 	"Malloc a string with the contents for the trampoline table"
+
 	<inline: true>
 	<returnTypeC: #'char *'>
 	<var: #routinePrefix type: #'char *'>
 	<var: #numArgs type: #int>
-	| theString |
 	<var: #theString type: #'char *'>
-	self cCode: '' inSmalltalk:
-		[^routinePrefix, (numArgs <= argsLimit ifTrue: [numArgs printString] ifFalse: ['N']), 'Args'].
+	| theString |
+	self cCode: '' inSmalltalk: [
+		^ routinePrefix , (numArgs <= argsLimit
+			   ifTrue: [ numArgs printString ]
+			   ifFalse: [ 'N' ]) , 'Args' ].
 	theString := self malloc: (self strlen: routinePrefix) + 6.
-	self s: theString pr: '%s%cArgs' in: routinePrefix tf: (numArgs <= argsLimit ifTrue: [$0 + numArgs] ifFalse: [$N]).
-	^theString
+	self cCall: 'sprintf' withArguments: {
+			theString.
+			'%s%cArgs'.
+			routinePrefix.
+			(numArgs <= argsLimit
+				 ifTrue: [ $0 + numArgs ]
+				 ifFalse: [ $N ]) }.
+	^ theString
 ]
 
 { #category : 'initialization' }
@@ -12259,24 +12071,6 @@ Cogit >> varBaseAddress [
 Cogit >> voidCogCompiledCode [
 	<api>
 	methodZone clearCogCompiledCode
-]
-
-{ #category : 'debug printing' }
-Cogit >> warnMultiple: cogMethod selectors: aSelectorOop [
-	<inline: true>
-	<var: 'cogMethod' type: #'CogMethod *'>
-	self cCode:
-			[self fp: #stderr
-				r: 'Warning, attempt to use method with selector %.*s and selector %.*s\n'
-				i: (self cCoerceSimple: (objectMemory numBytesOf: cogMethod selector) to: #int)
-				n: (self cCoerceSimple: (objectMemory firstIndexableField: cogMethod selector) to: #'char *')
-				t: (self cCoerceSimple: (objectMemory numBytesOf: aSelectorOop) to: #int)
-				f: (self cCoerceSimple: (objectMemory firstIndexableField: aSelectorOop) to: #'char *')]
-		inSmalltalk:
-			[self warn: 'Warning, attempt to use method with selector ',
-						(coInterpreter stringOf: cogMethod selector),
-						' and selector ',
-						(coInterpreter stringOf: aSelectorOop)]
 ]
 
 { #category : 'debug printing' }

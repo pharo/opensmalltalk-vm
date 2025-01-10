@@ -163,6 +163,18 @@ StackInterpreterSimulator >> atEachStepBlock: aBlock [
 	atEachStepBlock := aBlock
 ]
 
+{ #category : 'other primitives' }
+StackInterpreterSimulator >> attributeSize: index [
+
+	<doNotGenerate>
+	| attribute |
+	attribute := systemAttributes
+		             at: index
+		             ifAbsent: [ Smalltalk vm getSystemAttribute: index ].
+	attribute ifNil: [ ^ self primitiveFail ].
+	^ attribute size
+]
+
 { #category : 'initialization' }
 StackInterpreterSimulator >> basicInitialize [
 	"Initialize the StackInterpreterSimulator when running the interpreter
@@ -242,12 +254,6 @@ StackInterpreterSimulator >> byteAt: byteAddress [
 	^objectMemory byteAt: byteAddress
 ]
 
-{ #category : 'memory access' }
-StackInterpreterSimulator >> byteAt: byteAddress put: byte [
-	self deprecated.
-	^objectMemory byteAt: byteAddress put: byte
-]
-
 { #category : 'debug support' }
 StackInterpreterSimulator >> byteCount [
 	"So you can call this from temp debug statements in, eg, Interpreter, such as
@@ -284,13 +290,6 @@ StackInterpreterSimulator >> callExternalPrimitive: mapIndex [
 	 for accurate following of forwarders on primitive failure."
 	primitiveFunctionPointer := entry at: 2.
 	^ (entry at: 1) perform: (entry at: 2)
-]
-
-{ #category : 'object memory support' }
-StackInterpreterSimulator >> checkStackIntegrity [
-	"Override to deal with incomplete initialization."
-	stackPages ifNil: [^true].
-	^super checkStackIntegrity
 ]
 
 { #category : 'debug support' }
@@ -561,6 +560,21 @@ StackInterpreterSimulator >> functionPointerFor: primIndex inClass: lookupClass 
 		ifFalse: [0]
 ]
 
+{ #category : 'other primitives' }
+StackInterpreterSimulator >> getAttribute: index Into: objectBody Length: sz [
+
+	1 to: sz do: [ :i |
+		| attribute |
+		attribute := systemAttributes
+			             at: index
+			             ifAbsent: [ Smalltalk vm getSystemAttribute: index ].
+		attribute ifNil: [ ^ self primitiveFail ].
+
+		objectMemory
+			byteAt: objectBody + i - 1
+			put: (attribute at: i) asciiValue ]
+]
+
 { #category : 'memory access' }
 StackInterpreterSimulator >> halfWordHighInLong32: long32 [
 	^self subclassResponsibility
@@ -569,12 +583,6 @@ StackInterpreterSimulator >> halfWordHighInLong32: long32 [
 { #category : 'memory access' }
 StackInterpreterSimulator >> halfWordLowInLong32: long32 [
 	^self subclassResponsibility
-]
-
-{ #category : 'debug support' }
-StackInterpreterSimulator >> headerStart: oop [
-
-	^ (objectMemory extraHeaderBytes: oop) negated
 ]
 
 { #category : 'image save/restore' }
@@ -834,16 +842,6 @@ StackInterpreterSimulator >> ioRelinquishProcessorForMicroseconds: microseconds 
 	self incrementByteCount
 ]
 
-{ #category : 'I/O primitives' }
-StackInterpreterSimulator >> ioScreenDepth [
-	^DisplayScreen actualScreenDepth.
-]
-
-{ #category : 'I/O primitives support' }
-StackInterpreterSimulator >> ioScreenScaleFactor [
-	^ 1.0
-]
-
 { #category : 'process primitive support' }
 StackInterpreterSimulator >> ioSetMaxExtSemTableSize: anInteger [
 	"Inform the VM of the maximum size the image will grow the exernal semaphore table (specialObjectsArray at: 39) to.
@@ -869,10 +867,10 @@ StackInterpreterSimulator >> ioUTCMicroseconds [
 StackInterpreterSimulator >> ioUTCStartMicroseconds [
 	"Answer the value of the microsecond clock at startup."
 
-	^startMicroseconds ifNil:
-		[self class initializationOptions
-			at: #startMicroseconds
-			ifAbsent: [[Time utcMicrosecondClock] on: Error do: [Time totalSeconds * 1000000]]]
+	^ startMicroseconds ifNil: [
+		  self class initializationOptions
+			  at: #startMicroseconds
+			  ifAbsent: [ Time primUTCMicrosecondsClock ] ]
 ]
 
 { #category : 'primitive support' }
@@ -899,18 +897,6 @@ StackInterpreterSimulator >> loadNewPlugin: pluginString [
 		[:entry|
 		 pluginList := pluginList copyWith: entry.
 		 entry]
-]
-
-{ #category : 'memory access' }
-StackInterpreterSimulator >> longAt: byteAddress [
-	self deprecated.
-	^objectMemory longAt: byteAddress
-]
-
-{ #category : 'memory access' }
-StackInterpreterSimulator >> longAt: byteAddress put: a32BitValue [
-	self deprecated.
-	^objectMemory longAt: byteAddress put: a32BitValue
 ]
 
 { #category : 'plugin support' }
@@ -1037,21 +1023,6 @@ StackInterpreterSimulator >> primitiveExecuteMethodArgsArray [
 StackInterpreterSimulator >> primitiveFailFor: reasonCode [
 	"self halt."
 	^super primitiveFailFor: reasonCode
-]
-
-{ #category : 'other primitives' }
-StackInterpreterSimulator >> primitiveGetAttribute [
-	"Fetch the system attribute with the given integer ID. The result is a string, which will be empty if the attribute is not defined."
-
-	| index s attribute |
-	index := self stackIntegerValue: 0.
-	self successful ifTrue: [
-		attribute := systemAttributes at: index ifAbsent: [Smalltalk vm getSystemAttribute: index].
-		attribute ifNil: [ ^self primitiveFail ].
-		s := objectMemory instantiateClass: (objectMemory splObj: ClassByteString) indexableSize: attribute size.
-		1 to: attribute size do: [ :i |
-			objectMemory storeByte: i-1 ofObject: s withValue: (attribute at: i) asciiValue].
-		self pop: 2 "rcvr, attr" thenPush: s]
 ]
 
 { #category : 'debugging traps' }

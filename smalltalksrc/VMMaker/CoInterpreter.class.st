@@ -2030,6 +2030,12 @@ CoInterpreter >> convertToMachineCodeFrame: cogHomeMethod bcpc: bcpc [
 	^pc
 ]
 
+{ #category : 'frame access' }
+CoInterpreter >> defaultCallerSavedIP [
+
+	^ cogit ceBaseFrameReturnPC
+]
+
 { #category : 'process primitive support' }
 CoInterpreter >> deferStackLimitSmashAround: functionSymbol [
 	"Defer smashes of the stackLimit around the call of functionSymbol (for assert checks)"
@@ -2709,6 +2715,18 @@ CoInterpreter >> getBlockCompilationMSecs [
 
 	<doNotGenerate>
 	^ cogit getBlockCompilationMSecs
+]
+
+{ #category : 'frame access' }
+CoInterpreter >> getCallerIPFromFP: theFP callerFP: callerFP [
+
+	| callerIP |
+	callerIP := super getCallerIPFromFP: theFP callerFP: callerFP.
+	(self isMachineCodeIP: callerIP) ifTrue: [ ^ callerIP ].
+	
+	"If we call a machine code method from the interpreter, we need to use a machine code return address. Then, store the actual caller IP in an extra frame slot and use a trampoline as the return address. When the machine code method returns, it'll return to the trampoline which will restore the interpreter method."
+	self iframeSavedIP: callerFP put: callerIP.
+	^ cogit ceReturnToInterpreterPC
 ]
 
 { #category : 'cog jit support' }
@@ -3802,90 +3820,6 @@ CoInterpreter >> mnuMethodOrNilFor: rcvr [
 	^ nil
 ]
 
-{ #category : 'frame access' }
-CoInterpreter >> moveFramesIn: oldPage through: theFP toPage: newPage [
-	"Move frames from the hot end of oldPage through to theFP to newPage.
-	 This has the effect of making theFP a base frame which can be stored into.
-	 Answer theFP's new location."
-	| newSP newFP stackedReceiverOffset delta callerFP callerIP fpInNewPage offsetCallerFP theContext |
-	<inline: false>
-	<var: #oldPage type: #'StackPage *'>
-	<var: #theFP type: #'char *'>
-	<var: #newPage type: #'StackPage *'>
-	<var: #newSP type: #'char *'>
-	<var: #newFP type: #'char *'>
-	<var: #callerFP type: #'char *'>
-	<var: #fpInNewPage type: #'char *'>
-	<var: #offsetCallerFP type: #'char *'>
-	<var: #source type: #'char *'>
-	<returnTypeC: #'char *'>
-	"A base frame must have a context for cannotReturn: processing."
-	self assert: (self isBaseFrame: theFP) not.
-	self assert: self validStackPageBaseFrames.
-	callerFP := self frameCallerFP: theFP.
-	self assert: (self frameHasContext: callerFP).
-	self assert: (objectMemory isContext: (self frameContext: callerFP)).
-
-	"In cog the base frames are married, in non cog they are not"
-	self isCog ifTrue: [
-		theContext := self ensureFrameIsMarried: theFP SP: (self frameReceiverLocation: theFP).
-	] ifFalse: [
-		theContext := objectMemory nilObject.
-	].
-
-	stackPages
-		unsignedLongAt: (newSP := newPage baseAddress) put: (self frameContext: callerFP);
-		unsignedLongAt: (newSP := newSP - objectMemory wordSize) put:  theContext.
-
-	stackedReceiverOffset := self frameStackedReceiverOffset: theFP.
-	"First move the data, leaving room for the caller and base frame contexts.  We will fix up frame pointers later."
-	theFP + stackedReceiverOffset
-		to: oldPage headSP
-		by: objectMemory wordSize negated
-		do: [:source|
-			newSP := newSP - objectMemory wordSize.
-			stackPages longAt: newSP put: (stackPages longAt: source)].
-
-	"newSP = oldSP + delta => delta = newSP - oldSP"
-	delta := newSP - oldPage headSP.
-	newFP := newPage baseAddress - stackedReceiverOffset - (2 * objectMemory wordSize).
-	self setHeadFP: oldPage headFP + delta andSP: newSP inPage: newPage.
-	newPage baseFP: newFP.
-
-	callerIP := self oopForPointer: (self frameCallerSavedIP: theFP).
-	callerIP asUnsignedInteger >= objectMemory getMemoryMap startOfObjectMemory ifTrue:
-		[self iframeSavedIP: callerFP put: callerIP.
-		 callerIP := cogit ceReturnToInterpreterPC].
-	stackPages longAt: theFP + stackedReceiverOffset put: callerIP.
-	self assert: (callerFP < oldPage baseAddress
-				and: [callerFP > (oldPage realStackLimit - (LargeContextSlots * objectMemory bytesPerOop / 2))]).
-	oldPage
-		headFP: callerFP;
-		headSP: theFP + stackedReceiverOffset.
-	"Mark the new base frame in the new page"
-	stackPages
-		longAt: newFP + FoxCallerSavedIP put: cogit ceBaseFrameReturnPC;
-		longAt: newFP + FoxSavedFP put: 0.
-	"Now relocate frame pointers, updating married contexts to refer to their moved spouse frames."
-	fpInNewPage := newPage headFP.
-	[offsetCallerFP := self frameCallerFP: fpInNewPage.
-	 offsetCallerFP ~= 0 ifTrue:
-		[offsetCallerFP := offsetCallerFP + delta].
-	 stackPages longAt: fpInNewPage + FoxSavedFP put: (self oopForPointer: offsetCallerFP).
-	 (self frameHasContext: fpInNewPage) ifTrue:
-		[theContext := self frameContext: fpInNewPage.
-		 objectMemory storePointerUnchecked: SenderIndex
-			ofObject: theContext
-			withValue: (self withSmallIntegerTags: fpInNewPage).
-		 objectMemory storePointerUnchecked: InstructionPointerIndex
-			ofObject: theContext
-			withValue: (self withSmallIntegerTags: offsetCallerFP)].
-	 fpInNewPage := offsetCallerFP.
-	 fpInNewPage ~= 0] whileTrue.
-	self assert: self validStackPageBaseFrames.
-	^newFP
-]
-
 { #category : 'internal interpreter access' }
 CoInterpreter >> mtemporary: offset in: theFP [
 
@@ -4578,18 +4512,27 @@ CoInterpreter >> remapInstructionPointerInFrame: theFP inSavedInstructionPointer
 { #category : 'debug support' }
 CoInterpreter >> reportMinimumUnusedHeadroom [
 	"Report the stack page size and minimum unused headroom to stdout."
+
 	<api>
-	self cCode:
-			[self vm_printf: 'stack page bytes %lld available headroom %lld minimum unused headroom %lld\n'
-				_: self stackPageByteSize asUnsignedLongLong
-				_: (self stackPageByteSize - self stackLimitBytes - self stackLimitOffset) asUnsignedLongLong
-				_: self minimumUnusedHeadroom asUnsignedLongLong]
-		inSmalltalk:
-			["CogVMSimulator new initStackPagesForTests reportMinimumUnusedHeadroom"
-			 self print: 'stack page bytes '; printNum: self stackPageByteSize;
-				print: ' available headroom '; printNum: self stackPageByteSize - self stackLimitBytes - self stackLimitOffset;
-				print: ' minimum unused headroom '; printNum: self minimumUnusedHeadroom;
-				cr]
+	self
+		cCode: [
+			self cCall: 'vm_printf' withArguments: {
+					'stack page bytes %lld available headroom %lld minimum unused headroom %lld\n'.
+					self stackPageByteSize asUnsignedLongLong.
+					(self stackPageByteSize - self stackLimitBytes
+					 - self stackLimitOffset) asUnsignedLongLong.
+					self minimumUnusedHeadroom asUnsignedLongLong } ]
+		inSmalltalk: [ "CogVMSimulator new initStackPagesForTests reportMinimumUnusedHeadroom"
+			self
+				print: 'stack page bytes ';
+				printNum: self stackPageByteSize;
+				print: ' available headroom ';
+				printNum:
+					self stackPageByteSize - self stackLimitBytes
+					- self stackLimitOffset;
+				print: ' minimum unused headroom ';
+				printNum: self minimumUnusedHeadroom;
+				cr ]
 ]
 
 { #category : 'callback support' }
