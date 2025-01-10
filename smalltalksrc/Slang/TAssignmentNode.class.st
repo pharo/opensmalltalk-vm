@@ -139,24 +139,6 @@ TAssignmentNode >> asCASTValueExpansionIn: aCodeGen [
 ]
 
 { #category : 'transformations' }
-TAssignmentNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can change in value and the globals had no name change i.e: assuming every reference to a global is meant"
-
-	self variable: (variable
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn: classNames
-			 in: aCodeGen
-			 collect: changedVariables).
-	self expression: (expression
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn: classNames
-			 in: aCodeGen
-			 collect: changedVariables)
-]
-
-{ #category : 'transformations' }
 TAssignmentNode >> bindVariableUsesIn: aDictionary [
 	"Do NOT bind the variable on the left-hand-side of an assignment statement."
 	"was bindVariablesIn:"
@@ -315,6 +297,24 @@ TAssignmentNode >> printOn: aStream level: level [
 TAssignmentNode >> removeAssertions [
 
 	expression removeAssertions
+]
+
+{ #category : 'transformations' }
+TAssignmentNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can change in value and the globals had no name change i.e: assuming every reference to a global is meant"
+
+	self variable: (variable
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables)
 ]
 
 { #category : 'transformations' }

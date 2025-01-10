@@ -105,24 +105,6 @@ TCaseStmtNode >> asCASTIn: aBuilder addToEndOfCases: aNodeToPrepend [
 ]
 
 { #category : 'transformations' }
-TCaseStmtNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	self expression: (expression
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn: classNames
-			 in: aCodeGen
-			 collect: changedVariables).
-	self cases: (cases collect: [ :c |
-			 c
-				 bindClassVariablesIn: classVariables
-				 globalVariablesIn: globalsVariables
-				 classNameIn: classNames
-				 in: aCodeGen
-				 collect: changedVariables ])
-]
-
-{ #category : 'transformations' }
 TCaseStmtNode >> bindVariableUsesIn: aDictionary [
 
 	self expression: (expression bindVariableUsesIn: aDictionary).
@@ -406,6 +388,24 @@ TCaseStmtNode >> processSharedCodeBlocks: caseTree forCase: caseIndex in: codeGe
 TCaseStmtNode >> removeAssertions [
 	expression removeAssertions.
 	cases do: [ :case | case removeAssertions ].
+]
+
+{ #category : 'transformations' }
+TCaseStmtNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self cases: (cases collect: [ :c |
+			 c
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
 ]
 
 { #category : 'transformations' }

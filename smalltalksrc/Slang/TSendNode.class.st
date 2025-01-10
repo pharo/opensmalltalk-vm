@@ -192,24 +192,6 @@ TSendNode >> asTransformedConstantPerform [
 ]
 
 { #category : 'transformations' }
-TSendNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	self receiver: (receiver
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn: classNames
-			 in: aCodeGen
-			 collect: changedVariables).
-	self arguments: (arguments collect: [ :a |
-			 a
-				 bindClassVariablesIn: classVariables
-				 globalVariablesIn: globalsVariables
-				 classNameIn: classNames
-				 in: aCodeGen
-				 collect: changedVariables ])
-]
-
-{ #category : 'transformations' }
 TSendNode >> bindVariableUsesIn: aDictionary [
 
 	self receiver: (receiver bindVariableUsesIn: aDictionary).
@@ -608,6 +590,24 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 			(self selector beginsWith: #cCoerce)
 				ifTrue: [ self parent removeUnusedNodesInBranch: self ]
 				ifFalse: [ self reduceConditionalSend: branchIndex ] ]
+]
+
+{ #category : 'transformations' }
+TSendNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self receiver: (receiver
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self arguments: (arguments collect: [ :a |
+			 a
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
 ]
 
 { #category : 'transformations' }

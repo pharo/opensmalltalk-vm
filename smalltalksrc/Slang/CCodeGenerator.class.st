@@ -4226,10 +4226,11 @@ CCodeGenerator >> prepareMethods [
 	globals addAll: variables
 		, (apiVariables ifNotNil: [ apiVariables keys ] ifNil: [ #(  ) ]).
 	methods do: [ :m |
+		m recordDeclarationsIn: self.
 		m
-			bindClassVariablesIn: constants
-			andGlobalVariablesIn: globals
-			in: self.
+			renameLocalVariablesGivenClassVariables: constants
+			andGlobalVariables: globals
+			inCodeGenerator: self.
 		m allLocals , m args do: [ :var |
 			self checkForVariableNameConflict: var inMethod: m ].
 		m prepareMethodIn: self ]

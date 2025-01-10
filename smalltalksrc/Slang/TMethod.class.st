@@ -444,46 +444,6 @@ TMethod >> bindClassVariablesIn: constantDictionary [
 ]
 
 { #category : 'transformations' }
-TMethod >> bindClassVariablesIn: classVariables andGlobalVariablesIn: globalsVariables in: aCodeGen [
-	"Answer either the receiver, if it is not contained in the parameters, or a new node with the given variable rebound. only work after type inferences for declarations et pragmas updates"
-
-	| changedVariables |
-	changedVariables := Set new.
-	"necessary for implicit variables"
-	aCodeGen pushScope: self.
-	
-	self parseTree: (parseTree
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn:
-			 (SlangStructType allSubclasses collect: [ :class | class name ])
-			 in: aCodeGen
-			 collect: changedVariables).
-	changedVariables isEmpty ifTrue: [ ^ self ].
-	"no need to changed the locals of the TMethod, if the cache is nil they are retrieve from the parseTree which we will update"
-	cachedLocals := nil.
-	changedVariables do: [ :varName |
-		| newName |
-		newName := #_ , varName.
-		self args: (self args collect: [ :e |
-				 e ~= varName
-					 ifTrue: [ e ]
-					 ifFalse: [ newName ] ]).
-		self renameVarInDeclarations: varName with: newName.
-		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
-		self renameVarInReturnType: varName with: newName.
-
-		"update all the parseTree"
-		self parseTree nodesDo: [ :node |
-			node isStatementList ifTrue: [
-				node renameLocalOrArg: varName with: newName ].
-
-			"rare case but it can happen, see addressIsInFixups:"
-			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ].
-	aCodeGen popScope
-]
-
-{ #category : 'transformations' }
 TMethod >> bindVariableUsesIn: aDictionary [
 
 	self parseTree: (parseTree bindVariableUsesIn: aDictionary)
@@ -2715,6 +2675,46 @@ TMethod >> renameLabelsUsing: aDictionary [
 			[node setLabel: (aDictionary at: node label)].
 		(node isLabel and: [aDictionary includesKey: node label]) ifTrue:
 			[node setLabel: (aDictionary at: node label)]]
+]
+
+{ #category : 'transformations' }
+TMethod >> renameLocalVariablesGivenClassVariables: classVariables andGlobalVariables: globalsVariables inCodeGenerator: aCodeGen [
+	"Answer either the receiver, if it is not contained in the parameters, or a new node with the given variable rebound. only work after type inferences for declarations et pragmas updates"
+
+	| changedVariables |
+	changedVariables := Set new.
+	"necessary for implicit variables"
+	aCodeGen pushScope: self.
+	
+	self parseTree: (parseTree
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames:
+			 (SlangStructType allSubclasses collect: [ :class | class name ])
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	changedVariables isEmpty ifTrue: [ ^ self ].
+	"no need to changed the locals of the TMethod, if the cache is nil they are retrieve from the parseTree which we will update"
+	cachedLocals := nil.
+	changedVariables do: [ :varName |
+		| newName |
+		newName := #_ , varName.
+		self args: (self args collect: [ :e |
+				 e ~= varName
+					 ifTrue: [ e ]
+					 ifFalse: [ newName ] ]).
+		self renameVarInDeclarations: varName with: newName.
+		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+		self renameVarInReturnType: varName with: newName.
+
+		"update all the parseTree"
+		self parseTree nodesDo: [ :node |
+			node isStatementList ifTrue: [
+				node renameLocalOrArg: varName with: newName ].
+
+			"rare case but it can happen, see addressIsInFixups:"
+			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ].
+	aCodeGen popScope
 ]
 
 { #category : 'transformations' }

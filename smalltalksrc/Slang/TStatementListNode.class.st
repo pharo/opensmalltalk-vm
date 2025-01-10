@@ -312,18 +312,6 @@ TStatementListNode >> assignLastExpressionTo: variableNode [
 ]
 
 { #category : 'transformations' }
-TStatementListNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	self statements: (statements collect: [ :s |
-			 s
-				 bindClassVariablesIn: classVariables
-				 globalVariablesIn: globalsVariables
-				 classNameIn: classNames
-				 in: aCodeGen
-				 collect: changedVariables ])
-]
-
-{ #category : 'transformations' }
 TStatementListNode >> bindVariableUsesIn: aDictionary [
 
 	self statements: (statements collect: [ :s | s bindVariableUsesIn: aDictionary ]).
@@ -650,6 +638,18 @@ TStatementListNode >> renameLocalOrArg: varName with: newName [
 		             e ~= varName
 			             ifTrue: [ e ]
 			             ifFalse: [ newName ] ]
+]
+
+{ #category : 'transformations' }
+TStatementListNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self statements: (statements collect: [ :s |
+			 s
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
 ]
 
 { #category : 'transformations' }

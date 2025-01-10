@@ -22,17 +22,6 @@ TInlineNode >> asCASTIn: aBuilder [
 ]
 
 { #category : 'transformations' }
-TInlineNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	method := method
-		          bindClassVariablesIn: classVariables
-		          globalVariablesIn: globalsVariables
-		          classNameIn: classNames
-		          in: aCodeGen
-		          collect: changedVariables
-]
-
-{ #category : 'transformations' }
 TInlineNode >> bindVariableUsesIn: aDictionary [
 	method := method bindVariableUsesIn: aDictionary.
 
@@ -135,6 +124,17 @@ TInlineNode >> postCopy [
 { #category : 'printing' }
 TInlineNode >> printOn: aStream level: anInteger [
 	method parseTree printOn: aStream level: anInteger
+]
+
+{ #category : 'transformations' }
+TInlineNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	method := method
+		          renameLocalVariablesGivenClassVariables: classVariables
+		          globalVariables: globalsVariables
+		          classNames: classNames
+		          inCodeGenerator: aCodeGen
+		          collectingChangesIn: changedVariables
 ]
 
 { #category : 'transformations' }

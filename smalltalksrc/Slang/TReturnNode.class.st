@@ -68,17 +68,6 @@ TReturnNode >> asReturnNode [
 ]
 
 { #category : 'transformations' }
-TReturnNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	self expression: (expression
-			 bindClassVariablesIn: classVariables
-			 globalVariablesIn: globalsVariables
-			 classNameIn: classNames
-			 in: aCodeGen
-			 collect: changedVariables)
-]
-
-{ #category : 'transformations' }
 TReturnNode >> bindVariableUsesIn: aDictionary [
 
 	self expression: (expression bindVariableUsesIn: aDictionary)
@@ -213,6 +202,17 @@ TReturnNode >> printOn: aStream level: level [
 { #category : 'transformations' }
 TReturnNode >> removeAssertions [
 	expression removeAssertions
+]
+
+{ #category : 'transformations' }
+TReturnNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables)
 ]
 
 { #category : 'transformations' }

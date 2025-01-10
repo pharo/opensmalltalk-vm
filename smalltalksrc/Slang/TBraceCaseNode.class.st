@@ -12,25 +12,6 @@ Class {
 }
 
 { #category : 'transformations' }
-TBraceCaseNode >> bindClassVariablesIn: classVariables globalVariablesIn: globalsVariables classNameIn: classNames in: aCodeGen collect: changedVariables [
-
-	self caseLabels: (caseLabels collect: [ :node |
-			 node
-				 bindClassVariablesIn: classVariables
-				 globalVariablesIn: globalsVariables
-				 classNameIn: classNames
-				 in: aCodeGen
-				 collect: changedVariables ]).
-	self cases: (cases collect: [ :node |
-			 node
-				 bindClassVariablesIn: classVariables
-				 globalVariablesIn: globalsVariables
-				 classNameIn: classNames
-				 in: aCodeGen
-				 collect: changedVariables ])
-]
-
-{ #category : 'transformations' }
 TBraceCaseNode >> bindVariableUsesIn: aDictionary [
 
 	self caseLabels: (caseLabels collect: [:node| node bindVariableUsesIn: aDictionary]).
@@ -140,6 +121,25 @@ TBraceCaseNode >> nodesDo: aBlock unless: cautionaryBlock [
 	cases do:
 		[:node| node nodesDo: aBlock unless: cautionaryBlock].
 	aBlock value: self
+]
+
+{ #category : 'transformations' }
+TBraceCaseNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self caseLabels: (caseLabels collect: [ :node |
+			 node
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ]).
+	self cases: (cases collect: [ :node |
+			 node
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
 ]
 
 { #category : 'enumerating' }
