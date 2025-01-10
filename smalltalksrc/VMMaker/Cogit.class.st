@@ -3003,18 +3003,23 @@ Cogit >> addressIsInCurrentCompilation: address [
 
 { #category : 'testing' }
 Cogit >> addressIsInFixups: address [
+	"Hardcode renaming to _address"
+
 	<var: #address type: #'BytecodeFixup *'>
-	"Hardcode renaming to l_address"
-	^self cCode: '(BytecodeFixup *)l_address >= fixups && (BytecodeFixup *)l_address < (fixups + numAbstractOpcodes)'
-		inSmalltalk:
-			[fixups notNil
-			 and: [(fixups object identityIndexOf: address) between: 1 and: numAbstractOpcodes]]
+	^ self
+		  cCode:
+		  '(BytecodeFixup *)_address >= fixups && (BytecodeFixup *)_address < (fixups + numAbstractOpcodes)'
+		  inSmalltalk: [
+			  fixups notNil and: [
+				  (fixups object identityIndexOf: address)
+					  between: 1
+					  and: numAbstractOpcodes ] ]
 ]
 
 { #category : 'testing' }
 Cogit >> addressIsInInstructions: address [
 	<var: #address type: #'AbstractInstruction *'>
-	"Hardcode renaming to l_address"
+	"Hardcode renaming to _address"
 	^self cCode: '!((usqInt)(_address) & BytesPerWord-1) \
 				&& (_address) >= &abstractOpcodes[0] \
 				&& (_address) < &abstractOpcodes[opcodeIndex]'
