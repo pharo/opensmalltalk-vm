@@ -3015,9 +3015,9 @@ Cogit >> addressIsInFixups: address [
 Cogit >> addressIsInInstructions: address [
 	<var: #address type: #'AbstractInstruction *'>
 	"Hardcode renaming to l_address"
-	^self cCode: '!((usqInt)(l_address) & BytesPerWord-1) \
-				&& (l_address) >= &abstractOpcodes[0] \
-				&& (l_address) < &abstractOpcodes[opcodeIndex]'
+	^self cCode: '!((usqInt)(_address) & BytesPerWord-1) \
+				&& (_address) >= &abstractOpcodes[0] \
+				&& (_address) < &abstractOpcodes[opcodeIndex]'
 		inSmalltalk: [(abstractOpcodes object identityIndexOf: address) between: 1 and: opcodeIndex]
 ]
 
