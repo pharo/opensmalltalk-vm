@@ -4,3 +4,8 @@ Extension { #name : 'RBLiteralValueNode' }
 RBLiteralValueNode >> isConstantNumber [
 	^value isNumber
 ]
+
+{ #category : '*Slang' }
+RBLiteralValueNode >> isNodeNil [
+	^value == nil
+]

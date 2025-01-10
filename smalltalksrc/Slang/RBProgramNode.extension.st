@@ -23,3 +23,19 @@ RBProgramNode >> isBlockNode [
 RBProgramNode >> isConstantNumber [  "Overridden in RBLiteralValueNode"
 	^false
 ]
+
+{ #category : '*Slang' }
+RBProgramNode >> isNodeNil [
+	^false
+]
+
+{ #category : '*Slang' }
+RBProgramNode >> isVariableNode [
+	^false
+]
+
+{ #category : '*Slang' }
+RBProgramNode >> missingCommentNeededForCTranslation [
+	"So far the RBProgramNode hierarchy omits/elides comments :-("
+	^nil
+]
