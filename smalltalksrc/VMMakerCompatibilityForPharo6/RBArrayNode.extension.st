@@ -17,5 +17,5 @@ RBArrayNode >> asTranslatorNodeIn: aTMethod [
 			comment: statements].
 
 	"This is for varargs selectors (variants of printf:)"
-	^statements collect: [:elem| elem asTranslatorNodeIn: aTMethod]
+	^TStatementListNode statements: (statements collect: [:elem| elem asTranslatorNodeIn: aTMethod])
 ]
