@@ -1050,7 +1050,6 @@ CCodeGenerator >> emitCCodeOn: aStream doInlining: inlineFlag doAssertions: asse
 	| verbose methodList |
 	"method preparation"
 	verbose := false.
-	self prepareMethods.
 	verbose ifTrue: [
 		self printUnboundCallWarnings.
 		self printUnboundVariableReferenceWarnings.
@@ -4226,7 +4225,6 @@ CCodeGenerator >> prepareMethods [
 	globals addAll: variables
 		, (apiVariables ifNotNil: [ apiVariables keys ] ifNil: [ #(  ) ]).
 	methods do: [ :m |
-		m recordDeclarationsIn: self.
 		m
 			renameLocalVariablesGivenClassVariables: constants
 			andGlobalVariables: globals

@@ -2154,28 +2154,26 @@ TMethod >> mustBeInlined [
 
 { #category : 'initialization' }
 TMethod >> newCascadeTempFor: aTParseNode [
+
 	| varName varNode |
 	varName := self extraVariableName: 'cascade'.
 	varNode := TVariableNode new setName: varName.
-	aTParseNode isLeaf ifFalse:
-		[self
-			declarationAt: varName
-			put: [:tm :cg| | type |
-				type := tm determineTypeFor: aTParseNode in: cg.
-				(SlangStructType structTargetKindForType: type) == #struct ifTrue:
-					["can't copy structs into cascade temps; the struct is not updated.
+	aTParseNode isLeaf ifFalse: [
+		self declarationAt: varName put: [ :tm :cg |
+			| type |
+			type := tm determineTypeFor: aTParseNode in: cg.
+			(SlangStructType structTargetKindForType: type) == #struct ifTrue: [ "can't copy structs into cascade temps; the struct is not updated.
 					  must change to a pointer."
-					type := type, ' *'.
-					parseTree nodesDo:
-						[:node|
-						(node isAssignment
-						 and: [node variable name = varName]) ifTrue:
-							[node expression: (TSendNode new
-													setSelector: #addressOf:
-													receiver: (TVariableNode new setName: 'self')
-													arguments: {node expression})]]].
-				type]].
-	^varNode
+				type := type , ' *'.
+				parseTree nodesDo: [ :node |
+					(node isAssignment and: [ node variable name = varName ])
+						ifTrue: [
+							node expression: (TSendNode new
+									 setSelector: #addressOf:
+									 receiver: (TVariableNode new setName: 'self')
+									 arguments: { node expression }) ] ] ].
+			type ] ].
+	^ varNode
 ]
 
 { #category : 'accessing' }
@@ -2733,13 +2731,14 @@ TMethod >> renameVarInDeclarations: varName with: newName [
 
 { #category : 'transformations' }
 TMethod >> renameVarInReturnType: varName with: newName [
+
 	(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
-			ifTrue: [
-				returnType := returnType
-					              copyReplaceAll: varName
-					              with: newName
-					              tokenish: [ :ch |
-					              ch = $_ or: [ ch isAlphaNumeric ] ] ]
+		ifFalse: [ ^ self ].
+
+	self returnType: (returnType
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ])
 ]
 
 { #category : 'inlining support' }
