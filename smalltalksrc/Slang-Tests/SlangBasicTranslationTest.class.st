@@ -69,8 +69,8 @@ SlangBasicTranslationTest >> getTMethodFrom: selector [
 
 	generator addClass: SlangBasicTranslationTestClass.
 	generator
-		prepareMethods;
-		inferTypes.
+		inferTypes;
+		prepareMethods.
 	^ generator methodNamed: selector
 ]
 
@@ -7028,21 +7028,6 @@ SlangBasicTranslationTest >> testVariableUpdateAssignmentPlus [
 			expression: expression).
 
 	self assert: translation equals: 'var += 7'
-]
-
-{ #category : 'tests-variables' }
-SlangBasicTranslationTest >> testVariableWithConflictingNameShouldBeRenamed [
-	"tests if a local that would conflict with a function name is renamed"
-
-	| method translation |
-	method := self getTMethodFrom: #methodDefiningConflictingVariable.
-
-	generator renameConflictingLocals.
-
-	translation := self translate: method.
-
-
-	self assert: (translation includesSubstring: 'char *l_methodWithoutReturn').
 ]
 
 { #category : 'tests-variables' }

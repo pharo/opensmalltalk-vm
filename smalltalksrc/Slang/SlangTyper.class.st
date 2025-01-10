@@ -164,7 +164,7 @@ SlangTyper >> inferTypesForImplicitlyTypedVariablesAndMethods [
 	allMethods do:
 		[:m|
 		m removeFinalSelfReturnIn: codeGenerator. "must precede recordDeclarationsIn: because it may set returnType"
-		"m recordDeclarationsIn: codeGenerator."
+		m recordDeclarationsIn: codeGenerator.
 		(m returnType isNil
 		 and: [m isReturnConstant]) ifTrue:
 			[self inferReturnTypeOf: m]].

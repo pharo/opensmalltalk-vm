@@ -74,8 +74,8 @@ InterpreterPlugin class >> buildCodeGeneratorForVMClass: aVMClass [
 	(cg structClassesForTranslationClasses: pluginClasses) do:
 		[:structClasss| cg addStructClass: structClasss].
 	cg addMethodsForTranslatedPrimitives: self translatedPrimitives.
-	cg prepareMethods.
 	cg inferTypes.	
+	cg prepareMethods.
 	^cg
 ]
 

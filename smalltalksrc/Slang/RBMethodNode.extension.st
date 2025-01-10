@@ -83,7 +83,6 @@ RBMethodNode >> asTranslationMethodOfClass: aTMethodClass forCodeGenerator: aCod
 				   ifNotNil: [ :pragmaNode | pragmaNode arguments first value ])
 		  properties: additionalMethodState
 		  comment: comment;
-		  recordDeclarationsIn: aCodeGenerator;
 		  yourself
 ]
 

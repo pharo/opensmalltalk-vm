@@ -1058,7 +1058,6 @@ CCodeGenerator >> emitCCodeOn: aStream doInlining: inlineFlag doAssertions: asse
 
 	self renameConflictingMethods.
 	self renameKeywordsConflicts.
-	self renameConflictingLocals.
 
 	self doInlining: inlineFlag.
 	SLDeadCodeEliminationVisitor new removeDeadCodeUsing: self.
@@ -4507,24 +4506,6 @@ CCodeGenerator >> removeVariable: aName ifAbsent: ifAbsentBlock [
 	"Remove the given (instance) variable from the code base."
 	variableDeclarations removeKey: aName ifAbsent: [].
 	^variables remove: aName ifAbsent: ifAbsentBlock
-]
-
-{ #category : 'renaming' }
-CCodeGenerator >> renameConflictingLocals [
-	"renames locals that would conflict with a declared function"
-
-	| allFunctions |
-	allFunctions := methods values collect: [ :method |
-		                self cFunctionNameFor: method selector ].
-
-	methods do: [ :method |
-		| renames |
-		renames := Dictionary new.
-		method allLocals
-			select: [ :local | allFunctions includes: local ]
-			thenDo: [ :local | renames at: local put: 'l_' , local ].
-
-		method renameVariablesUsing: renames ]
 ]
 
 { #category : 'renaming' }
