@@ -261,18 +261,10 @@ VMMaker >> availablePlugins [
 VMMaker >> buildCodeGeneratorForCogit [
 	"Answer the code generator for translating the cogit."
 
-	^(Smalltalk classNamed: #CurrentReadOnlySourceFiles)
-		ifNil: [self
-				buildCodeGeneratorForCogit: self interpreterClass cogitClass
-				includeAPIMethods: true
-				initializeClasses: true]
-		ifNotNil:
-			[:crosf|
-			 crosf cacheDuring:
-				[self
-					buildCodeGeneratorForCogit: self interpreterClass cogitClass
-					includeAPIMethods: true
-					initializeClasses: true]]
+	^ self
+		  buildCodeGeneratorForCogit: self interpreterClass cogitClass
+		  includeAPIMethods: true
+		  initializeClasses: true
 ]
 
 { #category : 'generate sources' }
@@ -323,18 +315,10 @@ VMMaker >> buildCodeGeneratorForCogit: cogitClass includeAPIMethods: getAPIMetho
 VMMaker >> buildCodeGeneratorForInterpreter [
 	"Answer the code generator for translating the interpreter."
 
-	^(Smalltalk classNamed: #CurrentReadOnlySourceFiles)
-		ifNil: [self
-				buildCodeGeneratorForInterpreter: self interpreterClass
-				includeAPIMethods: true
-				initializeClasses: true]
-		ifNotNil:
-			[:crosf|
-			 crosf cacheDuring:
-				[self
-					buildCodeGeneratorForInterpreter: self interpreterClass
-					includeAPIMethods: true
-					initializeClasses: true]]
+	^ self
+		  buildCodeGeneratorForInterpreter: self interpreterClass
+		  includeAPIMethods: true
+		  initializeClasses: true
 ]
 
 { #category : 'generate sources' }
@@ -585,6 +569,8 @@ VMMaker >> generateCogitFileFor: cogitClass [
 	cg := self buildCodeGeneratorForCogit.
 
 	cg inferTypes.
+	cg 	prepareMethods.
+
 	self needsToRegenerateCogitFile ifFalse: [^cg].
 
 	cg vmClass preGenerationHook: cg.
@@ -753,6 +739,7 @@ VMMaker >> generateInterpreterFile [
 	self needsToRegenerateInterpreterFile ifFalse: [^nil].
 
 	cg inferTypes.
+	cg 	prepareMethods.
 
 	self interpreterClass preGenerationHook: cg.
 	vmHeaderContents := cg vmHeaderContentsWithBytesPerWord: self wordSize.

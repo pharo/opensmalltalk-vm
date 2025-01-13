@@ -22,7 +22,7 @@
 #include <signal.h>
 
 char vmName[PATH_MAX];
-char imageName[PATH_MAX];
+char _imageName[PATH_MAX];
 char vmFullPath[PATH_MAX];
 char vmPath[PATH_MAX];
 
@@ -184,11 +184,11 @@ void setVMName(const char* name){
 }
 
 char* getImageName(){
-	return imageName;
+	return _imageName;
 }
 
 /**
- * Sets the ImageName.
+ * Sets the _imageName.
  * It copies the parameter to internal storage.
  */
 void setImageName(const char* name){
@@ -198,9 +198,9 @@ void setImageName(const char* name){
 	* - does not check error code
 	* - does use count as the size of the destination buffer
 	*/
-	strcpy_s(imageName, PATH_MAX, name);
+	strcpy_s(_imageName, PATH_MAX, name);
 #else
-	strcpy(imageName, name);
+	strcpy(_imageName, name);
 #endif
 }
 
@@ -264,11 +264,11 @@ sqInt imageNameGetLength(sqInt sqImageNameIndex, sqInt length){
     char *sqImageName = pointerForOop(sqImageNameIndex);
     int count;
 
-    count= strlen(imageName);
+    count= strlen(_imageName);
     count= (length < count) ? length : count;
 
     /* copy the file name into the Squeak string */
-    memcpy(sqImageName, imageName, count);
+    memcpy(sqImageName, _imageName, count);
 
     return count;
 }
@@ -277,11 +277,11 @@ sqInt imageNamePutLength(sqInt sqImageNameIndex, sqInt length){
     char *sqImageName= pointerForOop(sqImageNameIndex);
     int count;
 
-    count = (length >= sizeof(imageName)) ? sizeof(imageName) - 1 : length;
+    count = (length >= sizeof(_imageName)) ? sizeof(_imageName) - 1 : length;
 
     /* copy the file name into a null-terminated C string */
-    memcpy(imageName, sqImageName, count);
-    imageName[count] = 0;
+    memcpy(_imageName, sqImageName, count);
+    _imageName[count] = 0;
 
     return count;
 }
@@ -289,7 +289,7 @@ sqInt imageNamePutLength(sqInt sqImageNameIndex, sqInt length){
 sqInt
 imageNameSize(void)
 {
-    return strlen(imageName);
+    return strlen(_imageName);
 }
 
 int vmParamsCount = 0;

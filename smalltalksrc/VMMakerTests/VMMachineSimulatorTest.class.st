@@ -130,7 +130,7 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionHandledCountIsRespected [
 		timeout: 0
 		count: 10. 
 
-  self 
+	self 
 		assert: self machineSimulator instructionPointerRegisterValue 
 		equals: jumpInstruction address
 ]

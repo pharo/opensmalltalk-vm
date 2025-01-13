@@ -479,6 +479,39 @@ TSwitchStmtNode >> removeUnusedNodesInBranch: aChild [
 ]
 
 { #category : 'transformations' }
+TSwitchStmtNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	expression := expression
+		              renameLocalVariablesGivenClassVariables: classVariables
+		              globalVariables: globalsVariables
+		              classNames: classNames
+		              inCodeGenerator: aCodeGen
+		              collectingChangesIn: changedVariables.
+	cases := cases collect: [ :pair | "<Array with: <Array with: ParseTreeNode> with: TStmtListNode"
+		         {
+			         (pair first collect: [ :labelNode |
+				          labelNode
+					          renameLocalVariablesGivenClassVariables: classVariables
+					          globalVariables: globalsVariables
+					          classNames: classNames
+					          inCodeGenerator: aCodeGen
+					          collectingChangesIn: changedVariables ]).
+			         (pair last
+				          renameLocalVariablesGivenClassVariables: classVariables
+				          globalVariables: globalsVariables
+				          classNames: classNames
+				          inCodeGenerator: aCodeGen
+				          collectingChangesIn: changedVariables) } ].
+	otherwiseOrNil ifNotNil: [
+		otherwiseOrNil := otherwiseOrNil
+			                  renameLocalVariablesGivenClassVariables: classVariables
+			                  globalVariables: globalsVariables
+			                  classNames: classNames
+			                  inCodeGenerator: aCodeGen
+			                  collectingChangesIn: changedVariables ]
+]
+
+{ #category : 'transformations' }
 TSwitchStmtNode >> replaceNodesIn: aDictionary [
 	^aDictionary
 		at: self

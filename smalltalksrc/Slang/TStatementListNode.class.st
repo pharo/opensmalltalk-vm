@@ -458,10 +458,10 @@ TStatementListNode >> isExpression [
 { #category : 'testing' }
 TStatementListNode >> isNilStmtListNode [
 
-	|stmt|
-	statements size = 1 ifFalse: [^false].
+	| stmt |
+	statements size = 1 ifFalse: [ ^ false ].
 	stmt := statements at: 1.
-	^ stmt isVariable and: [stmt name = 'nil']
+	^ stmt isConstant and: [ stmt value isNil ]
 ]
 
 { #category : 'testing' }
@@ -628,6 +628,31 @@ TStatementListNode >> renameLabelsForInliningInto: aTMethod [
 ]
 
 { #category : 'transformations' }
+TStatementListNode >> renameLocalOrArg: varName with: newName [
+
+	locals := locals collect: [ :e |
+		          e ~= varName
+			          ifTrue: [ e ]
+			          ifFalse: [ newName ] ].
+	arguments := arguments collect: [ :e |
+		             e ~= varName
+			             ifTrue: [ e ]
+			             ifFalse: [ newName ] ]
+]
+
+{ #category : 'transformations' }
+TStatementListNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self statements: (statements collect: [ :s |
+			 s
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
+]
+
+{ #category : 'transformations' }
 TStatementListNode >> replaceChild: aNode with: bNode [
 
 	self statements: (statements collect: [ :node |
@@ -664,14 +689,10 @@ TStatementListNode >> replaceNodesIn: aDictionary [
 TStatementListNode >> returnsExpression [
 	"Answer true if the last statement of this block is a return of some expression, not merely self or nil."
 
-	statements isEmpty ifTrue:
-		[^false].
-	self lastNonCommentStatement isReturn ifFalse:
-		[^false].
-	self lastNonCommentStatement isVariable ifFalse:
-		[^true].
-	^self lastNonCommentStatement variable ~= 'self'
-	  and: [self lastNonCommentStatement variable ~= 'nil']
+	statements isEmpty ifTrue: [ ^ false ].
+	self lastNonCommentStatement isReturn ifFalse: [ ^ false ].
+	self lastNonCommentStatement isVariable ifFalse: [ ^ true ].
+	^ self lastNonCommentStatement variable ~= 'self'
 ]
 
 { #category : 'accessing' }

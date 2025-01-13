@@ -39,13 +39,8 @@ function(build_SDL2)
     message(STATUS "Building SDL2")
   	include(cmake/DownloadProject.cmake)
 	download_project(PROJ   SDL2
-<<<<<<< HEAD
-        GIT_REPOSITORY      https://github.com/libsdl-org/SDL.git
-        GIT_TAG             "release-2.26.5"
-=======
         GIT_REPOSITORY      https://github.com/pharo-project/SDL2.git
         GIT_TAG             "v2.30.6"
->>>>>>> pharo-10
         ${UPDATE_DISCONNECTED_IF_AVAILABLE}
 	)
     add_subdirectory(${SDL2_SOURCE_DIR} ${SDL2_BINARY_DIR} EXCLUDE_FROM_ALL)

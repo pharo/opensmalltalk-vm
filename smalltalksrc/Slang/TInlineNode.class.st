@@ -127,6 +127,17 @@ TInlineNode >> printOn: aStream level: anInteger [
 ]
 
 { #category : 'transformations' }
+TInlineNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	method := method
+		          renameLocalVariablesGivenClassVariables: classVariables
+		          globalVariables: globalsVariables
+		          classNames: classNames
+		          inCodeGenerator: aCodeGen
+		          collectingChangesIn: changedVariables
+]
+
+{ #category : 'transformations' }
 TInlineNode >> replaceNodesIn: map [
 	^map at: self ifAbsent: [
 		method replaceNodesIn: map.

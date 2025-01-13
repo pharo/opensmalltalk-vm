@@ -593,6 +593,36 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 ]
 
 { #category : 'transformations' }
+TSendNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self receiver: (receiver
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self arguments: (arguments collect: [ :a |
+			 a
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
+]
+
+{ #category : 'transformations' }
+TSendNode >> renameVarInCCode: varName with: newVarName [
+
+	((selector beginsWith: #cCode:) and: [
+		 (arguments first value findString: varName) > 0 ]) ifTrue: [
+		arguments first setValue: (arguments first value
+				 copyReplaceAll: varName
+				 with: newVarName
+				 tokenish: [ :ch |
+				 ch = $_ or: [ ch isAlphaNumeric or: [ ch = $\ ] ] ]) ]
+]
+
+{ #category : 'transformations' }
 TSendNode >> replaceChild: aNode with: aReplacementNode [
 
 	receiver == aNode ifTrue: [

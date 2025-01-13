@@ -391,6 +391,24 @@ TCaseStmtNode >> removeAssertions [
 ]
 
 { #category : 'transformations' }
+TCaseStmtNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self cases: (cases collect: [ :c |
+			 c
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
+]
+
+{ #category : 'transformations' }
 TCaseStmtNode >> replaceNodesIn: aDictionary [
 
 	^aDictionary at: self ifAbsent: [

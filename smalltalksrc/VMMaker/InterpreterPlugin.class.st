@@ -57,18 +57,7 @@ InterpreterPlugin class >> browseTranslatedPrimitives [
 { #category : 'translation' }
 InterpreterPlugin class >> buildCodeGenerator [
 	"Build a CCodeGenerator for the plugin"
-	| cg pluginClasses |
-	cg := self codeGeneratorClass new initialize.
-	cg vmClass: self.
-	cg pluginClass: self.
-	cg vmMaker: VMMaker new.
-	cg vmMaker vmmakerConfiguration: VMMakerConfiguration.
-	(pluginClasses := self pluginClassesUpToRoot) do:
-		[:aClass| cg addClass: aClass].
-	(cg structClassesForTranslationClasses: pluginClasses) do:
-		[:structClasss| cg addStructClass: structClasss].
-	cg addMethodsForTranslatedPrimitives: self translatedPrimitives.
-	^cg
+	self buildCodeGeneratorForVMClass: self
 ]
 
 { #category : 'translation' }
@@ -85,6 +74,8 @@ InterpreterPlugin class >> buildCodeGeneratorForVMClass: aVMClass [
 	(cg structClassesForTranslationClasses: pluginClasses) do:
 		[:structClasss| cg addStructClass: structClasss].
 	cg addMethodsForTranslatedPrimitives: self translatedPrimitives.
+	cg inferTypes.	
+	cg prepareMethods.
 	^cg
 ]
 
@@ -333,7 +324,6 @@ InterpreterPlugin class >> translateInDirectory: directory doInlining: inlineFla
 	"The VM class should be nil for plugins, because there is code that conditionally checks if it is nil or not.
 	A nil VM class is assumed as a plugin context..."
 	cg := self buildCodeGeneratorForVMClass: nil.
-	cg inferTypes.
 	self pruneUnusedInterpreterPluginMethodsIn: cg.
 	cg storeCodeOnFile:  (directory / fname) fullName doInlining: inlineFlag.
 	^cg exportedPrimitiveNames asArray

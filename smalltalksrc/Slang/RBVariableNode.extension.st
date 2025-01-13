@@ -7,3 +7,8 @@ RBVariableNode >> asTranslatorNodeIn: aTMethod [
 	name = 'false' ifTrue: [^ TConstantNode value: false].
 	^ TVariableNode new setName: name
 ]
+
+{ #category : '*Slang' }
+RBVariableNode >> isVariableNode [
+	^true
+]

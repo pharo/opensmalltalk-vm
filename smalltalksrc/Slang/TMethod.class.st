@@ -143,9 +143,10 @@ TMethod >> allLocals [
 
 	| allLocals |
 	cachedLocals ifNotNil: [ ^ cachedLocals ].
-	
+
 	allLocals := Set new.
-	allLocals addAll: (declarations keys asSet reject: [:k| (declarations at: k) == #implicit]).
+	allLocals addAll: (declarations keys asSet reject: [ :k |
+			 (declarations at: k) == #implicit ]).
 	allLocals addAll: self locals.
 	self nodesDo: [ :node |
 		node isStatementList ifTrue: [ allLocals addAll: node locals ] ].
@@ -268,6 +269,12 @@ TMethod >> args [
 	"The arguments of this method."
 
 	^args
+]
+
+{ #category : 'accessing' }
+TMethod >> args: arguments [
+
+	args := arguments
 ]
 
 { #category : 'CAST translation' }
@@ -1551,7 +1558,6 @@ TMethod >> inlineReturningConditional: aSendNode in: aCodeGen [
 	returnIfTrue := aSendNode selector = #ifTrue:.
 	returnNode := aSendNode arguments first.
 	method := (aCodeGen methodNamed: aSendNode receiver selector) copy.
-	"self haltIf: [ selector = #markAndTrace: ]."
 	replacementTree := method
 		                   inlineFunctionCall: aSendNode receiver
 		                   in: aCodeGen.
@@ -1680,7 +1686,7 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 			ifFalse: [
 				inlineStmts add:
 					(TReturnNode new setExpression:
-						 (TVariableNode new setName: 'nil')) ] ].
+						 (TConstantNode new setValue: nil)) ] ].
 	exitLabel
     ifNotNil: [
 			inlineStmts add: (TLabeledCommentNode new
@@ -2148,28 +2154,26 @@ TMethod >> mustBeInlined [
 
 { #category : 'initialization' }
 TMethod >> newCascadeTempFor: aTParseNode [
+
 	| varName varNode |
 	varName := self extraVariableName: 'cascade'.
 	varNode := TVariableNode new setName: varName.
-	aTParseNode isLeaf ifFalse:
-		[self
-			declarationAt: varName
-			put: [:tm :cg| | type |
-				type := tm determineTypeFor: aTParseNode in: cg.
-				(SlangStructType structTargetKindForType: type) == #struct ifTrue:
-					["can't copy structs into cascade temps; the struct is not updated.
+	aTParseNode isLeaf ifFalse: [
+		self declarationAt: varName put: [ :tm :cg |
+			| type |
+			type := tm determineTypeFor: aTParseNode in: cg.
+			(SlangStructType structTargetKindForType: type) == #struct ifTrue: [ "can't copy structs into cascade temps; the struct is not updated.
 					  must change to a pointer."
-					type := type, ' *'.
-					parseTree nodesDo:
-						[:node|
-						(node isAssignment
-						 and: [node variable name = varName]) ifTrue:
-							[node expression: (TSendNode new
-													setSelector: #addressOf:
-													receiver: (TVariableNode new setName: 'self')
-													arguments: {node expression})]]].
-				type]].
-	^varNode
+				type := type , ' *'.
+				parseTree nodesDo: [ :node |
+					(node isAssignment and: [ node variable name = varName ])
+						ifTrue: [
+							node expression: (TSendNode new
+									 setSelector: #addressOf:
+									 receiver: (TVariableNode new setName: 'self')
+									 arguments: { node expression }) ] ] ].
+			type ] ].
+	^ varNode
 ]
 
 { #category : 'accessing' }
@@ -2669,6 +2673,72 @@ TMethod >> renameLabelsUsing: aDictionary [
 			[node setLabel: (aDictionary at: node label)].
 		(node isLabel and: [aDictionary includesKey: node label]) ifTrue:
 			[node setLabel: (aDictionary at: node label)]]
+]
+
+{ #category : 'transformations' }
+TMethod >> renameLocalVariablesGivenClassVariables: classVariables andGlobalVariables: globalsVariables inCodeGenerator: aCodeGen [
+	"Answer either the receiver, if it is not contained in the parameters, or a new node with the given variable rebound. only work after type inferences for declarations et pragmas updates"
+
+	| changedVariables |
+	changedVariables := Set new.
+	"necessary for implicit variables"
+	aCodeGen pushScope: self.
+	
+	self parseTree: (parseTree
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames:
+			 (SlangStructType allSubclasses collect: [ :class | class name ])
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	changedVariables isEmpty ifTrue: [ ^ self ].
+	"no need to changed the locals of the TMethod, if the cache is nil they are retrieve from the parseTree which we will update"
+	cachedLocals := nil.
+	changedVariables do: [ :varName |
+		| newName |
+		newName := #_ , varName.
+		self args: (self args collect: [ :e |
+				 e ~= varName
+					 ifTrue: [ e ]
+					 ifFalse: [ newName ] ]).
+		self renameVarInDeclarations: varName with: newName.
+		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+		self renameVarInReturnType: varName with: newName.
+
+		"update all the parseTree"
+		self parseTree nodesDo: [ :node |
+			node isStatementList ifTrue: [
+				node renameLocalOrArg: varName with: newName ].
+
+			"rare case but it can happen, see addressIsInFixups:"
+			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ].
+	aCodeGen popScope
+]
+
+{ #category : 'transformations' }
+TMethod >> renameVarInDeclarations: varName with: newName [
+
+	| oldDeclaration |
+	(declarations keys includes: varName) ifFalse: [ ^ self ].
+	oldDeclaration := declarations at: varName.
+	"new declaration"
+	declarations at: newName put: (oldDeclaration
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
+	declarations removeKey: varName
+]
+
+{ #category : 'transformations' }
+TMethod >> renameVarInReturnType: varName with: newName [
+
+	(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
+		ifFalse: [ ^ self ].
+
+	self returnType: (returnType
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ])
 ]
 
 { #category : 'inlining support' }

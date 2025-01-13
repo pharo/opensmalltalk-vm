@@ -2,7 +2,8 @@ Class {
 	#name : 'TConstantNode',
 	#superclass : 'TParseNode',
 	#instVars : [
-		'value'
+		'value',
+		'shouldBeGenerated'
 	],
 	#category : 'Slang-AST',
 	#package : 'Slang',
@@ -68,6 +69,13 @@ TConstantNode >> hasSideEffect [
 	^false
 ]
 
+{ #category : 'initialization' }
+TConstantNode >> initialize [
+
+	super initialize.
+	shouldBeGenerated := true
+]
+
 { #category : 'testing' }
 TConstantNode >> isConstant [
 
@@ -116,6 +124,17 @@ TConstantNode >> printOn: aStream level: level [
 TConstantNode >> setValue: anObject [
 
 	value := anObject.
+]
+
+{ #category : 'accessing' }
+TConstantNode >> shouldBeGenerated [
+	^ shouldBeGenerated 
+]
+
+{ #category : 'accessing' }
+TConstantNode >> shouldBeGenerated: aBoolean [
+
+	shouldBeGenerated := aBoolean
 ]
 
 { #category : 'type inference' }

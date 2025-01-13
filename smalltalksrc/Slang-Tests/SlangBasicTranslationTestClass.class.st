@@ -109,6 +109,8 @@ SlangBasicTranslationTestClass >> methodDefiningConflictingVariable [
 
 	<var: 'methodWithoutReturn' type: 'char *'>
 	| methodWithoutReturn |
+	
+	^ methodWithoutReturn
 ]
 
 { #category : 'inline' }
