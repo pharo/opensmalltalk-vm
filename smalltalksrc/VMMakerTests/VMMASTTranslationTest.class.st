@@ -172,7 +172,7 @@ VMMASTTranslationTest >> testComplexIfNilIfNotNilWithArgument [
 	self
 		assert: condition receiver name
 		equals: conditional arguments second arguments first.
-	self assert: condition arguments first name equals: 'nil'
+	self assert: condition arguments first value equals: nil
 ]
 
 { #category : 'tests' }
@@ -209,7 +209,7 @@ VMMASTTranslationTest >> testComplexIfNotNilIfNilWithArgument [
 	self
 		assert: condition receiver name
 		equals: conditional arguments second arguments first.
-	self assert: condition arguments first name equals: 'nil'
+	self assert: condition arguments first value equals: nil
 ]
 
 { #category : 'tests' }
@@ -241,7 +241,7 @@ VMMASTTranslationTest >> testComplexIfNotNilWithArgument [
 	self
 		assert: condition receiver name
 		equals: conditional arguments first arguments first.
-	self assert: condition arguments first name equals: 'nil'
+	self assert: condition arguments first value equals: nil
 ]
 
 { #category : 'tests' }

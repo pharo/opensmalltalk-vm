@@ -978,31 +978,6 @@ CogObjectRepresentationForSpur >> genGetFormatOf: sourceReg into: destReg leastS
 	^0
 ]
 
-{ #category : 'sista support' }
-CogObjectRepresentationForSpur >> genGetIdentityHash: rcvrReg resultReg: resultReg [
-	<var: #jumpSet type: #'AbstractInstruction *'>
-	| jumpSet |
-	"ReceiverResultReg is required for the trampoline. We force the allocation,
-	 and we have two path to avoid conflicts in ReceiverResultReg."
-	cogit voidReceiverResultRegContainsSelf. 
-	resultReg = ReceiverResultReg 
-		ifTrue: 
-			[cogit ssTop moveToReg: rcvrReg.
-			 self genGetHashFieldNonImmOf: rcvrReg asSmallIntegerInto: resultReg.
-			 cogit CmpCq: ConstZero R: resultReg.
-			 jumpSet := cogit JumpNonZero: 0.
-			 cogit MoveR: rcvrReg R: resultReg.
-			 cogit CallRT: ceInlineNewHashTrampoline]
-		ifFalse: 
-			[cogit ssTop moveToReg: ReceiverResultReg.
-		 	 self genGetHashFieldNonImmOf: ReceiverResultReg asSmallIntegerInto: resultReg.
-			 cogit CmpCq: ConstZero R: resultReg.
-			 jumpSet := cogit JumpNonZero: 0.
-			 cogit CallRT: ceInlineNewHashTrampoline.
-			 cogit MoveR: ReceiverResultReg R: resultReg].
-	jumpSet jmpTarget: cogit Label
-]
-
 { #category : 'inline primitive support' }
 CogObjectRepresentationForSpur >> genGetInstanceOfByteClass: classObj into: destReg initializingIf: initializeInstance numBytes: numBytes [
 	"Create an instance of classObj and assign it to destReg, initializing the instance
@@ -3040,13 +3015,6 @@ CogObjectRepresentationForSpur >> initialize [
 	ceStoreTrampolines := (CArrayAccessor on: (Array new: NumStoreTrampolines))
 ]
 
-{ #category : 'garbage collection' }
-CogObjectRepresentationForSpur >> inlineCacheTagIsYoung: cacheTag [
-	"Since all cache tags in Spur are class indices none of
-	 them are young or have to be updated in a scavenge."
-	^false
-]
-
 { #category : 'in-line cacheing' }
 CogObjectRepresentationForSpur >> inlineCacheTagsMayBeObjects [
 	^false
@@ -3168,17 +3136,6 @@ CogObjectRepresentationForSpur >> maybeMarkCounters: theCounters [
 	<inline: true>
 	theCounters ~= 0 ifTrue:
 		[objectMemory markAndTrace: theCounters - objectMemory baseHeaderSize]
-]
-
-{ #category : 'compilation' }
-CogObjectRepresentationForSpur >> maybeNoteDescriptor: descriptor blockStart: blockStart [
-	"Override to note inst var refs in blocks.  Used to avoid checking
-	 for forwarded receivers in blocks that don't refer to inst vars."
-	<var: #blockStart type: #'BlockStart *'>
-	<var: #descriptor type: #'BytecodeDescriptor *'>
-	<inline: true>
-	descriptor isInstVarRef ifTrue:
-		[blockStart hasInstVarRef: true]
 ]
 
 { #category : 'method cacheing' }

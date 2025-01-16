@@ -20,7 +20,7 @@ function(download_SDL2)
     else()
       add_third_party_dependency("SDL2-2.24.1")
     endif()
-  elseif(OSX)   
+  elseif(OSX)
     if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm64")
       add_third_party_dependency("SDL2-2.30.6")
     else()
@@ -47,11 +47,7 @@ function(build_SDL2)
 
     set_target_properties(SDL2 PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_PATH})
 
-    add_custom_target(SDL2_copy
-			COMMAND ${CMAKE_COMMAND} -E create_symlink libSDL2-2.0.dylib ${LIBRARY_OUTPUT_PATH}/libSDL2-2.0.0.dylib
-    )
-    add_dependencies(SDL2_copy SDL2)
-    add_dependencies(${VM_LIBRARY_NAME} SDL2_copy)
+    add_dependencies(${VM_LIBRARY_NAME} SDL2)
     set(SDL2_FOUND "From build_SDL2" PARENT_SCOPE)
 endfunction()
 
@@ -81,7 +77,7 @@ if (BUILD_BUNDLE)
       # SDL2 found, get the library location from the SDL2 CMake exported properties
       get_target_property(SDL2_LIBDIR SDL2::SDL2 IMPORTED_LOCATION)
       # SDL2_LIBDIR now contains the full path to the library including the file (.so/.dll/.dylib)
-      message(STATUS "Using system libSDL2 from ${SDL2_LIBDIR}")  
+      message(STATUS "Using system libSDL2 from ${SDL2_LIBDIR}")
 	  endif()
   endif()
 endif()

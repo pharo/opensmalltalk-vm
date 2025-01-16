@@ -293,7 +293,6 @@ static usqInt (*positive32BitValueOf)(sqInt oop);
 static usqLong (*positive64BitValueOf)(sqInt oop);
 static sqInt (*primitiveFail)(void);
 static sqInt (*primitiveFailFor)(sqInt reasonCode);
-static sqInt (*showDisplayBitsLeftTopRightBottom)(sqInt aForm, sqInt l, sqInt t, sqInt r, sqInt b);
 static sqInt (*slotSizeOf)(sqInt oop);
 static sqInt (*stackIntegerValue)(sqInt offset);
 static sqInt (*stackObjectValue)(sqInt offset);
@@ -335,7 +334,6 @@ extern usqInt positive32BitValueOf(sqInt oop);
 extern usqLong positive64BitValueOf(sqInt oop);
 extern sqInt primitiveFail(void);
 extern sqInt primitiveFailFor(sqInt reasonCode);
-extern sqInt showDisplayBitsLeftTopRightBottom(sqInt aForm, sqInt l, sqInt t, sqInt r, sqInt b);
 extern sqInt slotSizeOf(sqInt oop);
 extern sqInt stackIntegerValue(sqInt offset);
 extern sqInt stackObjectValue(sqInt offset);
@@ -1359,7 +1357,6 @@ copyBitsFromtoat(sqInt startX, sqInt stopX, sqInt yValue)
 	if (numGCsOnInvocation != (statNumGCs())) {
 		reloadDestAndSourceForms();
 	}
-	showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	return 0;
 }
 
@@ -2698,7 +2695,6 @@ drawLoopXY(sqInt xDelta, sqInt yDelta)
 						if (numGCsOnInvocation != (statNumGCs())) {
 							reloadDestAndSourceForms();
 						}
-						showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 
 						/* init null rectangle */
 						affL = (affT = 9999);
@@ -2742,7 +2738,6 @@ drawLoopXY(sqInt xDelta, sqInt yDelta)
 						if (numGCsOnInvocation != (statNumGCs())) {
 							reloadDestAndSourceForms();
 						}
-						showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 
 						/* init null rectangle */
 						affL = (affT = 9999);
@@ -5118,7 +5113,6 @@ primitiveCopyBits(void)
 	if (numGCsOnInvocation != (statNumGCs())) {
 		reloadDestAndSourceForms();
 	}
-	showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	if (failed()) {
 		return null;
 	}
@@ -5278,7 +5272,6 @@ primitiveDisplayString(void)
 	if (numGCsOnInvocation != (statNumGCs())) {
 		reloadDestAndSourceForms();
 	}
-	showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	storeIntegerofObjectwithValue(BBDestXIndex, bbObj, destX);
 	pop(6);
 	return 0;
@@ -5375,7 +5368,6 @@ primitiveDrawLoop(void)
 							if (numGCsOnInvocation != (statNumGCs())) {
 								reloadDestAndSourceForms();
 							}
-							showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 
 							/* init null rectangle */
 							affL = (affT = 9999);
@@ -5419,7 +5411,6 @@ primitiveDrawLoop(void)
 							if (numGCsOnInvocation != (statNumGCs())) {
 								reloadDestAndSourceForms();
 							}
-							showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 
 							/* init null rectangle */
 							affL = (affT = 9999);
@@ -5442,7 +5433,6 @@ primitiveDrawLoop(void)
 		if (numGCsOnInvocation != (statNumGCs())) {
 			reloadDestAndSourceForms();
 		}
-		showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	}
 	if (!(failed())) {
 		pop(2);
@@ -5657,7 +5647,6 @@ primitiveWarpBits(void)
 	if (numGCsOnInvocation != (statNumGCs())) {
 		reloadDestAndSourceForms();
 	}
-	showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	if (failed()) {
 		return null;
 	}
@@ -6652,7 +6641,6 @@ setInterpreter(struct VirtualMachine *anInterpreter)
 		positive64BitValueOf = interpreterProxy->positive64BitValueOf;
 		primitiveFail = interpreterProxy->primitiveFail;
 		primitiveFailFor = interpreterProxy->primitiveFailFor;
-		showDisplayBitsLeftTopRightBottom = interpreterProxy->showDisplayBitsLeftTopRightBottom;
 		slotSizeOf = interpreterProxy->slotSizeOf;
 		stackIntegerValue = interpreterProxy->stackIntegerValue;
 		stackObjectValue = interpreterProxy->stackObjectValue;
@@ -6763,7 +6751,6 @@ showDisplayBits(void)
 	if (numGCsOnInvocation != (statNumGCs())) {
 		reloadDestAndSourceForms();
 	}
-	showDisplayBitsLeftTopRightBottom(destForm, affectedL, affectedT, affectedR, affectedB);
 	return 0;
 }
 

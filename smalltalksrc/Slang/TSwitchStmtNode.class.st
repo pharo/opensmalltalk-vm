@@ -310,6 +310,12 @@ TSwitchStmtNode >> expression: expr cases: aTBraceNode otherwiseOrNil: otherwise
 	self otherwiseOrNil: otherwiseOrNilNode
 ]
 
+{ #category : 'testing' }
+TSwitchStmtNode >> isExpression [
+
+	^ true
+]
+
 { #category : 'comparing' }
 TSwitchStmtNode >> isSameAs: anotherNode [
 
@@ -470,6 +476,39 @@ TSwitchStmtNode >> removeUnusedNodesInBranch: aChild [
 	otherwiseOrNil isEmptyStmtListNode ifFalse: [ ^ self ].
 	self transformExpressionAfterEmptyCasesAndOtherwise.
 	self parent removeUnusedNodesInBranch: self
+]
+
+{ #category : 'transformations' }
+TSwitchStmtNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	expression := expression
+		              renameLocalVariablesGivenClassVariables: classVariables
+		              globalVariables: globalsVariables
+		              classNames: classNames
+		              inCodeGenerator: aCodeGen
+		              collectingChangesIn: changedVariables.
+	cases := cases collect: [ :pair | "<Array with: <Array with: ParseTreeNode> with: TStmtListNode"
+		         {
+			         (pair first collect: [ :labelNode |
+				          labelNode
+					          renameLocalVariablesGivenClassVariables: classVariables
+					          globalVariables: globalsVariables
+					          classNames: classNames
+					          inCodeGenerator: aCodeGen
+					          collectingChangesIn: changedVariables ]).
+			         (pair last
+				          renameLocalVariablesGivenClassVariables: classVariables
+				          globalVariables: globalsVariables
+				          classNames: classNames
+				          inCodeGenerator: aCodeGen
+				          collectingChangesIn: changedVariables) } ].
+	otherwiseOrNil ifNotNil: [
+		otherwiseOrNil := otherwiseOrNil
+			                  renameLocalVariablesGivenClassVariables: classVariables
+			                  globalVariables: globalsVariables
+			                  classNames: classNames
+			                  inCodeGenerator: aCodeGen
+			                  collectingChangesIn: changedVariables ]
 ]
 
 { #category : 'transformations' }

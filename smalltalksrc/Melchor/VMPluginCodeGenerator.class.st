@@ -504,9 +504,9 @@ VMPluginCodeGenerator >> sizeOfIntegralCType: anIntegralCType [ "<String>"
 	(anIntegralCType beginsWith: 'register ') ifTrue:
 		[^self sizeOfIntegralCType: (anIntegralCType allButFirst: 9)].
 	prunedCType := (anIntegralCType beginsWith: 'unsigned ')
-						ifTrue: [(anIntegralCType allButFirst: 9) withBlanksTrimmed]
+						ifTrue: [(anIntegralCType allButFirst: 9) trimBoth]
 						ifFalse: [(anIntegralCType beginsWith: 'signed ')
-									ifTrue: [(anIntegralCType allButFirst: 7) withBlanksTrimmed]
+									ifTrue: [(anIntegralCType allButFirst: 7) trimBoth]
 									ifFalse: [anIntegralCType]].
 	
 	^prunedCType asString caseOf: {
@@ -521,7 +521,7 @@ VMPluginCodeGenerator >> sizeOfIntegralCType: anIntegralCType [ "<String>"
 		['short']			->	[2].
 		['short int']		->	[2].
 		['char']			->	[1].
-		['long']			->	[BytesPerWord]. "It's ambiguous on LLP64 and we'll later remove it"
+		['long']			->	[ self bytesPerWord ]. "It's ambiguous on LLP64 and we'll later remove it"
 		['size_t']		->	[6].
 		['pid_t']			->	[6].
 	}
@@ -529,7 +529,7 @@ VMPluginCodeGenerator >> sizeOfIntegralCType: anIntegralCType [ "<String>"
 		[((anIntegralCType beginsWith: 'unsigned') "e.g. 'unsigned  : 8'"
 		  and: [(anIntegralCType includesAnyOf: '[*]') not
 		  and: [(index := anIntegralCType indexOf: $:) > 0]])
-			ifTrue: [(Integer readFrom: (anIntegralCType copyFrom: index + 1 to: anIntegralCType size) withBlanksTrimmed readStream) + 7 // 8]
+			ifTrue: [(Integer readFrom: (anIntegralCType copyFrom: index + 1 to: anIntegralCType size) trimBoth readStream) + 7 // 8]
 			ifFalse: [self error: 'unrecognized integral type']]
 ]
 
@@ -545,7 +545,7 @@ VMPluginCodeGenerator >> structTargetKindForDeclaration: decl [ "<String>"
 		[pluginClass ifNotNil:
 			[(pluginClass isStructType: (decl last = $*
 											ifTrue: [decl allButLast]
-											ifFalse: [decl]) withBlanksTrimmed) ifTrue:
+											ifFalse: [decl]) trimBoth) ifTrue:
 				[(decl indexOf: $*) > 0
 					ifTrue: [#pointer]
 					ifFalse: [#struct]]]]

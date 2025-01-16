@@ -95,6 +95,11 @@ TMethod >> addLocal: aString [
 	self locals add: aString
 ]
 
+{ #category : 'adding' }
+TMethod >> addLocals: locals [ 
+	locals do: [ :local | self addLocal: local ]
+]
+
 { #category : 'initialization' }
 TMethod >> addTypeForSelf [
 	"If self should be typed then add a suitable type declaration.
@@ -111,10 +116,12 @@ TMethod >> addTypeForSelf [
 TMethod >> addVarsDeclarationsAndLabelsOf: methodToBeInlined except: doNotRename [
 	"Prepare to inline the body of the given method into the receiver by making the args and locals of the argument to the receiver be locals of the receiver. Record any type declarations for these variables. Record labels. Assumes that the variables have already be renamed to avoid name clashes."
 
-	self locals
-		addAll: (methodToBeInlined args reject: [ :v | doNotRename includes: v]);
-		addAll: (methodToBeInlined locals reject: [ :v | doNotRename includes: v]);
-		yourself.
+    | newLocals |
+
+   newLocals := methodToBeInlined allLocals copyWithAll: methodToBeInlined args.
+
+	self addLocals: (newLocals copyWithoutAll: doNotRename).
+
 	methodToBeInlined declarations keysAndValuesDo:
 		[ :v :decl |
 		(doNotRename includes: v) ifFalse:
@@ -136,9 +143,10 @@ TMethod >> allLocals [
 
 	| allLocals |
 	cachedLocals ifNotNil: [ ^ cachedLocals ].
-	
+
 	allLocals := Set new.
-	allLocals addAll: (declarations keys asSet reject: [:k| (declarations at: k) == #implicit]).
+	allLocals addAll: (declarations keys asSet reject: [ :k |
+			 (declarations at: k) == #implicit ]).
 	allLocals addAll: self locals.
 	self nodesDo: [ :node |
 		node isStatementList ifTrue: [ allLocals addAll: node locals ] ].
@@ -233,7 +241,7 @@ TMethod >> argConversionExprFor: varName stackIndex: stackIndex [
 	| exprList decl type stmtList |
 	exprList := OrderedCollection new.
 	((decl := declarations at: varName ifAbsent: []) notNil
-	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') withBlanksTrimmed)])
+	 and: ['int' ~= (type := (decl copyReplaceAll: varName with: '') trimBoth)])
 		ifTrue:
 			[(decl includes: $*) ifTrue: "array"
 				[(decl includesSubstring: 'char')
@@ -261,6 +269,12 @@ TMethod >> args [
 	"The arguments of this method."
 
 	^args
+]
+
+{ #category : 'accessing' }
+TMethod >> args: arguments [
+
+	args := arguments
 ]
 
 { #category : 'CAST translation' }
@@ -351,7 +365,7 @@ TMethod >> asCASTFunctionPrototypeIn: aCodeGen isPrototype: isPrototype [
 { #category : 'CAST translation' }
 TMethod >> asCASTIn: aCodeGen [
 
-	| compoundStatement functionDefinition body|
+	| compoundStatement functionDefinition body |
 	aCodeGen currentMethod: self.
 	compoundStatement := CCompoundStatementNode new
 		                     needsBrackets: false;
@@ -653,9 +667,11 @@ TMethod >> declarationAt: aVariableName ifPresent: presentBlock [
 ]
 
 { #category : 'accessing' }
-TMethod >> declarationAt: aVariableName  "<String>" put: aDeclaration [ "<String>" "^aDeclaration"
+TMethod >> declarationAt: aVariableName put: aDeclaration [
 
-	^declarations at: aVariableName put: aDeclaration
+	self validateVariableDeclarationExists: aVariableName.
+
+	^ declarations at: aVariableName put: aDeclaration
 ]
 
 { #category : 'accessing' }
@@ -679,6 +695,15 @@ TMethod >> declareNonConflictingLocalNamedLike: aString [
 	cachedLocals := nil.
 	self locals add: newVarName.
 	^ newVarName
+]
+
+{ #category : 'testing' }
+TMethod >> declaresVariableWithName: aVariableName [
+
+	| referencesInScope |
+	referencesInScope := self allLocals , self args.
+
+	^ referencesInScope includes: aVariableName
 ]
 
 { #category : 'testing' }
@@ -803,39 +828,6 @@ TMethod >> emitCFunctionPrototype: aStream generator: aCodeGen isPrototype: isPr
 			[aCodeGen maybeEmitPrimitiveFailureDefineFor: selector on: aStream.
 			 self terminateConditionalDefineFor: compileTimeOptionPragmas on: aStream]].
 	^compileTimeOptionPragmas notEmpty
-]
-
-{ #category : 'C code generation' }
-TMethod >> emitCLocalsOn: aStream generator: aCodeGen [
-	"Emit a C function header for this method onto the given stream."
-
-	| volatileVariables maybeExternFunctions |
-	volatileVariables := properties includesKey: #volatile.
-	self refersToGlobalStruct ifTrue:
-		[aStream
-			next: 3 put: Character space; "there's already an opening ${ on this line; see sender"
-			nextPutAll: (volatileVariables
-						ifTrue: ['DECL_MAYBE_VOLATILE_SQ_GLOBAL_STRUCT']
-						ifFalse: ['DECL_MAYBE_SQ_GLOBAL_STRUCT'])].
-	aStream cr.
-	maybeExternFunctions := (declarations select: [:decl| decl beginsWith: 'extern']) keys.
-	(locals isEmpty and: [maybeExternFunctions isEmpty]) ifFalse:
-		[(aCodeGen sortStrings: locals, maybeExternFunctions) do:
-			[ :var | | decl |
-			decl := self declarationAt: var
-							ifAbsent: [aCodeGen defaultType, ' ', var].
-			(volatileVariables
-			 or: [(decl beginsWith: 'static')
-			 or: [(decl beginsWith: 'extern')
-			 or: [usedVariablesCache includes: var]]]) ifTrue:
-				[aStream next: 4 put: Character space.
-				 volatileVariables ifTrue:
-					[aStream nextPutAll: #volatile; space].
-				 aStream
-					nextPutAll: decl;
-					nextPut: $;;
-					cr]].
-		 aStream cr]
 ]
 
 { #category : 'C code generation' }
@@ -1297,6 +1289,12 @@ TMethod >> hasProperties [
 	^properties notNil and: [properties notEmpty]
 ]
 
+{ #category : 'transformations' }
+TMethod >> hasProperty: aName [
+
+	^ self hasProperties and: [ properties includesKey: aName ]
+]
+
 { #category : 'testing' }
 TMethod >> hasReturn [
 	"Answer true if this method contains a return statement."
@@ -1560,7 +1558,6 @@ TMethod >> inlineReturningConditional: aSendNode in: aCodeGen [
 	returnIfTrue := aSendNode selector = #ifTrue:.
 	returnNode := aSendNode arguments first.
 	method := (aCodeGen methodNamed: aSendNode receiver selector) copy.
-	"self haltIf: [ selector = #markAndTrace: ]."
 	replacementTree := method
 		                   inlineFunctionCall: aSendNode receiver
 		                   in: aCodeGen.
@@ -1617,27 +1614,27 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 	 otherwise the assignee variable type must match the return type of the inlinee.  Return
 	 types are not propagated."
 
-	| sel meth methArgs exitLabel inlineStmts label exitType elidedArgs |
+	| sel callee calleeParameters exitLabel inlineStmts label exitType omittedParameters |
 	sel := aSendNode selector.
-	meth := aCodeGen methodNamed: sel.
-	methArgs := meth args.
+	callee := aCodeGen methodNamed: sel.
+	calleeParameters := callee args.
 	"convenient for debugging..."
 	aCodeGen maybeBreakForInlineOf: aSendNode in: self.
-	elidedArgs := #(  ).
-	(methArgs notEmpty and: [ methArgs first beginsWith: 'self_in_' ])
+	omittedParameters := #(  ).
+	(calleeParameters notEmpty and: [ calleeParameters first beginsWith: 'self_in_' ])
 		ifTrue: [ "If the first arg is not used we can and should elide it."
 			| varNode |
-			varNode := TVariableNode new setName: methArgs first.
-			(meth parseTree noneSatisfy: [ :node | varNode isSameAs: node ])
-				ifTrue: [ elidedArgs := { methArgs first } ].
-			methArgs := methArgs allButFirst ].
-	methArgs size = aSendNode arguments size ifFalse: [ ^ nil ].
-	meth := meth copy.
+			varNode := TVariableNode new setName: calleeParameters first.
+			(callee parseTree noneSatisfy: [ :node | varNode isSameAs: node ])
+				ifTrue: [ omittedParameters := { calleeParameters first } ].
+			calleeParameters := calleeParameters allButFirst ].
+	calleeParameters size = aSendNode arguments size ifFalse: [ ^ nil ].
+	callee := callee copy.
 
-	(meth statements size > 1 and: [
-		 meth statements first isSend and: [
-			 meth statements first selector == #flag: ] ]) ifTrue: [
-		meth statements removeFirst ].
+	(callee statements size > 1 and: [
+		 callee statements first isSend and: [
+			 callee statements first selector == #flag: ] ]) ifTrue: [
+		callee statements removeFirst ].
 
 	"Propagate the return type of an inlined method"
 	(directReturn or: [ exitVar notNil ]) ifTrue: [
@@ -1645,42 +1642,42 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 			            ifTrue: [ returnType ]
 			            ifFalse: [
 			            (self typeFor: exitVar in: aCodeGen) ifNil: [ #sqInt ] ].
-		(exitType = #void or: [ exitType = meth returnType ]) ifFalse: [
-			meth propagateReturnIn: aCodeGen ] ].
+		(exitType = #void or: [ exitType = callee returnType ]) ifFalse: [
+			callee propagateReturnIn: aCodeGen ] ].
 
 	"Propagate any unusual argument types to untyped argument variables"
-	methArgs with: aSendNode arguments do: [ :formal :actual |
-		(meth declarationAt: formal ifAbsent: nil) ifNil: [
+	calleeParameters with: aSendNode arguments do: [ :formal :actual |
+		(callee declarationAt: formal ifAbsent: nil) ifNil: [
 			| type |
 			(actual isVariable and: [
 				 (type := self typeFor: actual name in: aCodeGen) notNil ])
 				ifTrue: [
 					type ~= #sqInt ifTrue: [
-						meth declarationAt: formal put: (type last = $*
+						callee declarationAt: formal put: (type last = $*
 								 ifTrue: [ type , formal ]
 								 ifFalse: [ type , ' ' , formal ]) ] ] ] ].
 
-	meth renameVarsForInliningInto: self except: elidedArgs in: aCodeGen.
-	meth renameLabelsForInliningInto: self.
-	self addVarsDeclarationsAndLabelsOf: meth except: elidedArgs.
-	meth hasReturn ifTrue: [
+	callee renameVarsForInliningInto: self except: omittedParameters in: aCodeGen.
+	callee renameLabelsForInliningInto: self.
+	self addVarsDeclarationsAndLabelsOf: callee except: omittedParameters.
+	callee hasReturn ifTrue: [
 		directReturn ifFalse: [
 			exitLabel := self unusedLabelForInliningInto: self.
-			(meth exitVar: exitVar label: exitLabel)
+			(callee exitVar: exitVar label: exitLabel)
 				ifTrue: [ labels add: exitLabel ]
 				ifFalse: [ "is label used?" exitLabel := nil ] ] ].
 	(inlineStmts := OrderedCollection new:
-			                meth statements size + meth args size + 2)
+			                callee statements size + callee args size + 2)
 		add: (label := TLabeledCommentNode new setComment: 'begin ' , sel);
 		addAll: (self
-				 argAssignmentsFor: meth
+				 argAssignmentsFor: callee
 				 send: aSendNode
-				 except: elidedArgs
+				 except: omittedParameters
 				 in: aCodeGen);
-		addAll: meth statements. "method body"
+		addAll: callee statements. "method body"
 	directReturn ifTrue: [
-		meth parseTree parent: aSendNode parent.
-		meth endsWithReturn
+		callee parseTree parent: aSendNode parent.
+		callee endsWithReturn
 			ifTrue: [
 				exitVar ifNotNil: [ "don't remove the returns if being invoked in the context of a return"
 					inlineStmts
@@ -1689,7 +1686,7 @@ TMethod >> inlineSend: aSendNode directReturn: directReturn exitVar: exitVar in:
 			ifFalse: [
 				inlineStmts add:
 					(TReturnNode new setExpression:
-						 (TVariableNode new setName: 'nil')) ] ].
+						 (TConstantNode new setValue: nil)) ] ].
 	exitLabel
     ifNotNil: [
 			inlineStmts add: (TLabeledCommentNode new
@@ -1737,13 +1734,13 @@ TMethod >> inlineableSend: aNode in: aCodeGen [
 
 	| m |
 	aCodeGen maybeBreakForTestToInline: aNode in: self.
-	aNode isSend ifFalse: [^false].
-	m := aCodeGen methodNamed: aNode selector.  "nil if builtin or external function"
-	^m ~= nil
-	 and: [m ~~ self
-	 and: [m mayBeInlined
-	 and: [(m isComplete and: [aCodeGen mayInline: m selector])
-		or: [m checkForRequiredInlinability]]]]
+	aNode isSend ifFalse: [ ^ false ].
+	m := aCodeGen methodNamed: aNode selector. "nil if builtin or external function"
+	^ m isNotNil and: [
+		  m ~~ self and: [
+			  m mayBeInlined and: [
+				  (m isComplete and: [ aCodeGen mayInline: m selector ]) or: [
+					  m checkForRequiredInlinability ] ] ] ]
 ]
 
 { #category : 'accessing' }
@@ -2157,28 +2154,26 @@ TMethod >> mustBeInlined [
 
 { #category : 'initialization' }
 TMethod >> newCascadeTempFor: aTParseNode [
+
 	| varName varNode |
 	varName := self extraVariableName: 'cascade'.
 	varNode := TVariableNode new setName: varName.
-	aTParseNode isLeaf ifFalse:
-		[self
-			declarationAt: varName
-			put: [:tm :cg| | type |
-				type := tm determineTypeFor: aTParseNode in: cg.
-				(SlangStructType structTargetKindForType: type) == #struct ifTrue:
-					["can't copy structs into cascade temps; the struct is not updated.
+	aTParseNode isLeaf ifFalse: [
+		self declarationAt: varName put: [ :tm :cg |
+			| type |
+			type := tm determineTypeFor: aTParseNode in: cg.
+			(SlangStructType structTargetKindForType: type) == #struct ifTrue: [ "can't copy structs into cascade temps; the struct is not updated.
 					  must change to a pointer."
-					type := type, ' *'.
-					parseTree nodesDo:
-						[:node|
-						(node isAssignment
-						 and: [node variable name = varName]) ifTrue:
-							[node expression: (TSendNode new
-													setSelector: #addressOf:
-													receiver: (TVariableNode new setName: 'self')
-													arguments: {node expression})]]].
-				type]].
-	^varNode
+				type := type , ' *'.
+				parseTree nodesDo: [ :node |
+					(node isAssignment and: [ node variable name = varName ])
+						ifTrue: [
+							node expression: (TSendNode new
+									 setSelector: #addressOf:
+									 receiver: (TVariableNode new setName: 'self')
+									 arguments: { node expression }) ] ] ].
+			type ] ].
+	^ varNode
 ]
 
 { #category : 'accessing' }
@@ -2510,7 +2505,10 @@ TMethod >> recordDeclarationsIn: aCCodeGen [
 				declarationAt: varName
 				put: varType , varName ].
 		pragma selector = #returnTypeC: ifTrue: [ 
-			self returnType: pragma arguments last ] ]
+			self returnType: pragma arguments last ] ].
+	
+		"reset cache since declarations changed"
+		cachedLocals := nil
 ]
 
 { #category : 'accessing' }
@@ -2569,7 +2567,8 @@ TMethod >> removeLocal: local [
 TMethod >> removeLocal: local ifAbsent: aBlock [
 
 	cachedLocals := nil.
-	self locals remove: local ifAbsent: aBlock
+	self locals remove: local ifAbsent: aBlock.
+	self declarations removeKey: local ifAbsent: [ ] "We assume local-declarations are a subset of locals"
 ]
 
 { #category : 'dead-code-elimination' }
@@ -2674,6 +2673,72 @@ TMethod >> renameLabelsUsing: aDictionary [
 			[node setLabel: (aDictionary at: node label)].
 		(node isLabel and: [aDictionary includesKey: node label]) ifTrue:
 			[node setLabel: (aDictionary at: node label)]]
+]
+
+{ #category : 'transformations' }
+TMethod >> renameLocalVariablesGivenClassVariables: classVariables andGlobalVariables: globalsVariables inCodeGenerator: aCodeGen [
+	"Answer either the receiver, if it is not contained in the parameters, or a new node with the given variable rebound. only work after type inferences for declarations et pragmas updates"
+
+	| changedVariables |
+	changedVariables := Set new.
+	"necessary for implicit variables"
+	aCodeGen pushScope: self.
+	
+	self parseTree: (parseTree
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames:
+			 (SlangStructType allSubclasses collect: [ :class | class name ])
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	changedVariables isEmpty ifTrue: [ ^ self ].
+	"no need to changed the locals of the TMethod, if the cache is nil they are retrieve from the parseTree which we will update"
+	cachedLocals := nil.
+	changedVariables do: [ :varName |
+		| newName |
+		newName := #_ , varName.
+		self args: (self args collect: [ :e |
+				 e ~= varName
+					 ifTrue: [ e ]
+					 ifFalse: [ newName ] ]).
+		self renameVarInDeclarations: varName with: newName.
+		"rare case but it can happen, see genCallPICEnilopmartNumArgs:"
+		self renameVarInReturnType: varName with: newName.
+
+		"update all the parseTree"
+		self parseTree nodesDo: [ :node |
+			node isStatementList ifTrue: [
+				node renameLocalOrArg: varName with: newName ].
+
+			"rare case but it can happen, see addressIsInFixups:"
+			node isSend ifTrue: [ node renameVarInCCode: varName with: newName ] ] ].
+	aCodeGen popScope
+]
+
+{ #category : 'transformations' }
+TMethod >> renameVarInDeclarations: varName with: newName [
+
+	| oldDeclaration |
+	(declarations keys includes: varName) ifFalse: [ ^ self ].
+	oldDeclaration := declarations at: varName.
+	"new declaration"
+	declarations at: newName put: (oldDeclaration
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ]).
+	declarations removeKey: varName
+]
+
+{ #category : 'transformations' }
+TMethod >> renameVarInReturnType: varName with: newName [
+
+	(returnType isNotNil and: [ (returnType findString: varName) > 0 ])
+		ifFalse: [ ^ self ].
+
+	self returnType: (returnType
+			 copyReplaceAll: varName
+			 with: newName
+			 tokenish: [ :ch | ch = $_ or: [ ch isAlphaNumeric ] ])
 ]
 
 { #category : 'inlining support' }
@@ -2820,7 +2885,7 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 	definingClass := class.
 	args := argList asOrderedCollection collect: [:arg | arg name].
 	declarations := Dictionary new.
-	self addTypeForSelf.
+	
 	primitive := aNumber.
 	properties := methodProperties.
 	comment := aComment.
@@ -2833,7 +2898,7 @@ TMethod >> setSelector: sel definingClass: class args: argList locals: localList
 
 	self parseTree: (aBlockNode asTranslatorNodeIn: self).
 	self locals: tempParseTree locals, (localList  collect: [:arg | arg name]).
-	
+	self addTypeForSelf.
 	
 	complete := false.  "set to true when all possible inlining has been done"
 	export := self extractExportDirective.
@@ -2920,10 +2985,18 @@ TMethod >> statementsListsForInliningIn: aCodeGen [
 		unless: [ :node | 
 			node isSend and: [ 
 				node selector == #cCode:inSmalltalk: or: [ 
-					aCodeGen isAssertSelector: node selector ] ] ].
+					node selector == #cCall: or: [ 
+						node selector == #cCall:withArguments: or: [ 
+							aCodeGen isAssertSelector: node selector ] ] ] ] ].
 	parseTree nodesDo: [ :node | 
 		node isSend ifTrue: [ 
 			node selector = #cCode:inSmalltalk: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall: ifTrue: [ 
+				node nodesDo: [ :ccisNode | 
+					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
+			node selector = #cCall:withArguments: ifTrue: [ 
 				node nodesDo: [ :ccisNode | 
 					stmtLists remove: ccisNode ifAbsent: [  ] ] ].
 			(node selector = #cppIf:ifTrue:ifFalse: or: [ 
@@ -3224,8 +3297,6 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 	 Answer if something was inlined."
 
 	| didSomething statementLists |
-	"complete ifTrue:
-		[^false]."
 	self definedAsMacro ifTrue: [
 		complete ifTrue: [ ^ false ].
 		^ complete := true ].
@@ -3239,9 +3310,11 @@ TMethod >> tryToInlineMethodsIn: aCodeGen [
 		                didSomething ].
 
 	didSomething ifTrue: [ writtenToGlobalVarsCache := nil ].
+	
+	"marking a method complete is progress"
 	complete ifFalse: [
 		self checkForCompletenessIn: aCodeGen.
-		complete ifTrue: [ didSomething := true ] ]. "marking a method complete is progress"
+		complete ifTrue: [ didSomething := true ] ]. 
 	^ didSomething
 ]
 
@@ -3305,6 +3378,20 @@ TMethod >> usesVariableUninlinably: argName in: aCodeGen [
 				  node arguments anySatisfy: [ :argNode | 
 					  argNode anySatisfy: [ :subNode | 
 						  subNode isVariable and: [ subNode name = argName ] ] ] ] ] ]
+]
+
+{ #category : 'accessing' }
+TMethod >> validateVariableDeclarationExists: aVariableName [
+
+	| shouldCheckVariable |
+	shouldCheckVariable := (aVariableName beginsWithAnyOf:
+		                       #( #self #cascade #toDoLimit #std )) not.
+
+	(shouldCheckVariable and: [
+		 (self declaresVariableWithName: aVariableName) not]) ifTrue: [
+		TranslationError signal:
+			'Undefined local or argument ' , aVariableName
+			, ' type declaration' ]
 ]
 
 { #category : 'utilities' }

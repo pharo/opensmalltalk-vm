@@ -263,6 +263,12 @@ TParseNode >> isEmptyOrHasNothingButComments [
 ]
 
 { #category : 'testing' }
+TParseNode >> isExpression [
+
+	^ false
+]
+
+{ #category : 'testing' }
 TParseNode >> isGoTo [
 
 	^false
@@ -477,6 +483,13 @@ TParseNode >> removeUnusedNodesInBranch: aChild [
 	self children remove: aChild.
 	(self children isEmpty or: [ self isEmptyOrHasNothingButComments ]) ifTrue: [
 		self parent removeUnusedNodesInBranch: self ]
+]
+
+{ #category : 'transformations' }
+TParseNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+	"Answer either the receiver, if it contains no references to the given variables, or a new node with the given variables rebound.
+	 But do not change variables that appear on the left-hand-side of an assignment statement."
+	^self
 ]
 
 { #category : 'transformations' }

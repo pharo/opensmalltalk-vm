@@ -207,6 +207,12 @@ TAssignmentNode >> isAssignment [
 ]
 
 { #category : 'testing' }
+TAssignmentNode >> isExpression [
+
+	^ true
+]
+
+{ #category : 'testing' }
 TAssignmentNode >> isSameAs: aTParseNode [
 	^aTParseNode isAssignment
 	 and: [(variable isSameAs: aTParseNode variable)
@@ -292,6 +298,24 @@ TAssignmentNode >> printOn: aStream level: level [
 TAssignmentNode >> removeAssertions [
 
 	expression removeAssertions
+]
+
+{ #category : 'transformations' }
+TAssignmentNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+	"bind the variables in the left and in the right of the assignment, it is the equivalent of what happened previously with bindVariablesIn:, the class variables can change in value and the globals had no name change i.e: assuming every reference to a global is meant"
+
+	self variable: (variable
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables)
 ]
 
 { #category : 'transformations' }

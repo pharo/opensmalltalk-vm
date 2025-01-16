@@ -98,7 +98,7 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionComesWithCorrectAddress [
 { #category : 'tests - memory access exception' }
 VMMachineSimulatorTest >> testMemoryAccessExceptionHandledCountIsRespected [
 
-	| label lastInstruction invalidAddressHandled addInstruction jumpInstruction expectedAddress |
+	| label lastInstruction invalidAddressHandled addInstruction jumpInstruction |
 
 	self timeLimit: 30 minutes.
 
@@ -129,13 +129,10 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionHandledCountIsRespected [
 		until: lastInstruction address
 		timeout: 0
 		count: 10. 
-	
-	expectedAddress := jumpInstruction address.
-	
-	
+
 	self 
 		assert: self machineSimulator instructionPointerRegisterValue 
-		equals: expectedAddress
+		equals: jumpInstruction address
 ]
 
 { #category : 'tests - memory access exception' }
@@ -363,7 +360,7 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionInJumpHasUpdatedPC [
 { #category : 'tests - memory access exception' }
 VMMachineSimulatorTest >> testMemoryAccessExceptionInstructionPointerInCorrectAddress [
 
-	| lastInstruction invalidAccessInstruction invalidAddressHandled exptectedAddress |
+	| lastInstruction invalidAccessInstruction invalidAddressHandled |
 	self timeLimit: 30 minutes.
 
 	self compile: [ 
@@ -375,13 +372,12 @@ VMMachineSimulatorTest >> testMemoryAccessExceptionInstructionPointerInCorrectAd
 		lastInstruction := cogit Call: cogit methodZoneBase + 16rFFFFF0.  ].
 	
 	invalidAddressHandled := false.
-	exptectedAddress := invalidAccessInstruction address.
-	
+
 	self machineSimulator invalidAccessHandler: [:invalidAccess | 
 		invalidAddressHandled := true.
 		self 
 			assert: self machineSimulator lastExecutedInstructionAddress 
-			equals: exptectedAddress.
+			equals: invalidAccessInstruction address.
 		false ].
 	
 	self

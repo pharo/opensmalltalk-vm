@@ -12,7 +12,7 @@ AMD64 Architecture Programmer's Manual Volume 5: 64-bit Media and x87 Floating P
 "
 Class {
 	#name : 'CogX64Compiler',
-	#superclass : 'CogAbstractInstruction',
+	#superclass : 'CogX86Compiler',
 	#classVars : [
 		'CDQ',
 		'CLD',
@@ -3971,24 +3971,24 @@ CogX64Compiler >> genMemCopy: originalSourceReg to: originalDestReg size: origin
 ]
 
 { #category : 'abstract instructions' }
-CogX64Compiler >> genMoveCf32: constantFloat32 Rs: register [
+CogX64Compiler >> genMoveCf32: constantFloat32 Rs: reg [
 	<inline: true>
 	<returnTypeC: #'AbstractInstruction *'>
 	<var: #constantFloat32 type: #float>
 	| inst |
 	inst := cogit PushCw: constantFloat32 asIEEE32BitWord.
-	cogit PopRs: register.
+	cogit PopRs: reg.
 	^ inst
 ]
 
 { #category : 'abstract instructions' }
-CogX64Compiler >> genMoveCf64: constantFloat64 Rd: register [
+CogX64Compiler >> genMoveCf64: constantFloat64 Rd: reg [
 	<inline: true>
 	<returnTypeC: #'AbstractInstruction *'>
 	<var: #constantFloat64 type: #double>
 	| inst |
 	inst := cogit PushCw: constantFloat64 asIEEE64BitWord.
-	cogit PopRd: register.
+	cogit PopRd: reg.
 	^ inst
 ]
 
@@ -4031,54 +4031,6 @@ CogX64Compiler >> genPushRd: reg [
 	inst := cogit MoveRd: reg M64: -8 r: SPReg.
 	cogit SubCq: 8 R: SPReg.
 	^ inst
-]
-
-{ #category : 'smalltalk calling convention' }
-CogX64Compiler >> genPushRegisterArgsForAbortMissNumArgs: numArgs [
-	"Ensure that the register args are pushed before the outer and
-	 inner retpcs at an entry miss for arity <= self numRegArgs.  The
-	 outer retpc is that of a call at a send site.  The inner is the call
-	 from a method or PIC abort/miss to the trampoline."
-
-	"This won't be as clumsy on a RISC.  But putting the receiver and
-	 args above the return address means the CoInterpreter has a
-	 single machine-code frame format which saves us a lot of work."
-
-	"Iff there are register args convert
-		base	->	outerRetpc		(send site retpc)
-		sp		->	innerRetpc		(PIC abort/miss retpc)
-	 to
-		base	->	receiver
-					(arg0)
-					(arg1)
-					outerRetpc
-		sp		->	innerRetpc		(PIC abort/miss retpc)"
-	numArgs <= cogit numRegArgs ifTrue:
-		[self assert: cogit numRegArgs <= 2.
-		 numArgs = 0 ifTrue:
-			[cogit MoveMw: 0 r: SPReg R: TempReg.
-			 cogit PushR: TempReg.
-			 cogit MoveMw: objectMemory wordSize * 2 r: SPReg R: TempReg.
-			 cogit MoveR: TempReg Mw: objectMemory wordSize r: SPReg.
-			 cogit MoveR: ReceiverResultReg Mw: 2 * objectMemory wordSize r: SPReg.
-			 ^self].
-		 numArgs = 1 ifTrue:
-			[cogit MoveMw: objectMemory wordSize r: SPReg R: TempReg.
-			 cogit PushR: TempReg.
-			 cogit MoveMw: objectMemory wordSize r: SPReg R: TempReg.
-			 cogit PushR: TempReg.
-			 cogit MoveR: ReceiverResultReg Mw: 3 * objectMemory wordSize r: SPReg.
-			 cogit MoveR: Arg0Reg Mw: 2 * objectMemory wordSize r: SPReg.
-			 ^self].
-		 numArgs = 2 ifTrue:
-			[cogit PushR: Arg1Reg.
-			 cogit MoveMw: objectMemory wordSize * 2 r: SPReg R: TempReg.
-			 cogit PushR: TempReg.
-			 cogit MoveMw: objectMemory wordSize * 2 r: SPReg R: TempReg.
-			 cogit PushR: TempReg.
-			 cogit MoveR: ReceiverResultReg Mw: 4 * objectMemory wordSize r: SPReg.
-			 cogit MoveR: Arg0Reg Mw: 3 * objectMemory wordSize r: SPReg.
-			 ^self]]
 ]
 
 { #category : 'smalltalk calling convention' }
@@ -4786,26 +4738,31 @@ CogX64Compiler >> stop [
 
 { #category : 'generate machine code' }
 CogX64Compiler >> stopsFrom: startAddr to: endAddr [
+
 	self
-		cCode: [self me: startAddr ms: self stop et: endAddr - startAddr + 1]
-		inSmalltalk:
-			[| alignedEnd alignedStart stops |
+		cCode: [
+			self cCall: 'memset' withArguments: {
+					startAddr.
+					self stop.
+					(endAddr - startAddr + 1) } ]
+		inSmalltalk: [
+			| alignedEnd alignedStart stops |
 			stops := self stop << 8 + self stop.
 			stops := stops << 16 + stops.
 			stops := stops << 32 + stops.
 			alignedStart := startAddr + 7 // 8 * 8.
 			alignedEnd := endAddr - 1 // 8 * 8.
 			alignedEnd <= startAddr
-				ifTrue:
-					[startAddr to: endAddr do:
-						[:addr | objectMemory byteAt: addr put: self stop]]
-				ifFalse:
-					[startAddr to: alignedStart - 1 do:
-						[:addr | objectMemory byteAt: addr put: self stop].
-					 alignedStart to: alignedEnd by: 8 do:
-						[:addr | objectMemory long64At: addr put: stops].
-					 alignedEnd + 8 to: endAddr do:
-						[:addr | objectMemory byteAt: addr put: self stop]]]
+				ifTrue: [
+					startAddr to: endAddr do: [ :addr |
+					objectMemory byteAt: addr put: self stop ] ]
+				ifFalse: [
+					startAddr to: alignedStart - 1 do: [ :addr |
+					objectMemory byteAt: addr put: self stop ].
+					alignedStart to: alignedEnd by: 8 do: [ :addr |
+					objectMemory long64At: addr put: stops ].
+					alignedEnd + 8 to: endAddr do: [ :addr |
+					objectMemory byteAt: addr put: self stop ] ] ]
 ]
 
 { #category : 'inline cacheing' }

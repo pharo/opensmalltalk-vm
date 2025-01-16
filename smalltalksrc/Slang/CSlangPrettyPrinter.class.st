@@ -164,7 +164,7 @@ CSlangPrettyPrinter >> visitBinary: aBinary [
 { #category : 'generated' }
 CSlangPrettyPrinter >> visitBreakStatement: aBreakStatement [
 
-	stream nextPutAll: 'break'
+	stream nextPutAll: 'break;'; cr
 ]
 
 { #category : 'generated' }
@@ -203,7 +203,9 @@ CSlangPrettyPrinter >> visitComment: aComment [
 
 	stream nextPutAll: '/*'.
 	stream nextPutAll: aComment comment.
-	stream nextPutAll: '*/'
+	stream nextPutAll: '*/'.
+	(aComment parent isNotNil and: [ aComment parent isExpression not ])
+		ifTrue: [ stream cr ]
 ]
 
 { #category : 'generated' }
@@ -220,32 +222,39 @@ CSlangPrettyPrinter >> visitCompoundStatement: aCompoundStatement [
 
 	aCompoundStatement declarations do: [ :e |
 		first
-			ifTrue: [ first := false. ]
-			ifFalse: [ stream tab: level ].
-			e acceptVisitor: self.
-			e needsSeparator ifTrue: [ stream nextPut: $; ].
-			stream cr. ].
+			ifTrue: [ first := false ]
+			ifFalse: [
+				e isEmptyStatement
+					ifFalse: [ stream tab: level  ] ].
+		e acceptVisitor: self.
+		e isExpression
+			ifTrue: [
+				stream nextPut: $;.
+				stream cr ] ].
 	
 	"Put at least one empty line to separate declarations and statements.
 	This is required for the current GNUisation to work, which searches for empty lines"
-	aCompoundStatement declarations ifNotEmpty: [
-		stream cr.
-	].
+	aCompoundStatement declarations ifNotEmpty: [ stream cr ].
 
 	aCompoundStatement statements do: [ :e |
 		first
-			ifTrue: [ first := false. ]
-			ifFalse: [ stream tab: level ].
-			e acceptVisitor: self.
-			e needsSeparator ifTrue: [ stream nextPut: $; ]]
-		separatedBy: [ stream cr ].
+			ifTrue: [ first := false ]
+			ifFalse: [
+				e isEmptyStatement
+					ifFalse: [ stream tab: level  ] ].
+		e acceptVisitor: self.
+		e isExpression
+			ifTrue: [
+				stream nextPut: $;.
+				stream cr ] ].
 
 	aCompoundStatement needsBrackets ifTrue: [ 
 		level := level - 1.
-		(aCompoundStatement statements, aCompoundStatement declarations)
-			ifNotEmpty: [ stream cr ].
 		stream tab: level.
-		stream nextPut: $} ]
+		stream nextPut: $}.
+
+		aCompoundStatement isAtEndOfStatement ifTrue: [
+			stream cr ] ].
 ]
 
 { #category : 'generated' }
@@ -265,7 +274,8 @@ CSlangPrettyPrinter >> visitDeclaration: aDeclaration [
 		aDeclaration declarators
 			do: [ :e | e acceptVisitor: self ]
 			separatedBy: [ stream nextPutAll: ', ' ] ].
-	aDeclaration isFunctionPrototype ifTrue: [ stream nextPut: $; ]
+	stream nextPut: $;.
+	stream cr.
 ]
 
 { #category : 'generated' }
@@ -292,11 +302,12 @@ CSlangPrettyPrinter >> visitDecrement: anDecrementNode [
 { #category : 'generated' }
 CSlangPrettyPrinter >> visitDoStatement: aDoStatement [
 
-	stream nextPutAll: 'do'.
+	stream nextPutAll: 'do '.
 	aDoStatement statement acceptVisitor: self.
-	stream nextPutAll: 'while('.
+	stream nextPutAll: ' while ('.
 	aDoStatement while acceptVisitor: self.
-	stream nextPut: $)
+	stream nextPutAll: ');'.
+	stream cr
 ]
 
 { #category : 'generated' }
@@ -371,14 +382,15 @@ CSlangPrettyPrinter >> visitFunctionDefinition: aFunction [
 		aFunction declarator acceptVisitor: self ].
 	stream cr.
 	aFunction body acceptVisitor: self.
-	stream cr.
 ]
 
 { #category : 'generated' }
 CSlangPrettyPrinter >> visitGotoStatement: aGoToStatement [
 
 	stream nextPutAll: 'goto ';
-			 nextPutAll: aGoToStatement label name
+			 nextPutAll: aGoToStatement label name;
+			 nextPut: $;;
+			 cr.
 	
 ]
 
@@ -396,13 +408,13 @@ CSlangPrettyPrinter >> visitIfStatement: anIf [
 	stream nextPutAll: ') '.
 	anIf then isCompoundStatement ifFalse: [ stream crtab: level + 1 ].
 	anIf then acceptVisitor: self.
-	anIf then needsTrailingSemicolon ifTrue: [ stream nextPut: $; ].
+	anIf then isExpression ifTrue: [ stream nextPut: $; ].
 	anIf else ifNotNil: [ :e | 
 		anIf then isCompoundStatement ifFalse: [ stream crtab: level ].
 		stream nextPutAll: ' else '.
 		anIf else isCompoundStatement ifFalse: [ stream crtab: level + 1 ].
 		e acceptVisitor: self.
-		anIf else needsTrailingSemicolon ifTrue: [ stream nextPut: $; ]]
+		anIf else isExpression ifTrue: [ stream nextPut: $; ]]
 ]
 
 { #category : 'generated' }
@@ -459,11 +471,21 @@ CSlangPrettyPrinter >> visitLabeledStatement: aLabeledStatement [
 	stream crtab: level.
 
 	aLabeledStatement statement acceptVisitor: self.
-
-	"Close the statement here to keep compatibility with slang"
-	((aLabeledStatement case notNil or: [ aLabeledStatement label notNil ]) 
-		 and: [ aLabeledStatement statement needsSeparator ]) ifTrue: [ 
-		stream nextPutAll: ';' ]
+	"If this statement labels an expression OR we are at the end of a compound
+	 statement labeling an empty statement then we need to add the closing
+	 semicolon"
+	(aLabeledStatement statement isExpression
+		or: [ aLabeledStatement statement isEmpty
+				and: [ aLabeledStatement case isNil
+				and: [ aLabeledStatement parent isNotNil
+				and: [ aLabeledStatement parent isCompoundStatement
+				and: [ | statements lastNonCommentIdx |
+					statements := aLabeledStatement parent statements.
+					lastNonCommentIdx := statements findLast: [ :e | e isComment not ].
+					(statements at: lastNonCommentIdx) = aLabeledStatement ] ] ] ] ])
+		ifTrue: [
+			stream nextPutAll: ';'.
+			stream cr ]
 ]
 
 { #category : 'generated' }
@@ -520,10 +542,11 @@ CSlangPrettyPrinter >> visitPreprocessorIf: anIf [
 	anIf if acceptVisitor: self.
 	stream crtab: level.
 	anIf then acceptVisitor: self.
+	anIf then isExpression
+		ifTrue: [ stream cr. ].
 	
 	anIf else ifNotNil: [ :e | 
 		stream
-			cr;
 			nextPut: $#;
 			next: tabbing * 2 put: Character space;
 			nextPutAll: 'else /* '.
@@ -531,16 +554,19 @@ CSlangPrettyPrinter >> visitPreprocessorIf: anIf [
 		stream
 			nextPutAll: ' */';
 			crtab: level.
-		e acceptVisitor: self ].
+		e acceptVisitor: self.
+		e isExpression
+			ifTrue: [ stream cr. ] ].
 	stream
-		cr;
 		nextPut: $#;
 		next: tabbing * 2 put: Character space;
 		nextPutAll: 'endif /* '.
 	anIf if acceptVisitor: self.
 	stream
 		nextPutAll: ' */'.
-	anIf isArgument ifTrue: [ stream crtab: level ].
+	anIf isArgument
+		ifTrue: [ stream crtab: level ]
+		ifFalse: [ stream cr ].
 	level := previousLevel.
 ]
 
@@ -556,7 +582,9 @@ CSlangPrettyPrinter >> visitReturnStatement: aReturn [
 	stream nextPutAll: 'return'.
 	aReturn expression ifNotNil: [ :exp |
 		stream space.
-		exp acceptVisitor: self ]
+		exp acceptVisitor: self ].
+	stream nextPut: $;.
+	stream cr
 ]
 
 { #category : 'generated' }

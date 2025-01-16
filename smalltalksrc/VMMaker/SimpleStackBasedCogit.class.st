@@ -770,11 +770,10 @@ SimpleStackBasedCogit >> compileOpenPIC: selector numArgs: numArgs [
 	<var: #jumpClassMiss type: #'AbstractInstruction *'>
 	<var: #itsAHit type: #'AbstractInstruction *'>
 	<var: #jumpBCMethod type: #'AbstractInstruction *'>
+	<flag: #lookupInMethodCacheSel:classTag:> "so this method shows up as a sender of lookupInMethodCacheSel:class:"
 	self preenMethodLabel.
 	self compilePICAbort: numArgs.
 	entry := objectRepresentation genGetClassTagOf: ReceiverResultReg into: SendNumArgsReg scratchReg: TempReg.
-
-	self flag: #lookupInMethodCacheSel:classTag:. "so this method shows up as a sender of lookupInMethodCacheSel:class:"
 
 	cacheBaseReg := NoReg.
 	(backEnd isWithinMwOffsetRange: coInterpreter methodCacheAddress) ifFalse:
@@ -790,7 +789,7 @@ SimpleStackBasedCogit >> compileOpenPIC: selector numArgs: numArgs [
 								ifFalse: [MethodCacheMethod << objectMemory shiftForWord])
 					r: ClassReg
 					R: SendNumArgsReg.
-			.
+
 	"If the method is compiled jump to its unchecked entry-point, otherwise interpret it."
 	objectRepresentation genLoadSlot: HeaderIndex sourceReg: SendNumArgsReg destReg: ClassReg.
 	jumpBCMethod := objectRepresentation genJumpImmediate: ClassReg.
@@ -1142,12 +1141,12 @@ SimpleStackBasedCogit >> genCallPrimitiveBytecode [
 ]
 
 { #category : 'constant support' }
-SimpleStackBasedCogit >> genCmpConstant: constant R: register [
+SimpleStackBasedCogit >> genCmpConstant: constant R: reg [
 	"If the objectMemory allows it, generates a quick constant cmp, else generates a word constant cmp"
 	<inline: true>
 	^ (objectRepresentation shouldAnnotateObjectReference: constant)
-		ifTrue: [ self annotate: (self CmpCw: constant R: register) objRef: constant ]
-		ifFalse: [ self CmpCq: constant R: register ]
+		ifTrue: [ self annotate: (self CmpCw: constant R: reg) objRef: constant ]
+		ifFalse: [ self CmpCq: constant R: reg ]
 	
 ]
 
@@ -1289,27 +1288,6 @@ SimpleStackBasedCogit >> genExtPushPseudoVariable [
 		}
 		otherwise:
 			[^self unknownBytecode].
-	^0
-]
-
-{ #category : 'bytecode generators' }
-SimpleStackBasedCogit >> genExtPushPseudoVariableOrOuterBytecode [
-	"77			01001101		Push false [* 1:true, 2:nil, 3:thisContext, ..., -N: pushEnclosingObjectAt: N, N = Extend B]"
-	| ext |
-	ext := extB.
-	extB := 0.
-	numExtB := 0.
-	ext caseOf: {
-		[0]	->	[^self genPushLiteral: objectMemory falseObject].
-		[1]	->	[^self genPushLiteral: objectMemory trueObject].
-		[2]	->	[^self genPushLiteral: objectMemory nilObject].
-		[3]	->	[^self genPushActiveContextBytecode]
-		}
-		otherwise:
-			[ext < 0 ifTrue:
-				[^self genPushEnclosingObjectAt: 0 - ext].
-			 self warning: 'undefined extension for extPushPseudoVariableOrOuter'.
-			 ^self unknownBytecode].
 	^0
 ]
 
@@ -1660,12 +1638,11 @@ SimpleStackBasedCogit >> genLookupForPerformNumArgs: numArgs [
 	<var: #jumpClassMiss type: #'AbstractInstruction *'>
 	<var: #jumpInterpret type: #'AbstractInstruction *'>
 	<var: #itsAHit type: #'AbstractInstruction *'>
+	<flag: #lookupInMethodCacheSel:classTag:> "so this method shows up as a sender of lookupInMethodCacheSel:class:"
 
 	"N.B.  Can't assume TempReg already contains the tag because a method can
 	 of course be invoked via the unchecked entry-point, e.g. as does perform:."
 	objectRepresentation genGetInlineCacheClassTagFrom: ReceiverResultReg into: SendNumArgsReg forEntry: false.
-
-	self flag: #lookupInMethodCacheSel:classTag:. "so this method shows up as a sender of lookupInMethodCacheSel:class:"
 
 	cacheBaseReg := NoReg.
 	(backEnd isWithinMwOffsetRange: coInterpreter methodCacheAddress) ifFalse:
@@ -2036,15 +2013,6 @@ SimpleStackBasedCogit >> genPushConstantZeroBytecode [
 ]
 
 { #category : 'bytecode generator support' }
-SimpleStackBasedCogit >> genPushEnclosingObjectAt: level [
-	"Uncached push enclosing object"
-	self MoveCq: level R: SendNumArgsReg.
-	self CallRT: ceEnclosingObjectTrampoline.
-	self PushR: ReceiverResultReg.
-	^0
-]
-
-{ #category : 'bytecode generator support' }
 SimpleStackBasedCogit >> genPushLiteral: literal [
 	self genPushConstant: literal.
 	^0
@@ -2366,6 +2334,9 @@ SimpleStackBasedCogit >> genSend: selectorIndex numArgs: numArgs [
 SimpleStackBasedCogit >> genSend: selectorIndex numArgs: numArgs sendTable: sendTable [
 	<inline: false>
 	<var: #sendTable type: #'sqInt *'>
+	
+	<story: #pic>
+	
 	| annotation |
 	self assert: needsFrame.
 	annotation := self annotationForSendTable: sendTable.

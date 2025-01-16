@@ -862,7 +862,7 @@ methodWithEmptyIfFalseInIfFalseIfTrueAndNoSendInReceiver(SLDeadCodeEliminationTe
 {
 	int i;
 
-	if (1) {
+	{
 		i = 5;
 	}
 	{
@@ -924,7 +924,7 @@ methodWithEmptyIfFalseInIfTrueIfFalseAndNoSendInReceiver(SLDeadCodeEliminationTe
 {
 	int i;
 
-	if (1) {
+	{
 		i = 5;
 	}
 	{
@@ -1154,9 +1154,6 @@ methodWithEmptyIfTrueInIfFalseIfTrueAndNoSendInReceiver(SLDeadCodeEliminationTes
 {
 	int i;
 
-	if (!1) {
-		i = 5;
-	}
 	{
 		return;
 	}
@@ -1216,9 +1213,6 @@ methodWithEmptyIfTrueInIfTrueIfFalseAndNoSendInReceiver(SLDeadCodeEliminationTes
 {
 	int i;
 
-	if (!1) {
-		i = 5;
-	}
 	{
 		return;
 	}
@@ -1384,9 +1378,6 @@ methodWithEmptyifNilInIfNilIfNotNilAndNoSendInReceiver(SLDeadCodeEliminationTest
 {
 	int i;
 
-	if (!(null == null)) {
-		i = 5;
-	}
 	{
 		return;
 	}
@@ -1446,9 +1437,6 @@ methodWithEmptyifNilInIfNotNilIfNilAndNoSendInReceiver(SLDeadCodeEliminationTest
 {
 	int i;
 
-	if (!(null == null)) {
-		i = 5;
-	}
 	{
 		return;
 	}
@@ -1508,7 +1496,7 @@ methodWithEmptyifNotNilInIfNilIfNotNilAndNoSendInReceiver(SLDeadCodeEliminationT
 {
 	int i;
 
-	if (null == null) {
+	{
 		i = 5;
 	}
 	{
@@ -1570,7 +1558,7 @@ methodWithEmptyifNotNilInIfNotNilIfNilAndNoSendInReceiver(SLDeadCodeEliminationT
 {
 	int i;
 
-	if (null == null) {
+	{
 		i = 5;
 	}
 	{
@@ -4669,7 +4657,5 @@ switchWithOnlyCommentSendInReceiver(SLDeadCodeEliminationTestClass * self_in_swi
 SLDeadCodeEliminationTest >> translate: tast [
 
 	^ String streamContents: [ :str | 
-		self
-			perform: (#astTranslate , #':inStream:') asSymbol
-			withArguments: { tast . str } ]
+		self astTranslate: tast inStream: str ]
 ]

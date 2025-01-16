@@ -249,7 +249,7 @@ int reverse_image_words(unsigned int *dst, unsigned int *src,int depth, int widt
 */
 #define MAX_PATH_UTF8 (MAX_PATH*3)
 
-extern char  imageName [];       /* full path and name to image - UTF8 */
+extern char  _imageName [];       /* full path and name to image - UTF8 */
 extern WCHAR imageNameW[];       /* full path and name to image - UTF16 */
 extern char  imagePathA[];       /* full path to image - UTF8 */
 extern WCHAR imagePathW[];       /* full path to image - UTF16 */
@@ -270,7 +270,7 @@ extern WCHAR squeakIniNameW[];   /* full path to ini file - UTF16 */
 #define vmPath vmPathW
 #define squeakIniName squeakIniNameW
 #else
-#define imageNameT imageName
+#define imageNameT _imageName
 #define imagePath  imagePathA
 #define vmName vmNameA
 #define vmPath vmPathA

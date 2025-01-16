@@ -476,7 +476,7 @@ typedef struct sqComplexEvent
 sqInt ioSetInputSemaphore(sqInt semaIndex);
 
 /* Image file and VM path names. */
-extern char imageName[];
+extern char _imageName[];
 char *getImageName(void);
 sqInt imageNameGetLength(sqInt sqImageNameIndex, sqInt length);
 sqInt imageNamePutLength(sqInt sqImageNameIndex, sqInt length);

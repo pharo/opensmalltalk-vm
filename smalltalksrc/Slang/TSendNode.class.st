@@ -393,6 +393,12 @@ TSendNode >> isDoIterativeSend [
 ]
 
 { #category : 'testing' }
+TSendNode >> isExpression [
+
+	^ true
+]
+
+{ #category : 'testing' }
 TSendNode >> isLiteralArrayDeclaration [
 	^selector == #cCoerce:to:
 	  and: [arguments first isConstant
@@ -609,6 +615,36 @@ TSendNode >> removeUnusedNodesInBranch: aChild [
 					^ self ].
 			self isConditionalSend ifTrue: [
 				self reduceConditionalSend: branchIndex ] ]
+]
+
+{ #category : 'transformations' }
+TSendNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self receiver: (receiver
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables).
+	self arguments: (arguments collect: [ :a |
+			 a
+				 renameLocalVariablesGivenClassVariables: classVariables
+				 globalVariables: globalsVariables
+				 classNames: classNames
+				 inCodeGenerator: aCodeGen
+				 collectingChangesIn: changedVariables ])
+]
+
+{ #category : 'transformations' }
+TSendNode >> renameVarInCCode: varName with: newVarName [
+
+	((selector beginsWith: #cCode:) and: [
+		 (arguments first value findString: varName) > 0 ]) ifTrue: [
+		arguments first setValue: (arguments first value
+				 copyReplaceAll: varName
+				 with: newVarName
+				 tokenish: [ :ch |
+				 ch = $_ or: [ ch isAlphaNumeric or: [ ch = $\ ] ] ]) ]
 ]
 
 { #category : 'transformations' }

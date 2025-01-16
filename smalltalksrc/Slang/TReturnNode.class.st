@@ -205,6 +205,17 @@ TReturnNode >> removeAssertions [
 ]
 
 { #category : 'transformations' }
+TReturnNode >> renameLocalVariablesGivenClassVariables: classVariables globalVariables: globalsVariables classNames: classNames inCodeGenerator: aCodeGen collectingChangesIn: changedVariables [
+
+	self expression: (expression
+			 renameLocalVariablesGivenClassVariables: classVariables
+			 globalVariables: globalsVariables
+			 classNames: classNames
+			 inCodeGenerator: aCodeGen
+			 collectingChangesIn: changedVariables)
+]
+
+{ #category : 'transformations' }
 TReturnNode >> replaceChild: aNode with: aReplacementNode [
 
 	expression == aNode ifFalse: [ self error: 'Node is not a child of current node' ].
