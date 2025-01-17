@@ -67,6 +67,14 @@ static const char* systemSearchPaths[] = {
 char** pluginPaths = NULL;
 char* emptyPaths[] = {NULL};
 
+sqInt
+ioProcessEvents(void)
+{
+    aioPoll(0);
+    return 0;
+}
+
+
 EXPORT(const char*) getSourceVersion(){
 	return VM_BUILD_SOURCE_STRING;
 }
