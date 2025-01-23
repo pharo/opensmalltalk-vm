@@ -14,13 +14,8 @@ endmacro()
 
 # Include a loose-dependency library in the project, but do not link it to the main library
 macro(addIndependentLibraryWithRPATH NAME)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-    set(CMAKE_INSTALL_RPATH ${PHARO_LIBRARY_PATH})
-
     add_library(${NAME} SHARED ${ARGN})
-    set_target_properties(${NAME} PROPERTIES MACOSX_RPATH ON)
     set_target_properties(${NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ${LIBRARY_OUTPUT_DIRECTORY})
-    set_target_properties(${NAME} PROPERTIES INSTALL_NAME_DIR ${PHARO_LIBRARY_PATH})
 endmacro()
 
 macro(get_platform_name VARNAME)

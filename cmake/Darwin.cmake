@@ -1,3 +1,6 @@
+set(CMAKE_INSTALL_RPATH "@executable_path/Plugins")
+set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
 function(add_platform_headers)
   target_include_directories(${VM_LIBRARY_NAME}
     PUBLIC
