@@ -12,7 +12,7 @@ cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0068 NEW)
 
 include(cmake/BuildType.cmake)
-include(macros.cmake)
+include(cmake/macros.cmake)
 
 message(STATUS "CMAKE_GENERATOR=${CMAKE_GENERATOR}")
 
