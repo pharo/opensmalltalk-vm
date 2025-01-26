@@ -93,6 +93,7 @@ macro(configure_installables INSTALL_COMPONENT)
 endmacro()
 
 macro(add_required_libs_per_platform)
+  target_compile_definitions(${VM_LIBRARY_NAME} PRIVATE READ_ONLY_CODE_ZONE=1)
   target_link_libraries(${VM_LIBRARY_NAME} dl)
   target_link_libraries(${VM_LIBRARY_NAME} m)
   target_link_libraries(${VM_LIBRARY_NAME} pthread)

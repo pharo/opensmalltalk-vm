@@ -3114,8 +3114,9 @@ CoInterpreter >> iframeSavedIP: theFP put: savedIP [
 { #category : 'initialization' }
 CoInterpreter >> initStackPagesAndInterpret [
 
-	self sqMakeMemoryNotExecutableFrom: objectMemory getMemoryMap startOfObjectMemory asUnsignedInteger
-		To: objectMemory getMemoryMap oldSpaceEnd asUnsignedInteger.
+	<flag: #FIXME>
+	"self sqMakeMemoryNotExecutableFrom: objectMemory getMemoryMap startOfObjectMemory asUnsignedInteger
+		To: objectMemory getMemoryMap oldSpaceEnd asUnsignedInteger."
 
 	^ super initStackPagesAndInterpret
 ]
@@ -4859,10 +4860,11 @@ CoInterpreter >> stackPageHeadroom [
 { #category : 'initialization' }
 CoInterpreter >> stackPagesInitializedAt: theStackMemory totalSize: stackPagesBytes pageSize: stackPageBytes [
 
+	<flag: #FIXME>
 	<inline: true>
 
-	self sqMakeMemoryNotExecutableFrom: theStackMemory asUnsignedInteger
-		To: theStackMemory asUnsignedInteger + stackPagesBytes.
+	"self sqMakeMemoryNotExecutableFrom: theStackMemory asUnsignedInteger
+		To: theStackMemory asUnsignedInteger + stackPagesBytes."
 
 	self assert: self minimumUnusedHeadroom = stackPageBytes.
 ]
