@@ -1955,16 +1955,32 @@ StackInterpreter >> addIdleUsecs: idleUsecs [
 StackInterpreter >> addLastLink: proc toList: aList [ 
 	"Add the given process to the end of the given linked list
 	 and set the backpointer of process to its new list."
-	| lastLink |
+	| lastLink procList |
+	
+	lastLink := objectMemory
+				            fetchPointer: LastLinkIndex
+				            ofObject: aList.
+
+	"If the process is already in a list two cases may arise"
+	procList := objectMemory followField: MyListIndex ofObject: proc.
+	procList ~= objectMemory nilObject ifTrue: [
+		procList = aList ifTrue: [ 
+			"It it is in the same list we want to put it, remove it so we make sure to install it at the end"
+			self removeProcess: proc fromList: aList.
+		] ifFalse: [
+			"Otherwise, we cannot ensure a correct behavior, fail.
+			If the process is already in a list, do not silently move it to another one"
+			self error: 'Process is already suspended in a different list'
+	]].
+	
 	self deny: (objectMemory isForwarded: proc).
 	self deny: (objectMemory isForwarded: aList).
 	self assert: (objectMemory fetchPointer: NextLinkIndex ofObject: proc) = objectMemory nilObject.
 	(self isEmptyList: aList)
 		ifTrue: [objectMemory storePointer: FirstLinkIndex ofObject: aList withValue: proc]
-		ifFalse:
-			[lastLink := objectMemory fetchPointer: LastLinkIndex ofObject: aList.
-			 self assert: lastLink ~= proc.
-			 objectMemory storePointer: NextLinkIndex ofObject: lastLink withValue: proc].
+		ifFalse: [
+			lastLink := objectMemory fetchPointer: LastLinkIndex ofObject: aList.
+			objectMemory storePointer: NextLinkIndex ofObject: lastLink withValue: proc].
 	objectMemory storePointer: LastLinkIndex ofObject: aList withValue: proc.
 	objectMemory storePointer: MyListIndex ofObject: proc withValue: aList
 ]
