@@ -54,11 +54,23 @@ endmacro()
 
 macro(configure_installables INSTALL_COMPONENT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/build/dist")
+    
+    #Configure the launch scripts and set execution permissions explicitly
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/launch.sh.in
-        ${CMAKE_CURRENT_BINARY_DIR}/build/packaging/linux/${VM_EXECUTABLE_NAME} @ONLY)
-    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/bin/launch.sh.in
-        ${CMAKE_CURRENT_BINARY_DIR}/build/packaging/linux/bin/${VM_EXECUTABLE_NAME} @ONLY)
+        ${CMAKE_CURRENT_BINARY_DIR}/tmp/${VM_EXECUTABLE_NAME} @ONLY)
+    file(
+        COPY ${CMAKE_CURRENT_BINARY_DIR}/tmp/${VM_EXECUTABLE_NAME}
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/build/packaging/linux/
+        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
 
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packaging/linux/bin/launch.sh.in
+        ${CMAKE_CURRENT_BINARY_DIR}/tmp/bin/${VM_EXECUTABLE_NAME} @ONLY)
+    file(
+        COPY ${CMAKE_CURRENT_BINARY_DIR}/tmp/bin/${VM_EXECUTABLE_NAME}
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/build/packaging/linux/bin/
+        FILE_PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+    )
 
     install(
       DIRECTORY "${CMAKE_BINARY_DIR}/build/packaging/linux/"
