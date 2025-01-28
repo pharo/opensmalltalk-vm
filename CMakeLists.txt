@@ -281,7 +281,6 @@ endif()
 add_compile_options(
 	${OPTIMIZATION_LEVEL}
     -Wno-sometimes-uninitialized
-    -Wno-self-assign
     -Wno-unused-variable
     -Wno-unused-but-set-variable
     -Wno-int-conversion

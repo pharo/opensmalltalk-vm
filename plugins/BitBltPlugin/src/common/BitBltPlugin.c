@@ -4547,11 +4547,9 @@ partitionedRgbComponentAlphadestnBitsnPartitions(unsigned int sourceWord, unsign
 						v = v & 0xFFFFFF;
 						goto l1;
 					}
-					v = v;
 					goto l1;
 				}
 				if (v == 0) {
-					v = v;
 					goto l1;
 				}
 				d = 32 - nBits;
@@ -6294,11 +6292,9 @@ rgbComponentAlphawith(sqInt sourceWord, sqInt destinationWord)
 						v = v & 0xFFFFFF;
 						goto l1;
 					}
-					v = v;
 					goto l1;
 				}
 				if (v == 0) {
-					v = v;
 					goto l1;
 				}
 				d = 32 - destDepth;
@@ -7925,10 +7921,6 @@ warpPickSmoothPixelsxDeltahyDeltahxDeltavyDeltavsourceMapsmoothingdstShiftInc(sq
 						if (sourceDepth == 16) {
 							/* begin rgbMap16To32: */
 							rgb = ((((usqInt)((rgb & 0x1F)) << 3)) | (((usqInt)((rgb & 0x3E0)) << 6))) | (((usqInt)((rgb & 0x7C00)) << 9));
-						}
-						else {
-							/* begin rgbMap32To32: */
-							rgb = rgb;
 						}
 					}
 					b += rgb & 0xFF;
