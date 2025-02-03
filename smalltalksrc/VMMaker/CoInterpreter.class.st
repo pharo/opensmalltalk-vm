@@ -2182,6 +2182,8 @@ CoInterpreter >> encodedNativePCOf: mcpc cogMethod: cogMethod [
 	<var: #cogMethod type: #'CogMethod *'>
 	mcpc = cogit ceCannotResumePC ifTrue:
 		[^HasBeenReturnedFromMCPCOop].
+	
+	self assert: (cogMethodZone methodFor: mcpc) = cogMethod.
 	^objectMemory integerObjectOf: cogMethod asInteger - mcpc
 ]
 
