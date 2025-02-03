@@ -2182,6 +2182,8 @@ CoInterpreter >> encodedNativePCOf: mcpc cogMethod: cogMethod [
 	<var: #cogMethod type: #'CogMethod *'>
 	mcpc = cogit ceCannotResumePC ifTrue:
 		[^HasBeenReturnedFromMCPCOop].
+	
+	self assert: (cogMethodZone methodFor: mcpc) = cogMethod.
 	^objectMemory integerObjectOf: cogMethod asInteger - mcpc
 ]
 
@@ -4584,44 +4586,42 @@ CoInterpreter >> returnToExecutive: inInterpreter postContextSwitch: switchedCon
 	 machine code.  The instructionPointer tells us where from.  If it is above startOfMemory we're
 	 in the interpreter.  If it is below, then we are in machine-code unless it is ceReturnToInterpreterPC,
 	 in which case we're in a machine-code primitive called from the interpreter."
-	<inline: false>
-	| cogMethod retValue fullyInInterpreter |
-	<var: #cogMethod type: #'CogMethod *'>
 
+	<inline: false>
+	| retValue fullyInInterpreter |
 	cogit assertCStackWellAligned.
-	(self isMachineCodeFrame: framePointer) ifTrue:
-		[self assertValidExecutionPointe: instructionPointer r: framePointer s: stackPointer imbar: false line: #'__LINE__'.
-		 "If returning after a context switch then a result may have to be popped from the stack.
+	(self isMachineCodeFrame: framePointer) ifTrue: [
+		self
+			assertValidExecutionPointe: instructionPointer
+			r: framePointer
+			s: stackPointer
+			imbar: false
+			line: #__LINE__.
+		"If returning after a context switch then a result may have to be popped from the stack.
 		  If the process is suspended at a send then the result of the primitive in which the
 		  process was suspended is still on the stack and must be popped into ReceiverResultReg.
 		  If not, nothing should be popped and ReceiverResultReg gets the receiver."
-		 switchedContext
-			ifTrue:
-				[cogMethod := self mframeCogMethod: framePointer.
-				self assert: (instructionPointer asUnsignedInteger > cogit minCogMethodAddress 
-							and: [instructionPointer asUnsignedInteger < cogit maxCogMethodAddress]).
-				 (instructionPointer ~= (cogMethod asInteger + cogMethod stackCheckOffset)
-				  and: [cogit isSendReturnPC: instructionPointer])
-					ifTrue:
-						[self assert: (objectMemory addressCouldBeOop: self stackTop).
-						 retValue := self popStack]
-					ifFalse:
-						[retValue := self mframeReceiver: framePointer]]
-			ifFalse: [retValue := self mframeReceiver: framePointer].
-		 self push: instructionPointer.
-		 self push: retValue.
-		 self callEnilopmart: #ceEnterCogCodePopReceiverReg.
-		 self unreachable].
+		retValue := self mframeReceiver: framePointer.
+		self push: instructionPointer.
+		self push: retValue.
+		self callEnilopmart: #ceEnterCogCodePopReceiverReg.
+		self unreachable ].
 	self setMethod: (self iframeMethod: framePointer).
 	fullyInInterpreter := inInterpreter.
-	instructionPointer = cogit ceReturnToInterpreterPC ifTrue:
-		[instructionPointer := (self iframeSavedIP: framePointer) asUnsignedInteger.
-		 fullyInInterpreter := false].
-	self assertValidExecutionPointe: instructionPointer r: framePointer s: stackPointer imbar: true line: #'__LINE__'.
-	fullyInInterpreter ifFalse:
-		[self siglong: reenterInterpreter jmp: ReturnToInterpreter.
-		 self unreachable].
-	^nil
+	instructionPointer = cogit ceReturnToInterpreterPC ifTrue: [
+		instructionPointer := (self iframeSavedIP: framePointer)
+			                      asUnsignedInteger.
+		fullyInInterpreter := false ].
+	self
+		assertValidExecutionPointe: instructionPointer
+		r: framePointer
+		s: stackPointer
+		imbar: true
+		line: #__LINE__.
+	fullyInInterpreter ifFalse: [
+		self siglong: reenterInterpreter jmp: ReturnToInterpreter.
+		self unreachable ].
+	^ nil
 ]
 
 { #category : 'return bytecodes' }

@@ -1322,34 +1322,6 @@ CogVMSimulator >> primTraceLogSize [
 	^PrimTraceLogSize * objectMemory wordSize
 ]
 
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveContextAtPut [
-	"| aContext |
-	aContext := self stackValue: 2.
-	(#(24205456 24205732) includes: aContext) ifTrue:
-		[(self checkIsStillMarriedContext: aContext currentFP: framePointer)
-			ifTrue: [self printFrame: (self frameOfMarriedContext: aContext)
-						WithSP: (self frameOfMarriedContext: aContext) - 48]
-			ifFalse: [self printContext: aContext]]."
-	^super primitiveContextAtPut
-]
-
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveDoPrimitiveWithArgs [
-	| primIndex |
-	primIndex := objectMemory integerValueOf: (self stackValue: 1).
-	transcript nextPutAll: 'DO PRIMITIVE: '; print: (self functionPointerFor: primIndex inClass: nil); cr; flush.
-	(#(76 "primitiveStoreStackp" 188 189 "eval method") includes: primIndex) ifTrue:
-		[self halt].
-	^super primitiveDoPrimitiveWithArgs
-]
-
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveExecuteMethod [
-	self halt: thisContext selector.
-	^super primitiveExecuteMethod
-]
-
 { #category : 'as yet unclassified' }
 CogVMSimulator >> primitiveFailCount [
 	^ primitiveFailCount
@@ -1381,15 +1353,6 @@ CogVMSimulator >> primitiveForceMachineCodeCompaction [
 
 ]
 
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveNewWithArg [
-	"(objectMemory hasSpurMemoryManagerAPI
-	 and: [self classNameOf: (self stackValue: 1) Is: 'Bitmap']) ifTrue:
-		[self printExternalHeadFrame.
-		 self halt]."
-	^super primitiveNewWithArg
-]
-
 { #category : 'object access primitives' }
 CogVMSimulator >> primitiveObjectAt [
 	"self transcript
@@ -1401,12 +1364,6 @@ CogVMSimulator >> primitiveObjectAt [
 	^super primitiveObjectAt
 ]
 
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveObjectPointsTo [
-	"self halt."
-	^super primitiveObjectPointsTo
-]
-
 { #category : 'system control primitives' }
 CogVMSimulator >> primitiveSignalAtMilliseconds [
 	super primitiveSignalAtMilliseconds.
@@ -1416,14 +1373,6 @@ CogVMSimulator >> primitiveSignalAtMilliseconds [
 			nextPutAll: ' now '; nextPutAll: self ioUTCMicroseconds hex;
 			nextPutAll: ' wakeup '; nextPutAll: nextWakeupUsecs hex;
 			nextPutAll: ' wakeup - now '; print: nextWakeupUsecs - self ioUTCMicroseconds; flush]"
-]
-
-{ #category : 'debugging traps' }
-CogVMSimulator >> primitiveStoreStackp [
-	"self printContext: (self stackValue: 1).
-	self halt."
-	"(self stackValue: 1) = 16r1934F80 ifTrue: [self halt]."
-	super primitiveStoreStackp
 ]
 
 { #category : 'plugin support' }

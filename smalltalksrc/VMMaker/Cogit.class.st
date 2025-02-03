@@ -953,10 +953,10 @@ Cogit class >> initializePrimitiveTable [
 		"(82 primitiveFail)"							"Blue Book: primitiveValueWithArgs"
 		(83 genPrimitivePerform)
 		"(84 primitivePerformWithArgs)"
-		"(85 primitiveSignal)"
-		"(86 primitiveWait)"
-		"(87 primitiveResume)"
-		"(88 primitiveSuspend)"
+		(85 genNonImplementedPrimitive -1 #maycallback) "primitiveSignal"
+		(86 genNonImplementedPrimitive -1 #maycallback) "primitiveWait"
+		(87 genNonImplementedPrimitive -1 #maycallback) "primitiveResume"
+		(88 genNonImplementedPrimitive -1 #maycallback) "primitiveSuspend"
 		"(89 primitiveFlushCache)"
 
 		"(90 primitiveMousePoint)"
@@ -1003,6 +1003,8 @@ Cogit class >> initializePrimitiveTable [
 
 		(165 genPrimitiveIntegerAt			1)	"Signed version of genPrimitiveAt"
 		(166 genPrimitiveIntegerAtPut		2)	"Signed version of genPrimitiveAtPut"
+
+		(167 genNonImplementedPrimitive -1 #maycallback) "primitiveYield"
 
 		(169 genPrimitiveNotIdentical 1)
 
@@ -8649,18 +8651,6 @@ Cogit >> isPureSendAnnotation: annotation [
 Cogit >> isSendAnnotation: annotation [
 	<inline: true>
 	^annotation >= IsSendCall
-]
-
-{ #category : 'jit - api' }
-Cogit >> isSendReturnPC: retpc [
-	<api>
-	"Answer if the instruction preceding retpc is a call instruction."
-	| target |
-	(backEnd isCallPrecedingReturnPC: retpc) ifFalse:
-		[^false].
-	target := backEnd callTargetFromReturnAddress: retpc.
-	^(target between: firstSend and: lastSend)
-	   or: [target between: methodZoneBase and: methodZone freeStart]
 ]
 
 { #category : 'initialization' }
